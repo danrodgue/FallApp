@@ -23,6 +23,7 @@
 
     <script>
         document.getElementById('logout').addEventListener('click', function(){
+            try{ localStorage.removeItem('fallapp_user'); }catch(e){}
             window.location.href = '../index.html';
         });
     </script>

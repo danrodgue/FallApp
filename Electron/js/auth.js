@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const ok = await fakeAuthenticate(username, password);
             if (ok) {
+                // Guardar el usuario logueado para usarlo en otras pantallas (ej. eventos)
+                try{ localStorage.setItem('fallapp_user', username); }catch(e){}
                 window.location.href = 'screens/home.html';
             } else {
                 showError('No se ha podido autenticar. Usuario o contraseña incorrectos.');
