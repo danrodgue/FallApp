@@ -1,0 +1,46 @@
+/* Estilos específicos para la pantalla de eventos */
+.events-header {display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.events-list {display:flex;flex-direction:column;gap:10px}
+.event-card{background:#fff;border-radius:8px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:flex-start}
+.event-meta{font-size:13px;color:#444;margin-bottom:6px}
+.event-actions button{margin-left:8px}
+.form-row{display:flex;gap:12px}
+.form-row > *{flex:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-card{background:#fff;padding:18px;border-radius:10px;width:820px;max-width:100%}
+.muted{color:#666;font-size:13px}
+
+/* Estilos para que la pantalla de eventos ocupe todo el viewport */
+.events-page {height:100vh;display:flex;flex-direction:column}
+.events-page .login-container{position:relative;box-shadow:none;border-radius:0;width:auto;max-width:none;padding:20px 28px;height:100%;display:flex;flex-direction:column;gap:12px;background:linear-gradient(180deg,#fff,#fff)}
+.events-page .events-header{margin-top:4px}
+.events-page #search{padding:10px;border-radius:8px;border:1px solid #e0e0e0}
+
+/* Layout principal: lista (sin sidebar) */
+.events-main{display:block}
+.events-panel{background:transparent}
+
+/* Mejor apariencia de tarjetas y acciones */
+.event-card{transition:transform .12s ease,box-shadow .12s ease}
+.event-card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.08)}
+.event-card strong{display:block;font-size:16px;margin-bottom:6px}
+.event-actions button{padding:6px 10px;border-radius:6px}
+.btn-danger{background:#f44336;color:#fff;border:none}
+
+/* Ajustes responsivos */
+@media (max-width:900px){
+  .events-main{display:block}
+}
+
+@media (max-width:700px){
+  .form-row{flex-direction:column}
+  .event-card{flex-direction:column;gap:8px}
+  .event-actions{display:flex;justify-content:flex-end}
+}
+
+/* Ajustes responsivos simples */
+@media (max-width:700px){
+  .form-row{flex-direction:column}
+  .event-card{flex-direction:column;gap:8px}
+  .event-actions{display:flex;justify-content:flex-end}
+}

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const ok = await fakeAuthenticate(username, password);
             if (ok) {
-                window.location.href = 'home.html';
+                window.location.href = 'screens/home.html';
             } else {
                 showError('No se ha podido autenticar. Usuario o contraseña incorrectos.');
             }
