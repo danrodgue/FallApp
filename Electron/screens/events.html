@@ -15,7 +15,7 @@
           <div class="muted">Gestiona los eventos: crea, edita, elimina y visualiza detalles.</div>
         </div>
         <div class="header-actions">
-          <a href="home.html" class="btn-back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>Volver</a>
+          <button id="events-back" class="btn-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>Volver</button>
           <button id="btn-new" class="btn-primary">Nuevo evento</button>
         </div>
       </div>
@@ -214,6 +214,10 @@
 
     // Render inicial
     renderList();
+
+    // Back button: volver a la página anterior si existe historial
+    const backBtn = document.getElementById('events-back');
+    if(backBtn){ backBtn.addEventListener('click', ()=>{ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; }); }
   </script>
 </body>
 </html>
