@@ -1,0 +1,49 @@
+/* Variables y estilos específicos para la página info.html */
+:root{
+  --color-primary:#c62828;
+  --color-primary-hover:#b71c1c;
+  --bg-muted:#f7f8fa;
+  --card-shadow: 0 24px 60px rgba(16,24,40,0.08);
+  --surface:#ffffff;
+  --muted:#6b7280;
+  --radius-lg:16px;
+}
+
+/* Info screen styling (pretty) */
+.falla-container{padding:28px;background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);border-radius:var(--radius-lg);box-shadow:var(--card-shadow);border:1px solid rgba(15,23,36,0.04)}
+.falla-header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.falla-title h2{margin:0;font-size:24px;color:#0f1720}
+.falla-meta{font-size:13px;color:var(--muted);margin-top:4px}
+.falla-body{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.falla-main{background:transparent}
+.falla-side{background:linear-gradient(180deg,#fcfcfd,#ffffff);padding:16px;border-radius:12px;border:1px solid rgba(15,23,36,0.03)}
+.falla-container .field label{display:block;font-size:13px;font-weight:700;color:#111827;margin-bottom:8px}
+.falla-container input,.falla-container select,.falla-container textarea{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #e6e9ef;background:#fff;transition:box-shadow .15s ease,border-color .15s ease}
+.falla-container input:focus,.falla-container select:focus,.falla-container textarea:focus{outline:none;border-color:var(--color-primary);box-shadow:0 10px 30px rgba(198,40,40,0.08)}
+.falla-container textarea{resize:vertical;min-height:140px}
+.falla-container .form-actions{margin-top:20px;display:flex;gap:10px;justify-content:flex-end}
+.falla-container .btn-primary{padding:10px 18px;border-radius:10px;background:var(--color-primary);color:#fff;border:none;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(198,40,40,0.12)}
+.falla-container .btn-primary:hover{background:var(--color-primary-hover);transform:translateY(-2px)}
+.falla-container .btn-secondary{background:transparent;border:1px solid #e6e9ef;color:#111827;padding:8px 14px;border-radius:10px}
+.falla-container .btn-back{padding:8px 12px;border-radius:10px;border:1px solid rgba(15,23,36,0.06);background:var(--color-primary);color:#fff;text-decoration:none;font-weight:700}
+.falla-container .btn-back:hover{background:var(--color-primary-hover)}
+.falla-container .readonly-creator{background:#f8fafc;color:#374151}
+
+.meta-chip{display:inline-block;background:#fff6f6;color:#7f1d1d;padding:6px 10px;border-radius:999px;font-size:13px;border:1px solid rgba(196,40,40,0.06)}
+
+.falla-side h4{margin-top:0}
+.falla-side .status-label{font-size:13px;color:#374151;margin-bottom:6px}
+.info-block p{margin:0}
+.side-actions{margin-top:16px}
+
+@media (max-width:1000px){
+  .falla-body{grid-template-columns:1fr 300px}
+}
+@media (max-width:800px){
+  .falla-body{grid-template-columns:1fr}
+  .falla-side{order:2}
+}
+
+@media (max-width:700px){
+  .modal-card{padding:12px}
+}

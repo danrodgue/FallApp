@@ -8,45 +8,49 @@
 </head>
 <body class="login-page events-page">
   <div class="login-container">
-    <div class="events-header">
-      <div>
-        <h2>Eventos</h2>
-        <div class="muted">Gestiona los eventos: crea, edita, elimina y visualiza detalles.</div>
+    <div class="events-center">
+      <div class="events-header">
+        <div>
+          <h1 class="events-title">Eventos</h1>
+          <div class="muted">Gestiona los eventos: crea, edita, elimina y visualiza detalles.</div>
+        </div>
+        <div class="header-actions">
+          <button id="events-back" class="btn-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>Volver</button>
+          <button id="btn-new" class="btn-primary">Nuevo evento</button>
+        </div>
       </div>
-      <div>
-        <a href="home.html" class="btn">Volver</a>
-        <button id="btn-new" class="btn">Nuevo evento</button>
-      </div>
-    </div>
 
-    <div style="margin:8px 0">
-      <input id="search" placeholder="Buscar por nombre, lugar o creador" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e0e0e0">
+    <div class="search-wrapper">
+      <input id="search" placeholder="Buscar por nombre, lugar o creador">
     </div>
 
     <div id="events" class="events-list" aria-live="polite">
       <!-- Eventos renderizados aquí -->
     </div>
-    <div id="empty" class="muted" style="margin-top:12px;display:none">No hay eventos.</div>
+    <div id="empty" class="muted">No hay eventos.</div>
   </div>
 
   <!-- Modal formulario -->
-  <div id="modal" style="display:none" class="modal" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <h3 id="modal-title">Nuevo evento</h3>
+  <div id="modal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card" role="document">
+      <div class="modal-header">
+        <h3 id="modal-title">Nuevo evento</h3>
+        <button id="modal-close" class="modal-close" aria-label="Cerrar">×</button>
+      </div>
       <form id="event-form">
         <input type="hidden" id="event-id">
         <div class="form-row">
-          <label>
-            Nombre
-            <input id="name" required>
-          </label>
-          <label>
-            Creador
-            <input id="creator" placeholder="Usuario que crea el evento" required>
-          </label>
+              <label>
+                Nombre
+                <input id="name" required>
+              </label>
+              <label>
+                Creador
+            <input id="creator" placeholder="Usuario que crea el evento" required readonly class="readonly-creator">
+              </label>
         </div>
 
-        <div class="form-row" style="margin-top:8px">
+        <div class="form-row">
           <label>
             Fecha
             <input id="date" type="date" required>
@@ -57,23 +61,23 @@
           </label>
         </div>
 
-        <div style="margin-top:8px">
+        <div class="field">
           <label>
             Lugar
             <input id="place" required>
           </label>
         </div>
 
-        <div style="margin-top:8px">
+        <div class="field">
           <label>
             Descripción
             <textarea id="description" rows="4"></textarea>
           </label>
         </div>
 
-        <div style="margin-top:12px;display:flex;justify-content:flex-end">
-          <button type="button" id="btn-cancel" class="btn">Cancelar</button>
-          <button type="submit" id="btn-save" class="btn">Guardar</button>
+        <div class="form-actions">
+          <button type="button" id="btn-cancel" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-save" class="btn-primary">Guardar</button>
         </div>
       </form>
     </div>
@@ -110,10 +114,12 @@
         const left = document.createElement('div');
         const title = document.createElement('strong'); title.textContent = ev.name || '(sin nombre)';
         const meta = document.createElement('div'); meta.className='event-meta';
-        meta.innerHTML = `<span><strong>Creador:</strong> ${escapeHtml(ev.creator||'')}</span> &nbsp;•&nbsp; <span><strong>Fecha:</strong> ${ev.date||''} ${ev.time||''}</span> &nbsp;•&nbsp; <span><strong>Lugar:</strong> ${escapeHtml(ev.place||'')}</span>`;
-        const desc = document.createElement('div'); desc.textContent = ev.description || ''; desc.style.marginTop='6px';
+        meta.innerHTML = `<span class="meta-chip"><strong>Creador:</strong> ${escapeHtml(ev.creator||'')}</span><span class="meta-chip"><strong>Fecha:</strong> ${ev.date||''} ${ev.time||''}</span><span class="meta-chip"><strong>Lugar:</strong> ${escapeHtml(ev.place||'')}</span>`;
+        const desc = document.createElement('div'); desc.className='desc'; desc.textContent = ev.description || '';
 
-        left.appendChild(title); left.appendChild(meta); left.appendChild(desc);
+        left.appendChild(title);
+        left.appendChild(meta);
+        left.appendChild(desc);
 
         const actions = document.createElement('div'); actions.className='event-actions';
         const btnView = document.createElement('button'); btnView.className='btn'; btnView.textContent='Ver'; btnView.addEventListener('click', ()=>openView(ev.id));
@@ -135,7 +141,10 @@
     const inputs = {id:document.getElementById('event-id'),name:document.getElementById('name'),creator:document.getElementById('creator'),date:document.getElementById('date'),time:document.getElementById('time'),place:document.getElementById('place'),description:document.getElementById('description')}
 
     document.getElementById('btn-new').addEventListener('click', openNew);
-    document.getElementById('btn-cancel').addEventListener('click', closeModal);
+    document.getElementById('btn-cancel')?.addEventListener('click', closeModal);
+    document.getElementById('modal-close')?.addEventListener('click', closeModal);
+    // Cerrar modal al clicar fuera del contenido
+    document.getElementById('modal').addEventListener('click', (ev)=>{ if(ev.target.id==='modal') closeModal(); });
     document.getElementById('search').addEventListener('input', e=>renderList(e.target.value));
     // Sidebar actions removed; import/export handled by backend when integrated
 
@@ -143,12 +152,16 @@
       openModal();
       document.getElementById('modal-title').textContent='Nuevo evento';
       form.reset(); inputs.id.value='';
+      const current = localStorage.getItem('fallapp_user') || '';
+      inputs.creator.value = current;
     }
 
     function openEdit(id){
       const ev = events.find(x=>x.id===id); if(!ev) return alert('Evento no encontrado');
       openModal(); document.getElementById('modal-title').textContent='Editar evento';
-      inputs.id.value = ev.id; inputs.name.value=ev.name||''; inputs.creator.value=ev.creator||''; inputs.date.value=ev.date||''; inputs.time.value=ev.time||''; inputs.place.value=ev.place||''; inputs.description.value=ev.description||'';
+      inputs.id.value = ev.id; inputs.name.value=ev.name||''; inputs.date.value=ev.date||''; inputs.time.value=ev.time||''; inputs.place.value=ev.place||''; inputs.description.value=ev.description||'';
+      // Mostrar el creador pero no permitir editarlo
+      inputs.creator.value = ev.creator || localStorage.getItem('fallapp_user') || '';
     }
 
     function openView(id){
@@ -164,14 +177,21 @@
 
     function saveFromForm(){
       const id = inputs.id.value;
-      const payload = { id: id || generateId(), name: inputs.name.value.trim(), creator: inputs.creator.value.trim(), date: inputs.date.value, time: inputs.time.value, place: inputs.place.value.trim(), description: inputs.description.value.trim() };
+      // El creador será el usuario logueado; si no hay, usar el valor del input (fallback)
+      const currentUser = localStorage.getItem('fallapp_user') || inputs.creator.value.trim();
+      const payload = { id: id || generateId(), name: inputs.name.value.trim(), creator: currentUser, date: inputs.date.value, time: inputs.time.value, place: inputs.place.value.trim(), description: inputs.description.value.trim() };
 
       if(id){
-        // Aquí irá la llamada a la API para actualizar: await apiUpdateEvent(payload)
-        const idx = events.findIndex(x=>x.id===id); if(idx>=0){ events[idx]=payload; }
+        // Mantener el creador original al editar (no se permite cambiar)
+        const idx = events.findIndex(x=>x.id===id);
+        if(idx>=0){
+          const original = events[idx];
+          payload.creator = original.creator || payload.creator;
+          events[idx]=payload;
+        }
         saveLocal(); renderList(document.getElementById('search').value);
       } else {
-        // Aquí irá la llamada a la API para crear: await apiCreateEvent(payload)
+        // Crear nuevo evento con el usuario actual como creador
         events.push(payload); saveLocal(); renderList(document.getElementById('search').value);
       }
 
@@ -194,6 +214,10 @@
 
     // Render inicial
     renderList();
+
+    // Back button: volver a la página anterior si existe historial
+    const backBtn = document.getElementById('events-back');
+    if(backBtn){ backBtn.addEventListener('click', ()=>{ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; }); }
   </script>
 </body>
 </html>

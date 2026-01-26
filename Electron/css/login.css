@@ -135,6 +135,9 @@ input:focus {
     font-size: 14px;
 }
 
+/* Ocultar inicialmente el contenedor de error en login (antes inline en index.html) */
+#error-msg{display:none}
+
 /* Logo de la empresa en la pantalla de login */
 .logo {
     display: block;
@@ -144,26 +147,32 @@ input:focus {
 }
 
 /* Header rojo con logo centrado */
-.site-header .header-rect {
-    background: var(--color-primary);
-    padding: 18px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-}
-.site-header .header-rect .header-logo {
-    max-width: 160px;
-}
-
-/* Header fijo a todo el ancho en la parte superior */
 .site-header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 1000;
+    box-shadow: 0 2px 12px rgba(11,22,33,0.06);
 }
+.site-header .header-rect {
+    background: linear-gradient(90deg, var(--color-primary), #9f1e1e);
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    gap: 12px;
+}
+.site-header .header-rect .header-logo {
+    max-width: 150px;
+    height: auto;
+    display: block;
+}
+
+/* Evitar subrayados en el header y links globalmente (mejora estética) */
+a { text-decoration: none; }
+.site-header a, .site-header button { text-decoration: none; color: inherit; }
 
 /* espacio para que el contenido no quede debajo del header */
 .home-page {
@@ -172,19 +181,20 @@ input:focus {
 
 /* Botón de cerrar sesión en el header (arriba a la derecha) */
 .header-logout {
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
     width: auto;
     padding: 8px 12px;
     min-width: 0;
     background: rgba(255,255,255,0.14);
     color: #fff;
-    border-radius: 6px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s ease, transform .08s ease;
 }
 .header-logout:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.22);
+    transform: translateY(-1px);
 }
 
 /* Botones de navegación bajo el header */

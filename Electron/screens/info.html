@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+     <meta charset="UTF-8">
+     <title>Información - FallApp</title>
+     <link rel="stylesheet" href="../css/login.css">
+     <link rel="stylesheet" href="../css/info.css">
+     <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body class="events-page">
+     <div class="events-center">
+          <div class="modal-card falla-container">
+               <div class="falla-header">
+                    <a href="home.html" class="btn-back">← Volver</a>
+                    <div class="falla-title">
+                         <h2>Información de la falla</h2>
+                         <div class="falla-meta muted">Detalles, estado y edición rápida</div>
+                    </div>
+               </div>
+
+               <div class="falla-body">
+                    <div class="falla-main">
+                         <form id="fallaForm">
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>ID</label>
+                                        <input id="fallaId" name="id" readonly />
+                                   </div>
+                                   <div class="field">
+                                        <label>Fecha</label>
+                                        <input id="fallaFecha" name="fecha" type="datetime-local" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Ubicación</label>
+                                        <input id="fallaUbicacion" name="ubicacion" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Tipo</label>
+                                        <input id="fallaTipo" name="tipo" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="field">
+                                   <label>Descripción</label>
+                                   <textarea id="fallaDescripcion" name="descripcion" rows="6" disabled></textarea>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Estado</label>
+                                        <select id="fallaEstado" name="estado" disabled>
+                                             <option value="abierta">Abierta</option>
+                                             <option value="en_progreso">En progreso</option>
+                                             <option value="resuelta">Resuelta</option>
+                                             <option value="cerrada">Cerrada</option>
+                                        </select>
+                                   </div>
+                                   <div class="field">
+                                        <label>Reportado por</label>
+                                        <input id="fallaReportadoPor" name="reportado_por" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="form-actions">
+                                   <button type="button" id="editBtn" class="btn-secondary">Editar</button>
+                                   <button type="button" class="btn-primary" id="saveBtn" style="display:none;">Guardar</button>
+                              </div>
+                         </form>
+                    </div>
+
+                    <aside class="falla-side">
+                         <div class="status-block">
+                              <div class="status-label">Estado actual</div>
+                              <div id="statusChip" class="meta-chip">Abierta</div>
+                         </div>
+                         <div class="info-block">
+                              <h4>Resumen</h4>
+                              <p class="muted" id="sideSummary">Breve resumen de la incidencia mostrado aquí.</p>
+                         </div>
+                         <div class="side-actions">
+                              <button id="deleteBtn" class="btn btn-danger">Eliminar</button>
+                         </div>
+                    </aside>
+               </div>
+          </div>
+     </div>
+
+     <script src="../js/info.js"></script>
+</body>
+</html>
+
