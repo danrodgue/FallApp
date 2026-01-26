@@ -1,9 +1,12 @@
 package com.example.Fallapp.controller;
 
 import com.example.Fallapp.model.Falla;
+import com.example.Fallapp.model.GeoShape;
 import com.example.Fallapp.repository.FallaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +59,16 @@ public class FallaController {
     @GetMapping("/seccion/{seccion}")
     public List<Falla> obtenerPorSeccion(@PathVariable String seccion) {
         return fallaRepository.findBySeccion(seccion);
+    }
+    @GetMapping("/boceto/{id}")
+    public String obtenerBoceto(@PathVariable String id) {
+        return fallaRepository.findById(id).get().getBoceto();
+    }
+
+    @GetMapping("/ubicacion/{idFalla}")
+    public Optional<List<Double>> obtenerCoordenadasPorFalla(@PathVariable String idFalla) {
+
+    return fallaRepository.findById(idFalla).map(falla -> falla.getGeo_shape().getGeometry().getCoordinates());
     }
 
 

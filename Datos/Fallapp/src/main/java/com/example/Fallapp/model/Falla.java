@@ -20,7 +20,7 @@ public class Falla {
     private String distintivo;
     private String boceto;
     private Integer experim;
-    private  Object geo_shape;
+    private GeoShape geo_shape;
     private Object geo_point_2d;
 
     // Relación ManyToOne con Artista (por id)
@@ -41,7 +41,7 @@ public class Falla {
                  String distintivo,
                  String boceto,
                  Integer experim,
-                 Object geo_shape,
+                 GeoShape geo_shape,
                  Object geo_location) {
         this.objectid = objectid;
         this.id_falla = id_Falla;
@@ -163,11 +163,11 @@ public class Falla {
         this.experim = experim;
     }
 
-    public Object getGeo_shape() {
+    public GeoShape getGeo_shape() {
         return geo_shape;
     }
 
-    public void setGeo_shape(Object geo_shape) {
+    public void setGeo_shape(GeoShape geo_shape) {
         this.geo_shape = geo_shape;
     }
 

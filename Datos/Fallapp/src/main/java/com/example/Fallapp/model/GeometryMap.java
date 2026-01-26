@@ -2,7 +2,7 @@ package com.example.Fallapp.model;
 
 import java.util.List;
 
-public class Geometry {
+public class GeometryMap {
     private List<Double> coordinates;
 
     public List<Double> getCoordinates() {
