@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 </head>
 <body class="login-page home-page">
+        <script src="../js/config.js"></script>
 
     <header class="site-header">
         <div class="header-rect">
@@ -21,11 +22,6 @@
         <a href="events.html" class="btn main-action-btn">Eventos</a>
     </div>
 
-    <script>
-        document.getElementById('logout').addEventListener('click', function(){
-            try{ localStorage.removeItem('fallapp_user'); }catch(e){}
-            window.location.href = '../index.html';
-        });
-    </script>
+    <script src="../js/home.js"></script>
 </body>
 </html>

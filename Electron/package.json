@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "electron": "^40.0.0",
-    "mongoose": "^9.1.4"
+    "mongoose": "^9.1.4",
+    "node-fetch": "^2.6.9"
   }
 }
