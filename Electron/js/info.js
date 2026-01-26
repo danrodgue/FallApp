@@ -1,5 +1,7 @@
 // Lógica cliente para pantalla de detalles/edición de falla (restaurado desde screen2.js)
-const nf = require('node-fetch');
+// Usar window.fetch si está disponible en el renderer; si no, intentar require('node-fetch')
+let nf;
+try { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : require('node-fetch'); } catch(e) { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : null; }
 document.addEventListener('DOMContentLoaded', function () {
    const params = new URLSearchParams(window.location.search);
    const id = params.get('id') || '';
@@ -21,6 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
    if (saveBtn) saveBtn.addEventListener('click', saveFalla);
    if (editBtn) editBtn.addEventListener('click', toggleEditMode);
    if (deleteBtn) deleteBtn.addEventListener('click', function(){ if(confirm('¿Eliminar esta falla?')){ const idToDel = document.getElementById('fallaId').value; if(idToDel){ nf(window._recurso + '/' + idToDel, { method: 'delete' }).then(()=>{ alert('Falla eliminada'); window.location.href='events.html'; }).catch(()=>{ alert('Error al eliminar'); }); } else { alert('No hay id para eliminar'); } } });
+    // Habilitar edición por defecto para que el usuario pueda escribir aunque no se persista
+    setEditMode(true);
 });
 
 function loadFallaById(id) {

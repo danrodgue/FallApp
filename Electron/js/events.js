@@ -1,23 +1,13 @@
-const nf = require('node-fetch');
+// Use window.fetch when available (renderer), otherwise fall back to node-fetch
+let nf;
+try { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : require('node-fetch'); } catch(e) { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : null; }
 
 // Externalized events UI logic. Tries backend, falls back to localStorage.
 const STORAGE_KEY = 'fallapp_events_v1';
 window._eventsResource = window._eventsResource || 'http://127.0.0.1:8080/api/events';
 
 let events = [];
-const eventsEl = document.getElementById('events');
-const emptyEl = document.getElementById('empty');
-const modal = document.getElementById('modal');
-const form = document.getElementById('event-form');
-const inputs = {
-  id: document.getElementById('event-id'),
-  name: document.getElementById('name'),
-  creator: document.getElementById('creator'),
-  date: document.getElementById('date'),
-  time: document.getElementById('time'),
-  place: document.getElementById('place'),
-  description: document.getElementById('description')
-};
+let eventsEl, emptyEl, modal, form, inputs;
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>\"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -67,6 +57,8 @@ function openModal(){ if(modal) modal.style.display='flex'; }
 function closeModal(){ if(modal) modal.style.display='none'; }
 
 function generateId(){ return 'ev_' + Math.random().toString(36).slice(2,9); }
+
+function currentSearchValue(){ const s = document.getElementById('search'); return (s && s.value) ? s.value : ''; }
 
 // API wrappers (use node-fetch to follow librosexpress pattern)
 async function apiFetchEvents(){
@@ -127,11 +119,11 @@ async function saveFromForm(){
       await apiUpdateEvent(payload);
       const idx = events.findIndex(x=>x.id===id);
       if(idx>=0) events[idx]=payload;
-      saveLocal(); renderList(document.getElementById('search')?.value||'');
+      saveLocal(); renderList(currentSearchValue() || '');
     }catch(e){
       // fallback local
       const idx = events.findIndex(x=>x.id===id);
-      if(idx>=0){ events[idx]=payload; saveLocal(); renderList(document.getElementById('search')?.value||''); }
+          if(idx>=0){ events[idx]=payload; saveLocal(); renderList(currentSearchValue() || ''); }
     }
   } else {
     // Create
@@ -139,9 +131,9 @@ async function saveFromForm(){
       const created = await apiCreateEvent(payload);
       // use created if backend returned an id
       if(created && created.id) payload.id = created.id;
-      events.push(payload); saveLocal(); renderList(document.getElementById('search')?.value||'');
+      events.push(payload); saveLocal(); renderList(currentSearchValue() || '');
     }catch(e){
-      events.push(payload); saveLocal(); renderList(document.getElementById('search')?.value||'');
+      events.push(payload); saveLocal(); renderList(currentSearchValue() || '');
     }
   }
   closeModal();
@@ -151,23 +143,38 @@ async function deleteEvent(id){
   if(!confirm('¿Eliminar este evento?')) return;
   try{
     await apiDeleteEvent(id);
-    events = events.filter(x=>x.id!==id); saveLocal(); renderList(document.getElementById('search')?.value||'');
+    events = events.filter(x=>x.id!==id); saveLocal(); renderList(currentSearchValue() || '');
   }catch(e){
     // fallback local
-    events = events.filter(x=>x.id!==id); saveLocal(); renderList(document.getElementById('search')?.value||'');
+    events = events.filter(x=>x.id!==id); saveLocal(); renderList(currentSearchValue() || '');
   }
 }
 
 // Init
 async function init(){
-  // Wire buttons
-  document.getElementById('btn-new')?.addEventListener('click', openNew);
-  document.getElementById('btn-cancel')?.addEventListener('click', closeModal);
-  document.getElementById('modal-close')?.addEventListener('click', closeModal);
-  document.getElementById('modal')?.addEventListener('click', (ev)=>{ if(ev.target.id==='modal') closeModal(); });
-  document.getElementById('search')?.addEventListener('input', e=>renderList(e.target.value));
-  form?.addEventListener('submit', (e)=>{ e.preventDefault(); saveFromForm(); });
-  document.getElementById('events-back')?.addEventListener('click', ()=>{ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; });
+  // Initialize DOM references (safer if script loads early)
+  eventsEl = document.getElementById('events');
+  emptyEl = document.getElementById('empty');
+  modal = document.getElementById('modal');
+  form = document.getElementById('event-form');
+  inputs = {
+    id: document.getElementById('event-id'),
+    name: document.getElementById('name'),
+    creator: document.getElementById('creator'),
+    date: document.getElementById('date'),
+    time: document.getElementById('time'),
+    place: document.getElementById('place'),
+    description: document.getElementById('description')
+  };
+
+  // Wire buttons (defensive checks for older runtimes)
+  const btnNew = document.getElementById('btn-new'); if(btnNew) btnNew.addEventListener('click', openNew);
+  const btnCancel = document.getElementById('btn-cancel'); if(btnCancel) btnCancel.addEventListener('click', closeModal);
+  const modalClose = document.getElementById('modal-close'); if(modalClose) modalClose.addEventListener('click', closeModal);
+  const modalEl = document.getElementById('modal'); if(modalEl) modalEl.addEventListener('click', function(ev){ if(ev.target && ev.target.id==='modal') closeModal(); });
+  const searchEl = document.getElementById('search'); if(searchEl) searchEl.addEventListener('input', function(e){ renderList(e.target.value); });
+  if(form) form.addEventListener('submit', function(e){ e.preventDefault(); saveFromForm(); });
+  const backBtn = document.getElementById('events-back'); if(backBtn) backBtn.addEventListener('click', function(){ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; });
 
   // Load from backend if possible
   try{
