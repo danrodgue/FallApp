@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/fallas")
+@CrossOrigin(origins = "*")
 public class FallaController {
 
     private final FallaRepository fallaRepository;
