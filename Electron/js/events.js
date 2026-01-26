@@ -1,10 +1,5 @@
-// Use window.fetch when available (renderer), otherwise fall back to node-fetch
-let nf;
-try { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : require('node-fetch'); } catch(e) { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : null; }
-
-// Externalized events UI logic. Tries backend, falls back to localStorage.
+// Externalized events UI logic. Uses preload API (main process) for HTTP.
 const STORAGE_KEY = 'fallapp_events_v1';
-window._eventsResource = window._eventsResource || 'http://127.0.0.1:8080/api/events';
 
 let events = [];
 let eventsEl, emptyEl, modal, form, inputs;
@@ -60,30 +55,25 @@ function generateId(){ return 'ev_' + Math.random().toString(36).slice(2,9); }
 
 function currentSearchValue(){ const s = document.getElementById('search'); return (s && s.value) ? s.value : ''; }
 
-// API wrappers (use node-fetch to follow librosexpress pattern)
+// API wrappers via preload/contextBridge (main process will call the HTTP API)
 async function apiFetchEvents(){
-  try{
-    const res = await nf(window._eventsResource);
-    if(!res.ok) throw new Error('No backend');
-    const json = await res.json();
-    return json;
-  }catch(e){ throw e }
+  if (window.api && window.api.getEvents) return await window.api.getEvents();
+  throw new Error('API bridge not available');
 }
 
 async function apiCreateEvent(payload){
-  const res = await nf(window._eventsResource, { method: 'post', body: JSON.stringify(payload), headers: {'Content-Type':'application/json'} });
-  if(!res.ok) throw new Error('create failed');
-  return await res.json();
+  if (window.api && window.api.createEvent) return await window.api.createEvent(payload);
+  throw new Error('API bridge not available');
 }
+
 async function apiUpdateEvent(payload){
-  const res = await nf(window._eventsResource + '/' + payload.id, { method: 'put', body: JSON.stringify(payload), headers: {'Content-Type':'application/json'} });
-  if(!res.ok) throw new Error('update failed');
-  return await res.json();
+  if (window.api && window.api.updateEvent) return await window.api.updateEvent(payload);
+  throw new Error('API bridge not available');
 }
+
 async function apiDeleteEvent(id){
-  const res = await nf(window._eventsResource + '/' + id, { method: 'delete' });
-  if(!res.ok) throw new Error('delete failed');
-  return true;
+  if (window.api && window.api.deleteEvent) return await window.api.deleteEvent(id);
+  throw new Error('API bridge not available');
 }
 
 // UI actions

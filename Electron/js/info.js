@@ -1,7 +1,6 @@
 // Lógica cliente para pantalla de detalles/edición de falla (restaurado desde screen2.js)
 // Usar window.fetch si está disponible en el renderer; si no, intentar require('node-fetch')
-let nf;
-try { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : require('node-fetch'); } catch(e) { nf = (typeof window !== 'undefined' && window.fetch) ? window.fetch.bind(window) : null; }
+let nf = null; // not used in renderer anymore; main process handles HTTP
 document.addEventListener('DOMContentLoaded', function () {
    const params = new URLSearchParams(window.location.search);
    const id = params.get('id') || '';
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
    if (saveBtn) saveBtn.addEventListener('click', saveFalla);
    if (editBtn) editBtn.addEventListener('click', toggleEditMode);
-   if (deleteBtn) deleteBtn.addEventListener('click', function(){ if(confirm('¿Eliminar esta falla?')){ const idToDel = document.getElementById('fallaId').value; if(idToDel){ nf(window._recurso + '/' + idToDel, { method: 'delete' }).then(()=>{ alert('Falla eliminada'); window.location.href='events.html'; }).catch(()=>{ alert('Error al eliminar'); }); } else { alert('No hay id para eliminar'); } } });
+   if (deleteBtn) deleteBtn.addEventListener('click', function(){ if(confirm('¿Eliminar esta falla?')){ const idToDel = document.getElementById('fallaId').value; if(idToDel){ if(window.api && window.api.deleteFalla){ window.api.deleteFalla(idToDel).then(()=>{ alert('Falla eliminada'); window.location.href='events.html'; }).catch(()=>{ alert('Error al eliminar'); }); } else { alert('API no disponible'); } } else { alert('No hay id para eliminar'); } } });
     // Habilitar edición por defecto para que el usuario pueda escribir aunque no se persista
     setEditMode(true);
 });
@@ -43,26 +42,18 @@ function loadFallaById(id) {
       return;
    }
 
-   // Petición al backend (usa node-fetch en renderer, como en librosexpress)
-   nf(window._recurso + '/' + id)
-      .then(res => {
-         if (!res.ok) throw new Error('No encontrado');
-         return res.json();
-      })
-      .then(json => populateForm(json))
-      .catch(err => {
+   // Pedir al main process que obtenga la falla
+   if (window.api && window.api.getFalla) {
+      window.api.getFalla(id).then(json => populateForm(json)).catch(err => {
          console.warn('No se pudo cargar desde backend, usando stub. ', err);
-         const ejemplo = {
-            id: id,
-            fecha: new Date().toISOString().slice(0,16),
-            ubicacion: 'Calle Falsa 123',
-            tipo: 'Caída',
-            descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.',
-            estado: 'abierta',
-            reportado_por: 'Juan Pérez'
-         };
+         const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez' };
          populateForm(ejemplo);
       });
+   } else {
+      console.warn('API bridge no disponible, usando stub');
+      const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez' };
+      populateForm(ejemplo);
+   }
 }
 
 function populateForm(data) {
@@ -96,26 +87,22 @@ function saveFalla() {
    const url = id ? (window._recurso + '/' + id) : window._recurso;
    const method = id ? 'put' : 'post';
 
-   nf(url, {
-      method: method,
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' }
-   }).then(res => {
-      if (!res.ok) throw new Error('Error en guardado');
-      return res.json();
-   }).then(json => {
-      alert('Cambios guardados');
-      // actualizar side
-      const sc = document.getElementById('statusChip'); if(sc) sc.textContent = json.estado || payload.estado;
-      const side = document.getElementById('sideSummary'); if(side) side.textContent = (json.descripcion||payload.descripcion||'').slice(0,140) + ((json.descripcion||payload.descripcion) && (json.descripcion||payload.descripcion).length>140? '...':'');
-      // salir de modo edición
+   if (window.api && window.api.saveFalla) {
+      window.api.saveFalla(payload).then(json => {
+         alert('Cambios guardados');
+         const sc = document.getElementById('statusChip'); if(sc) sc.textContent = json.estado || payload.estado;
+         const side = document.getElementById('sideSummary'); if(side) side.textContent = (json.descripcion||payload.descripcion||'').slice(0,140) + ((json.descripcion||payload.descripcion) && (json.descripcion||payload.descripcion).length>140? '...':'');
+         setEditMode(false);
+         if (json.id) document.getElementById('fallaId').value = json.id;
+      }).catch(err => {
+         console.error('Error guardando:', err);
+         alert('Error al guardar. Ver consola para más detalles.');
+      });
+   } else {
+      console.warn('API bridge no disponible - cambios no persistidos');
+      alert('Cambios guardados localmente (simulado).');
       setEditMode(false);
-      // si era creación, rellenar el id devuelto
-      if (json.id) document.getElementById('fallaId').value = json.id;
-   }).catch(err=>{
-      console.error('Error guardando:',err);
-      alert('Error al guardar. Ver consola para más detalles.');
-   });
+   }
 }
 
 // Exportar para pruebas (opcional)
