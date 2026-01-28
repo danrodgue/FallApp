@@ -1,0 +1,12 @@
+# Archivos y carpetas que no necesitamos en la imagen de Docker
+target
+.mvn
+.idea
+.git
+.gitignore
+*.iml
+*.log
+*.tmp
+*.swp
+*.swo
+node_modules

@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: fallapp-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: changeme
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ./Datos/Fallapp
+      dockerfile: Dockerfile
+    container_name: fallapp-backend
+    environment:
+      # URL de conexión a MongoDB dentro de la red de Docker
+      SPRING_DATA_MONGODB_URI: mongodb+srv://drodgue123_db_user:B7P0YbmAADQqKMgv@fallapp-cluster.mjo1rw2.mongodb.net/?appName=Fallapp-Cluster
+      SPRING_DATA_MONGODB_DATABASE: Fallapp
+      SPRING_SECURITY_USER_NAME: test
+      SPRING_SECURITY_USER_PASSWORD: 1234
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:
+
