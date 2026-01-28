@@ -4,7 +4,8 @@
   let cfg = null;
   try {
     // En renderer con nodeIntegration=true se puede usar require para leer archivos JSON
-    cfg = require('../config.json');
+    // El archivo real se encuentra en js/config.json
+    cfg = require('./config.json');
   } catch (e) {
     cfg = null;
   }

@@ -29,7 +29,8 @@ function renderList(filter=''){
     // Imagen del evento
     const eventImage = document.createElement('div'); eventImage.className='event-image';
     const img = document.createElement('img');
-    img.src = ev.image || '../img/fallap_logo.png';
+    // Usar el logo desde renderer/src/img si no hay imagen específica
+    img.src = ev.image || '../renderer/src/img/fallap_logo.png';
     img.alt = ev.name || 'Evento';
     img.onerror = function() { this.style.display='none'; this.parentElement.classList.add('no-image'); };
     eventImage.appendChild(img);

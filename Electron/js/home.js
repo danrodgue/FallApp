@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(!btn) return;
   btn.addEventListener('click', function(){
     try{ localStorage.removeItem('fallapp_user'); }catch(e){}
-    window.location.href = '../index.html';
+    // Volver a la pantalla de login ubicada en js/index.html
+    window.location.href = '../js/index.html';
   });
 });

@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (ok) {
                 // Guardar el usuario logueado para usarlo en otras pantallas (ej. eventos)
                 try{ localStorage.setItem('fallapp_user', username); }catch(e){}
-                window.location.href = 'screens/home.html';
+                // Desde js/index.html navegamos a screens/home.html
+                window.location.href = '../screens/home.html';
             } else {
                 showError('No se ha podido autenticar. Usuario o contraseña incorrectos.');
             }

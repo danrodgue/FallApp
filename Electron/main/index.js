@@ -2,9 +2,12 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fetch = require('node-fetch');
 
-// Leer config local (apiBase)
+// Leer config local (apiBase) desde la ubicación real del archivo
 let API_BASE = 'http://127.0.0.1:8080';
-try { const cfg = require('./config.json'); API_BASE = cfg.apiBase || API_BASE; } catch(e) {}
+try {
+  const cfg = require(path.join(__dirname, '../js/config.json'));
+  API_BASE = cfg.apiBase || API_BASE;
+} catch (e) {}
 
 let mainWindow;
 
@@ -16,13 +19,14 @@ function createWindow() {
     fullscreenable: false,
     autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, '../preload/preload.js'),
       nodeIntegration: false,
       contextIsolation: true
     }
   });
 
-  mainWindow.loadFile('index.html');
+  // Cargar la pantalla de login ubicada en js/index.html
+  mainWindow.loadFile(path.join(__dirname, '../js/index.html'));
   mainWindow.maximize();
   mainWindow.setMenu(null);
 
