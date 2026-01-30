@@ -1,9 +1,5 @@
 package com.example.Fallapp.model;
 
-import com.mongodb.client.model.geojson.Geometry;
-
-import java.util.List;
-
 public class GeoShape {
 
     private GeometryMap geometry;

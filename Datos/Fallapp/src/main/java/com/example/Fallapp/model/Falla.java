@@ -1,5 +1,6 @@
 package com.example.Fallapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -163,6 +164,7 @@ public class Falla {
         this.experim = experim;
     }
 
+    @JsonIgnore
     public GeoShape getGeo_shape() {
         return geo_shape;
     }
@@ -171,6 +173,7 @@ public class Falla {
         this.geo_shape = geo_shape;
     }
 
+    @JsonIgnore
     public Object getGeo_point_2d() {
         return geo_point_2d;
     }
