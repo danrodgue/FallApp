@@ -62,6 +62,24 @@ function renderList(filter=''){
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('photo');
+  const preview = document.getElementById('photo-preview');
+
+  if (!input) {
+    console.error('No se encontró el input de foto');
+    return;
+  }
+
+  input.addEventListener('change', () => {
+    const file = input.files[0];
+
+    if (!file) return;
+
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = 'block';
+  });
+});
 // Modal helpers
 function openModal(){ if(modal) modal.style.display='flex'; }
 function closeModal(){ if(modal) modal.style.display='none'; }
