@@ -5,6 +5,7 @@
      <title>Información - FallApp</title>
      <link rel="stylesheet" href="../css/login.css">
      <link rel="stylesheet" href="../css/info.css">
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
      <meta name="viewport" content="width=device-width,initial-scale=1">
 </head>
 <body class="events-page">
@@ -24,15 +25,10 @@
                          <form id="fallaForm">
                               <div class="falla-helper">Los campos están editables localmente (no persistidos a menos que guardes con backend).</div>
                               
-                              <!-- Sección de imagen de la falla -->
+
                               <div class="falla-image-section">
-                                   <label>Ubicación de la falla</label>
-                                   <div class="falla-image-container">
-                                        <img id="fallaImagen" src="../renderer/src/img/mapa.jpg" alt="Imagen de la falla" onerror="this.style.display='none'">
-                                        <div class="falla-image-placeholder" id="fallaImagePlaceholder">
-                                             <span>Sin imagen disponible</span>
-                                        </div>
-                                   </div>
+                                   <label>Ubicación de la Falla</label>
+                                   <div id="map" class="falla-image-container" aria-label="Mapa de la ubicación"></div>
                               </div>
 
                               <div class="form-row">
@@ -82,6 +78,7 @@
           </div>
      </div>
 
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
      <script src="../js/info.js"></script>
 </body>
 </html>

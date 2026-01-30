@@ -22,8 +22,11 @@ document.addEventListener('DOMContentLoaded', function () {
    if (saveBtn) saveBtn.addEventListener('click', saveFalla);
    if (editBtn) editBtn.addEventListener('click', toggleEditMode);
    if (deleteBtn) deleteBtn.addEventListener('click', function(){ if(confirm('¿Eliminar esta falla?')){ const idToDel = document.getElementById('fallaId').value; if(idToDel){ if(window.api && window.api.deleteFalla){ window.api.deleteFalla(idToDel).then(()=>{ alert('Falla eliminada'); window.location.href='events.html'; }).catch(()=>{ alert('Error al eliminar'); }); } else { alert('API no disponible'); } } else { alert('No hay id para eliminar'); } } });
-    // Habilitar edición por defecto para que el usuario pueda escribir aunque no se persista
-    setEditMode(true);
+      // Inicializar mapa Leaflet aunque no haya coordenadas (mejora UX)
+      try{ if(window.showFaultLocation) { /* noop - ensure function exists */ } }catch(e){}
+      if(typeof ensureLeafletMap === 'function') ensureLeafletMap().catch(()=>{});
+      // Habilitar edición por defecto para que el usuario pueda escribir aunque no se persista
+      setEditMode(true);
 });
 
 function loadFallaById(id) {
@@ -34,7 +37,9 @@ function loadFallaById(id) {
          fecha: new Date().toISOString().slice(0,16),
          nombre: 'Calle Falsa 123',
          agrupacion: 'Caída',
-         descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.'
+         descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.',
+         lat: 39.4684257,
+         lng: -0.388816
       };
       populateForm(ejemplo);
       return;
@@ -44,12 +49,12 @@ function loadFallaById(id) {
    if (window.api && window.api.getFalla) {
       window.api.getFalla(id).then(json => populateForm(json)).catch(err => {
          console.warn('No se pudo cargar desde backend, usando stub. ', err);
-         const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez' };
+         const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez', lat: 40.4168, lng: -3.7038 };
          populateForm(ejemplo);
       });
    } else {
       console.warn('API bridge no disponible, usando stub');
-      const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez' };
+      const ejemplo = { id: id, fecha: new Date().toISOString().slice(0,16), ubicacion: 'Calle Falsa 123', tipo: 'Caída', descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', estado: 'abierta', reportado_por: 'Juan Pérez', lat: 40.4168, lng: -3.7038 };
       populateForm(ejemplo);
    }
 }
@@ -157,4 +162,59 @@ function toggleEditMode(){
    const enabled = !(saveBtn && saveBtn.style.display === 'inline-block');
    setEditMode(enabled);
 }
+
+// ------------------ Leaflet (OpenStreetMap) integration ------------------
+function ensureLeafletMap(){
+   return new Promise((resolve,reject)=>{
+      if(window._leafletMap) { resolve(window._leafletMap); return; }
+      const mapEl = document.getElementById('map');
+      if(!mapEl) return reject(new Error('Elemento #map no encontrado'));
+      try{
+         // Default center Madrid
+         window._leafletMap = L.map(mapEl).setView([40.4168, -3.7038], 13);
+         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+         }).addTo(window._leafletMap);
+         // small delay to ensure sizing in hidden/animated containers
+         setTimeout(()=>{ try{ window._leafletMap.invalidateSize(); }catch(e){} }, 200);
+         resolve(window._leafletMap);
+      }catch(err){
+         reject(err);
+      }
+   });
+}
+
+window.showFaultLocation = function(lat,lng,title){
+   if(lat === undefined || lng === undefined || lat === null || lng === null) return;
+   ensureLeafletMap().then(map=>{
+      const latf = parseFloat(lat), lngf = parseFloat(lng);
+      map.setView([latf, lngf], 17);
+      if(window._leafletMarker){
+         window._leafletMarker.setLatLng([latf, lngf]);
+      } else {
+         window._leafletMarker = L.marker([latf, lngf]).addTo(map).bindPopup(title || 'Falla');
+      }
+      if(window._leafletMarker && title) window._leafletMarker.bindPopup(title || 'Falla');
+      setTimeout(()=>{ try{ map.invalidateSize(); }catch(e){} }, 200);
+   }).catch(err=>{
+      console.warn('No se pudo inicializar Leaflet:', err);
+   });
+};
+
+// Intentar mostrar ubicación cuando se llena el formulario (compatibilidad con distintos nombres)
+const _origPopulateForm = populateForm;
+populateForm = function(data){
+   _origPopulateForm(data);
+   if(!data) return;
+   let lat = data.lat || (data.coords && data.coords.lat) || data.locationLat || null;
+   let lng = data.lng || (data.coords && data.coords.lng) || data.locationLng || null;
+   if(!lat && data.ubicacion && typeof data.ubicacion === 'string'){
+      const m = data.ubicacion.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+      if(m){ lat = m[1]; lng = m[2]; }
+   }
+   if(lat && lng){
+      if(window.showFaultLocation) window.showFaultLocation(parseFloat(lat), parseFloat(lng), data.ubicacion || 'Falla');
+   }
+};
 

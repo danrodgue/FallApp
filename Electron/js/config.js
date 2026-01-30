@@ -27,4 +27,6 @@
   } else {
     window._API_CREDENTIALS = window._API_CREDENTIALS || { user: '', pass: '' };
   }
+  // Google Maps API Key (opcional, agregar a js/config.json)
+  window._GOOGLE_MAPS_API_KEY = (cfg && cfg.googleMapsApiKey) ? cfg.googleMapsApiKey : (window._GOOGLE_MAPS_API_KEY || '');
 })();
