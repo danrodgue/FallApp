@@ -1,9 +1,0 @@
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/FallappApplication.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/controller/FallaController.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/model/Falla.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/model/GeoShape.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/model/GeometryMap.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/model/Login.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/repository/CustomFallaRepository.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/repository/CustomFallaRepositoryImpl.java
-/home/runner/work/FallApp/FallApp/01.backend/src/main/java/com/example/Fallapp/repository/FallaRepository.java
