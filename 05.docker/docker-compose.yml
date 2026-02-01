@@ -1,35 +1,171 @@
 version: "3.9"
 
 services:
-  mongo:
-    image: mongo:6
-    container_name: fallapp-mongo
+  # =============================================================================
+  # PostgreSQL - Base de datos relacional principal
+  # =============================================================================
+  postgres:
+    image: postgres:13-alpine
+    container_name: fallapp-postgres
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: changeme
+      # Credenciales iniciales
+      POSTGRES_DB: ${POSTGRES_DB:-fallapp}
+      POSTGRES_USER: ${POSTGRES_USER:-fallapp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fallapp_secure_password_2026}
+      
+      # Configuración de performance
+      POSTGRES_INITDB_ARGS: "--locale=es_ES.UTF-8 --encoding=UTF8"
+    
     ports:
-      - "27017:27017"
+      - "${POSTGRES_PORT:-5432}:5432"
+    
     volumes:
-      - mongo-data:/data/db
+      # Volumen persistente para datos
+      - postgres_data:/var/lib/postgresql/data
+      
+      # Scripts de inicialización (ejecutados en orden)
+      - ./07.datos/scripts:/docker-entrypoint-initdb.d
+      
+      # Archivo de configuración personalizado (opcional)
+      - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
+    
+    # Health check para verificar disponibilidad
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fallapp_user} -d ${POSTGRES_DB:-fallapp}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    
+    networks:
+      - fallapp-network
+    
+    # Limitar recursos
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
 
+  # =============================================================================
+  # Backend Spring Boot - API REST
+  # =============================================================================
   backend:
     build:
       context: ../01.backend
       dockerfile: Dockerfile
     container_name: fallapp-backend
+    restart: unless-stopped
+    
     environment:
-      # URL de conexión a MongoDB dentro de la red de Docker
-      SPRING_DATA_MONGODB_URI: mongodb+srv://drodgue123_db_user:B7P0YbmAADQqKMgv@fallapp-cluster.mjo1rw2.mongodb.net/?appName=Fallapp-Cluster
-      SPRING_DATA_MONGODB_DATABASE: Fallapp
-      SPRING_SECURITY_USER_NAME: test
-      SPRING_SECURITY_USER_PASSWORD: 1234
-      PORT: 8080
+      # ========== Base de Datos PostgreSQL ==========
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-fallapp}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-fallapp_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-fallapp_secure_password_2026}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      
+      # ========== JPA/Hibernate ==========
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQL13Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_DDL_AUTO:-validate}
+      SPRING_JPA_SHOW_SQL: "false"
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_BATCH_SIZE: "20"
+      SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_INSERTS: "true"
+      SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_UPDATES: "true"
+      
+      # ========== Seguridad ==========
+      SPRING_SECURITY_USER_NAME: ${API_USER:-admin}
+      SPRING_SECURITY_USER_PASSWORD: ${API_PASSWORD:-admin1234}
+      
+      # ========== Server ==========
+      SERVER_PORT: 8080
+      SERVER_SERVLET_CONTEXT_PATH: /api
+      
+      # ========== Logging ==========
+      LOGGING_LEVEL_ROOT: "INFO"
+      LOGGING_LEVEL_COM_FALLAPP: "DEBUG"
+    
     ports:
-      - "8080:8080"
+      - "${API_PORT:-8080}:8080"
+    
     depends_on:
-      - mongo
+      postgres:
+        condition: service_healthy
+    
+    networks:
+      - fallapp-network
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "1"
+          memory: 512M
 
+  # =============================================================================
+  # pgAdmin - Interfaz gráfica para administrar PostgreSQL (DESARROLLO)
+  # =============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: fallapp-pgadmin
+    restart: unless-stopped
+    
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@fallapp.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin1234}
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    
+    volumes:
+      # Volumen para persistencia de configuración
+      - pgadmin_data:/var/lib/pgadmin
+    
+    networks:
+      - fallapp-network
+    
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+# =============================================================================
+# Volúmenes Persistentes
+# =============================================================================
 volumes:
-  mongo-data:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${POSTGRES_DATA_PATH:-./postgres_data}
+  
+  pgadmin_data:
+    driver: local
+
+# =============================================================================
+# Red Docker
+# =============================================================================
+networks:
+  fallapp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
 
