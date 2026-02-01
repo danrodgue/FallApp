@@ -83,8 +83,100 @@ public class EventoService {
         dto.setFechaEvento(evento.getFechaEvento());
         dto.setUbicacion(evento.getUbicacion());
         dto.setParticipantesEstimado(evento.getParticipantesEstimado());
-        dto.setFechaCreacion(evento.getCreadoEn());
-        dto.setCreadoPor(evento.getCreadoPor() != null ? evento.getCreadoPor().getNombreCompleto() : null);
         return dto;
     }
-}
+
+    /**
+     * Crear nuevo evento asociado a una falla
+     * 
+     * Validaciones:
+     * - Falla debe existir (relación obligatoria)
+     * - Fecha evento: @NotNull validado en DTO
+     * - Tipo evento: Enum (planta, crema, ofrenda, infantil, concierto, exposicion, otro)
+     * - Participantes estimado: @Min(0) si se proporciona
+     * 
+     * Campos automáticos:
+     * - fecha_creacion: Timestamp actual (default BD)
+     * - id: Auto-generado (sequence eventos_id_evento_seq)
+     * 
+     * @param eventoDTO DTO con datos del evento
+     * @return EventoDTO creado con ID y fechas
+     * @throws RuntimeException Si la falla no existe
+     */
+    @Transactional
+    public EventoDTO crear(EventoDTO eventoDTO) {
+        Falla falla = fallaRepository.findById(eventoDTO.getIdFalla())
+                .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + eventoDTO.getIdFalla()));
+
+        Evento evento = new Evento();
+        mapearDTOAEntidad(eventoDTO, evento, falla);
+        
+        Evento eventoSaved = eventoRepository.save(evento);
+        return convertirADTO(eventoSaved);
+    }
+
+    /**
+     * Actualizar evento existente
+     * 
+     * Permite cambiar:
+     * - Datos del evento (nombre, descripción, fecha, ubicación)
+     * - Tipo de evento (enum TipoEvento)
+     * - Falla asociada (reasignación permitida)
+     * - Participantes estimado
+     * 
+     * Comportamiento:
+     * - Validación de existencia de evento y falla
+     * - Sobrescritura completa de campos del DTO
+     * 
+     * @param id ID del evento a actualizar
+     * @param eventoDTO DTO con nuevos valores
+     * @return EventoDTO actualizado
+     * @throws RuntimeException Si evento o falla no existen
+     */
+    @Transactional
+    public EventoDTO actualizar(Long id, EventoDTO eventoDTO) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        Falla falla = fallaRepository.findById(eventoDTO.getIdFalla())
+                .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + eventoDTO.getIdFalla()));
+
+        mapearDTOAEntidad(eventoDTO, evento, falla);
+        
+        Evento eventoActualizado = eventoRepository.save(evento);
+        return convertirADTO(eventoActualizado);
+    }
+
+    /**
+     * Eliminar evento del sistema
+     * 
+     * Restricciones:
+     * - Solo rol ADMIN (validado en controller)
+     * - No hay relaciones CASCADE críticas (evento es hoja en árbol de dependencias)
+     * 
+     * @param id ID del evento a eliminar
+     * @throws RuntimeException Si el evento no existe
+     */
+    @Transactional
+    public void eliminar(Long id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+        
+        eventoRepository.delete(evento);
+    }
+
+    /**
+     * Mapear DTO a entidad
+     */
+    private void mapearDTOAEntidad(EventoDTO dto, Evento entidad, Falla falla) {
+        entidad.setFalla(falla);
+        entidad.setNombre(dto.getNombre());
+        entidad.setDescripcion(dto.getDescripcion());
+        entidad.setFechaEvento(dto.getFechaEvento());
+        entidad.setUbicacion(dto.getUbicacion());
+        entidad.setParticipantesEstimado(dto.getParticipantesEstimado());
+        
+        if (dto.getTipo() != null) {
+            entidad.setTipo(Evento.TipoEvento.valueOf(dto.getTipo().toLowerCase()));
+        }
+    }}

@@ -74,4 +74,43 @@ public class FallaController {
         PaginatedResponse<FallaDTO> resultado = fallaService.obtenerPorCategoria(categoria, pagina, tamano);
         return ResponseEntity.ok(ApiResponse.success(resultado));
     }
+
+    /**
+     * Crear nueva falla
+     * @param fallaDTO Datos de la nueva falla
+     * @return Respuesta con falla creada
+     */
+    @PostMapping
+    @Operation(summary = "Crear nueva falla", description = "Requiere autenticación. Solo administradores o usuarios con rol 'casal' pueden crear fallas.")
+    public ResponseEntity<ApiResponse<FallaDTO>> crear(@RequestBody @jakarta.validation.Valid FallaDTO fallaDTO) {
+        FallaDTO fallaCreada = fallaService.crear(fallaDTO);
+        return ResponseEntity.status(201).body(ApiResponse.success("Falla creada exitosamente", fallaCreada));
+    }
+
+    /**
+     * Actualizar falla existente
+     * @param id ID de la falla
+     * @param fallaDTO Datos actualizados
+     * @return Respuesta con falla actualizada
+     */
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar falla existente", description = "Requiere autenticación. Solo administradores o usuarios pertenecientes a la falla pueden actualizarla.")
+    public ResponseEntity<ApiResponse<FallaDTO>> actualizar(
+            @PathVariable Long id,
+            @RequestBody @jakarta.validation.Valid FallaDTO fallaDTO) {
+        FallaDTO fallaActualizada = fallaService.actualizar(id, fallaDTO);
+        return ResponseEntity.ok(ApiResponse.success("Falla actualizada exitosamente", fallaActualizada));
+    }
+
+    /**
+     * Eliminar falla
+     * @param id ID de la falla
+     * @return Respuesta de confirmación
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar falla", description = "Requiere autenticación. Solo administradores pueden eliminar fallas. ATENCIÓN: Esto eliminará también eventos, ninots y votos asociados.")
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
+        fallaService.eliminar(id);
+        return ResponseEntity.ok(ApiResponse.success("Falla eliminada exitosamente", null));
+    }
 }

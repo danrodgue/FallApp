@@ -2,6 +2,7 @@ com/fallapp/dto/PaginatedResponse$PaginatedResponseBuilder.class
 com/fallapp/model/Evento$TipoEvento.class
 com/fallapp/dto/LoginRequest.class
 com/fallapp/dto/ApiResponse$ApiResponseBuilder.class
+com/fallapp/controller/EstadisticasController.class
 com/fallapp/dto/EventoDTO$EventoDTOBuilder.class
 com/fallapp/service/FallaService.class
 com/fallapp/repository/EventoRepository.class
@@ -40,13 +41,16 @@ com/fallapp/repository/VotoRepository.class
 com/fallapp/service/UsuarioService.class
 com/fallapp/service/NinotService.class
 com/fallapp/exception/ResourceNotFoundException.class
+com/fallapp/controller/ComentarioController.class
 com/fallapp/exception/GlobalExceptionHandler.class
 com/fallapp/dto/LoginResponse$LoginResponseBuilder.class
 com/fallapp/dto/RegistroRequest.class
 com/fallapp/dto/ComentarioDTO$ComentarioDTOBuilder.class
 com/fallapp/repository/NinotRepository.class
+com/fallapp/service/EstadisticasService.class
 com/fallapp/model/Comentario.class
 com/fallapp/FallappApplication.class
+com/fallapp/service/ComentarioService.class
 com/fallapp/model/Usuario$RolUsuario.class
 com/fallapp/dto/CrearComentarioRequest.class
 com/fallapp/dto/VotoDTO.class

@@ -84,13 +84,9 @@ public class AuthController {
             Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            // TODO: Actualizar último acceso (bloqueado por ADR-008)
-            // ISSUE: PostgreSQL ENUM rol_usuario incompatible con JPA UPDATE
-            // WORKAROUND: Comentado temporalmente hasta migración VARCHAR
-            // MIGRACIÓN: Ver /srv/FallApp/04.docs/arquitectura/ADR-008-postgresql-enum-varchar.md
-            // PRÓXIMO PASO: Ejecutar script 99.migracion.enum.to.varchar.sql
-            // usuario.setUltimoAcceso(LocalDateTime.now());
-            // usuarioRepository.save(usuario);
+            // Actualizar último acceso (ADR-008 RESUELTO: columna rol migrada a VARCHAR)
+            usuario.setUltimoAcceso(LocalDateTime.now());
+            usuarioRepository.save(usuario);
 
             // Convertir a DTO
             UsuarioDTO usuarioDTO = usuarioService.convertirADTO(usuario);

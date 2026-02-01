@@ -49,6 +49,11 @@ public interface EventoRepository extends JpaRepository<Evento, Long> {
             Pageable pageable);
 
     /**
+     * Contar eventos por tipo
+     */
+    long countByTipo(Evento.TipoEvento tipo);
+
+    /**
      * Buscar próximos N eventos
      */
     @Query("SELECT e FROM Evento e WHERE e.fechaEvento >= CURRENT_TIMESTAMP ORDER BY e.fechaEvento ASC")

@@ -1,2 +1,4 @@
+com/fallapp/service/ComentarioServiceTest.class
+com/fallapp/service/EstadisticasServiceTest.class
 com/fallapp/security/JwtTokenProviderTest.class
 com/example/Fallapp/FallappApplicationTests.class

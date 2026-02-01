@@ -69,4 +69,36 @@ public class EventoController {
         Page<EventoDTO> eventos = eventoService.obtenerPorFalla(idFalla, pageable);
         return ResponseEntity.ok(ApiResponse.success(eventos));
     }
-}
+
+    /**
+     * POST /api/eventos - Crear nuevo evento
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<EventoDTO>> crear(
+            @RequestBody @jakarta.validation.Valid EventoDTO eventoDTO) {
+        EventoDTO eventoCreado = eventoService.crear(eventoDTO);
+        return ResponseEntity.status(201).body(ApiResponse.success("Evento creado exitosamente", eventoCreado));
+    }
+
+    /**
+     * PUT /api/eventos/{id} - Actualizar evento existente
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventoDTO>> actualizar(
+            @PathVariable Long id,
+            @RequestBody @jakarta.validation.Valid EventoDTO eventoDTO) {
+        EventoDTO eventoActualizado = eventoService.actualizar(id, eventoDTO);
+        return ResponseEntity.ok(ApiResponse.success("Evento actualizado exitosamente", eventoActualizado));
+    }
+
+    /**
+     * DELETE /api/eventos/{id} - Eliminar evento
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
+        eventoService.eliminar(id);
+        return ResponseEntity.ok(ApiResponse.success("Evento eliminado exitosamente", null));
+    }}

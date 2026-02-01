@@ -44,7 +44,7 @@ public class Voto {
     private TipoVoto tipoVoto;
 
     @CreationTimestamp
-    @Column(name = "creado_en", nullable = false, updatable = false)
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     /**

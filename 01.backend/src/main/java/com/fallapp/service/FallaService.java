@@ -130,4 +130,122 @@ public class FallaService {
                 .esUltimaPagina(page.isLast())
                 .build();
     }
-}
+
+    /**
+     * Crear nueva falla en el sistema
+     * 
+     * Validaciones de negocio:
+     * - Nombre único: No pueden existir dos fallas con el mismo nombre
+     * - Coordenadas: Latitud y longitud convertidas a BigDecimal
+     * - Categoría: Enum validado (especial, primera, segunda, tercera, cuarta, quinta)
+     * - Año fundación: Validado en DTO con @Min(1900)
+     * 
+     * Flujo de creación:
+     * 1. Verificar unicidad del nombre
+     * 2. Mapear DTO → Entidad (conversión de tipos)
+     * 3. Persistir en BD (JPA genera ID auto-incremental)
+     * 4. Convertir entidad guardada → DTO para respuesta
+     * 
+     * Transaccionalidad:
+     * @Transactional garantiza rollback si falla algún paso
+     * 
+     * @param fallaDTO DTO con datos validados por Bean Validation (@NotBlank, @Size, etc.)
+     * @return FallaDTO con ID generado y fechas de auditoría
+     * @throws IllegalArgumentException Si ya existe falla con ese nombre
+     * @see ADR-007 Formato estándar ApiResponse para respuestas
+     */
+    @Transactional
+    public FallaDTO crear(FallaDTO fallaDTO) {
+        // Verificar si ya existe una falla con ese nombre
+        if (fallaRepository.existsByNombre(fallaDTO.getNombre())) {
+            throw new IllegalArgumentException("Ya existe una falla con el nombre: " + fallaDTO.getNombre());
+        }
+
+        Falla falla = new Falla();
+        mapearDTOAEntidad(fallaDTO, falla);
+        
+        Falla fallaSaved = fallaRepository.save(falla);
+        return convertirADTO(fallaSaved);
+    }
+
+    /**
+     * Actualizar falla existente
+     */
+    @Transactional
+    public FallaDTO actualizar(Long id, FallaDTO fallaDTO) {
+        Falla falla = fallaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", id));
+
+        // Verificar si el nuevo nombre ya existe (y no es el mismo)
+        if (!falla.getNombre().equals(fallaDTO.getNombre()) && 
+            fallaRepository.existsByNombre(fallaDTO.getNombre())) {
+            throw new IllegalArgumentException("Ya existe una falla con el nombre: " + fallaDTO.getNombre());
+        }
+
+        mapearDTOAEntidad(fallaDTO, falla);
+        
+        Falla fallaActualizada = fallaRepository.save(falla);
+        return convertirADTO(fallaActualizada);
+    }
+
+    /**
+     * Eliminar falla del sistema (soft delete o hard delete según configuración)
+     * 
+     * IMPORTANTE - Efectos Cascada:
+     * - Eventos asociados: Eliminados (ON DELETE CASCADE)
+     * - Ninots asociados: Eliminados (ON DELETE CASCADE)
+     * - Votos de ninots: Eliminados (ON DELETE CASCADE)
+     * - Comentarios: Eliminados (ON DELETE CASCADE)
+     * - Usuarios asignados: Relación eliminada (usuarios no se borran)
+     * 
+     * Restricciones:
+     * - Solo usuarios con rol ADMIN pueden ejecutar (validado en Controller)
+     * - Operación irreversible (no hay papelera de reciclaje)
+     * 
+     * Performance:
+     * - Puede ser lento si la falla tiene muchos eventos/ninots (>100)
+     * - PostgreSQL maneja cascadas en BD (más eficiente que JPA)
+     * 
+     * @param id ID de la falla a eliminar
+     * @throws RuntimeException Si la falla no existe
+     * @see FallaController#eliminar Endpoint con @PreAuthorize("hasRole('ROLE_ADMIN')")
+     */
+    @Transactional
+    public void eliminar(Long id) {
+        Falla falla = fallaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", id));
+        
+        fallaRepository.delete(falla);
+    }
+
+    /**
+     * Mapear DTO a entidad
+     */
+    private void mapearDTOAEntidad(FallaDTO dto, Falla entidad) {
+        entidad.setNombre(dto.getNombre());
+        entidad.setSeccion(dto.getSeccion());
+        entidad.setFallera(dto.getFallera());
+        entidad.setPresidente(dto.getPresidente());
+        entidad.setArtista(dto.getArtista());
+        entidad.setLema(dto.getLema());
+        entidad.setAnyoFundacion(dto.getAnyoFundacion());
+        entidad.setDistintivo(dto.getDistintivo());
+        entidad.setUrlBoceto(dto.getUrlBoceto());
+        entidad.setExperim(dto.getExperim() != null ? dto.getExperim() : false);
+        
+        if (dto.getLatitud() != null) {
+            entidad.setUbicacionLat(java.math.BigDecimal.valueOf(dto.getLatitud()));
+        }
+        if (dto.getLongitud() != null) {
+            entidad.setUbicacionLon(java.math.BigDecimal.valueOf(dto.getLongitud()));
+        }
+        
+        entidad.setDescripcion(dto.getDescripcion());
+        entidad.setWebOficial(dto.getWebOficial());
+        entidad.setTelefonoContacto(dto.getTelefonoContacto());
+        entidad.setEmailContacto(dto.getEmailContacto());
+        
+        if (dto.getCategoria() != null) {
+            entidad.setCategoria(Falla.CategoriaFalla.valueOf(dto.getCategoria().toLowerCase()));
+        }
+    }}

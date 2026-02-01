@@ -102,4 +102,113 @@ public class NinotService {
         
         return dto;
     }
-}
+
+    /**
+     * Crear nuevo ninot asociado a una falla
+     * 
+     * Validaciones:
+     * - Falla debe existir (relación obligatoria)
+     * - Nombre: @NotBlank validado en DTO
+     * - Dimensiones: @DecimalMin(0.1) para altura y ancho (en metros)
+     * - Imágenes: Array de URLs (opcional)
+     * 
+     * Conversiones:
+     * - Double → BigDecimal para altura, ancho, profundidad (precisión decimal)
+     * - String[] → String (join con comas) para imágenes
+     * 
+     * @param ninotDTO DTO con datos del ninot
+     * @return NinotDTO creado con ID y totalVotos=0
+     * @throws RuntimeException Si la falla no existe
+     */
+    @Transactional
+    public NinotDTO crear(NinotDTO ninotDTO) {
+        Falla falla = fallaRepository.findById(ninotDTO.getIdFalla())
+                .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + ninotDTO.getIdFalla()));
+
+        Ninot ninot = new Ninot();
+        mapearDTOAEntidad(ninotDTO, ninot, falla);
+        
+        Ninot ninotSaved = ninotRepository.save(ninot);
+        return convertirADTO(ninotSaved);
+    }
+
+    /**
+     * Actualizar ninot existente
+     * 
+     * Permite modificar:
+     * - Datos básicos (nombre, artista, descripción)
+     * - Dimensiones (altura, ancho, profundidad)
+     * - Estado premiado (boolean)
+     * - Tipo premio y año premio (si premiado=true)
+     * - Array de imágenes (URLs)
+     * - Falla asociada (reasignación permitida)
+     * 
+     * Nota: Los votos NO se modifican aquí (usar endpoint /api/votos)
+     * 
+     * @param id ID del ninot a actualizar
+     * @param ninotDTO DTO con nuevos valores
+     * @return NinotDTO actualizado con totalVotos calculado
+     * @throws RuntimeException Si ninot o falla no existen
+     */
+    @Transactional
+    public NinotDTO actualizar(Long id, NinotDTO ninotDTO) {
+        Ninot ninot = ninotRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + id));
+
+        Falla falla = fallaRepository.findById(ninotDTO.getIdFalla())
+                .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + ninotDTO.getIdFalla()));
+
+        mapearDTOAEntidad(ninotDTO, ninot, falla);
+        
+        Ninot ninotActualizado = ninotRepository.save(ninot);
+        return convertirADTO(ninotActualizado);
+    }
+
+    /**
+     * Eliminar ninot del sistema
+     * 
+     * IMPORTANTE - Efectos Cascada:
+     * - Votos asociados: Eliminados (ON DELETE CASCADE)
+     * - Comentarios: Eliminados (ON DELETE CASCADE)
+     * 
+     * Restricciones:
+     * - Solo rol ADMIN (validado en controller)
+     * - Operación irreversible
+     * 
+     * @param id ID del ninot a eliminar
+     * @throws RuntimeException Si el ninot no existe
+     */
+    @Transactional
+    public void eliminar(Long id) {
+        Ninot ninot = ninotRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + id));
+        
+        ninotRepository.delete(ninot);
+    }
+
+    /**
+     * Mapear DTO a entidad
+     */
+    private void mapearDTOAEntidad(NinotDTO dto, Ninot entidad, Falla falla) {
+        entidad.setFalla(falla);
+        entidad.setNombreNinot(dto.getNombreNinot());
+        entidad.setTituloObra(dto.getTituloObra());
+        
+        if (dto.getAltura() != null) {
+            entidad.setAlturaMetros(java.math.BigDecimal.valueOf(dto.getAltura()));
+        }
+        if (dto.getAncho() != null) {
+            entidad.setAnchoMetros(java.math.BigDecimal.valueOf(dto.getAncho()));
+        }
+        
+        // Manejar imágenes
+        if (dto.getImagenes() != null && !dto.getImagenes().isEmpty()) {
+            entidad.setUrlImagenPrincipal(dto.getImagenes().get(0));
+            if (dto.getImagenes().size() > 1) {
+                String[] adicionales = dto.getImagenes().subList(1, dto.getImagenes().size()).toArray(new String[0]);
+                entidad.setUrlImagenesAdicionales(adicionales);
+            }
+        }
+        
+        entidad.setPremiado(dto.getPremiado() != null ? dto.getPremiado() : false);
+    }}

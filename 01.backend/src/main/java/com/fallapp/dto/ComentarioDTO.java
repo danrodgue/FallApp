@@ -1,5 +1,6 @@
 package com.fallapp.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,12 +17,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ComentarioDTO {
     private Long idComentario;
+    
+    @NotNull(message = "El ID del usuario es obligatorio")
     private Long idUsuario;
+    
     private String nombreUsuario;
+    
     private Long idFalla;
     private String nombreFalla;
+    
     private Long idNinot;
     private String nombreNinot;
+    
+    @NotBlank(message = "El contenido es obligatorio")
+    @Size(min = 3, max = 500, message = "El comentario debe tener entre 3 y 500 caracteres")
     private String contenido;
+    
     private LocalDateTime fechaCreacion;
-}
+    private LocalDateTime fechaActualizacion;}

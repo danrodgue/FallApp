@@ -3,6 +3,8 @@
 /srv/FallApp/01.backend/src/main/java/com/fallapp/config/RolUsuarioConverter.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/config/SecurityConfig.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/controller/AuthController.java
+/srv/FallApp/01.backend/src/main/java/com/fallapp/controller/ComentarioController.java
+/srv/FallApp/01.backend/src/main/java/com/fallapp/controller/EstadisticasController.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/controller/EventoController.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/controller/FallaController.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/controller/NinotController.java
@@ -39,6 +41,8 @@
 /srv/FallApp/01.backend/src/main/java/com/fallapp/security/JwtAuthenticationFilter.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/security/JwtTokenProvider.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/security/UserDetailsServiceImpl.java
+/srv/FallApp/01.backend/src/main/java/com/fallapp/service/ComentarioService.java
+/srv/FallApp/01.backend/src/main/java/com/fallapp/service/EstadisticasService.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/service/EventoService.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/service/FallaService.java
 /srv/FallApp/01.backend/src/main/java/com/fallapp/service/NinotService.java

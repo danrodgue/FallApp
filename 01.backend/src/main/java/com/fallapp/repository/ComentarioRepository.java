@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Repositorio para entidad Comentario
  */
@@ -21,12 +23,22 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     Page<Comentario> findByUsuario(Usuario usuario, Pageable pageable);
 
     /**
-     * Buscar comentarios por falla
+     * Buscar comentarios por falla ordenados por fecha
+     */
+    List<Comentario> findByFallaOrderByCreadoEnDesc(Falla falla);
+
+    /**
+     * Buscar comentarios por falla con paginación
      */
     Page<Comentario> findByFalla(Falla falla, Pageable pageable);
 
     /**
-     * Buscar comentarios por ninot
+     * Buscar comentarios por ninot ordenados por fecha
+     */
+    List<Comentario> findByNinotOrderByCreadoEnDesc(Ninot ninot);
+
+    /**
+     * Buscar comentarios por ninot con paginación
      */
     Page<Comentario> findByNinot(Ninot ninot, Pageable pageable);
 

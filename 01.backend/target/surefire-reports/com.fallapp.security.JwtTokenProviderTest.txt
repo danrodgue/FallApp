@@ -1,9 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.fallapp.security.JwtTokenProviderTest
--------------------------------------------------------------------------------
-Tests run: 13, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 1.484 s <<< FAILURE! -- in com.fallapp.security.JwtTokenProviderTest
-com.fallapp.security.JwtTokenProviderTest.testGenerateTokenFromAuthentication -- Time elapsed: 0.034 s <<< ERROR!
-java.lang.ClassCastException: class java.lang.String cannot be cast to class org.springframework.security.core.userdetails.UserDetails (java.lang.String is in module java.base of loader 'bootstrap'; org.springframework.security.core.userdetails.UserDetails is in unnamed module of loader 'app')
-	at com.fallapp.security.JwtTokenProvider.generateToken(JwtTokenProvider.java:62)
-	at com.fallapp.security.JwtTokenProviderTest.testGenerateTokenFromAuthentication(JwtTokenProviderTest.java:65)
-

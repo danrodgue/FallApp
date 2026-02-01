@@ -77,4 +77,36 @@ public class NinotController {
         Page<NinotDTO> ninots = ninotService.obtenerPremiados(pageable);
         return ResponseEntity.ok(ApiResponse.success(ninots));
     }
-}
+
+    /**
+     * POST /api/ninots - Crear nuevo ninot
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<NinotDTO>> crear(
+            @RequestBody @jakarta.validation.Valid NinotDTO ninotDTO) {
+        NinotDTO ninotCreado = ninotService.crear(ninotDTO);
+        return ResponseEntity.status(201).body(ApiResponse.success("Ninot creado exitosamente", ninotCreado));
+    }
+
+    /**
+     * PUT /api/ninots/{id} - Actualizar ninot existente
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<NinotDTO>> actualizar(
+            @PathVariable Long id,
+            @RequestBody @jakarta.validation.Valid NinotDTO ninotDTO) {
+        NinotDTO ninotActualizado = ninotService.actualizar(id, ninotDTO);
+        return ResponseEntity.ok(ApiResponse.success("Ninot actualizado exitosamente", ninotActualizado));
+    }
+
+    /**
+     * DELETE /api/ninots/{id} - Eliminar ninot
+     * Requiere autenticación (admin o usuario de la falla)
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
+        ninotService.eliminar(id);
+        return ResponseEntity.ok(ApiResponse.success("Ninot eliminado exitosamente", null));
+    }}

@@ -90,7 +90,7 @@ public class Falla {
     private CategoriaFalla categoria = CategoriaFalla.sin_categoria;
 
     @CreationTimestamp
-    @Column(name = "creado_en", nullable = false, updatable = false)
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     @UpdateTimestamp
