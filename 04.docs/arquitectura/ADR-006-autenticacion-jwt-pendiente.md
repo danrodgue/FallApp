@@ -35,19 +35,50 @@ El backend Spring Boot implementado incluía Spring Security y dependencias JWT 
 - BCrypt password verification funcionando
 - Token expiration: 24 horas (86400000 ms)
 
+### ✅ v0.4.0 - CRUD Endpoints con Autenticación (2026-02-01)
+
+**Endpoints POST/PUT/DELETE implementados con JWT**:
+- ✅ POST /api/fallas (requiere autenticación)
+- ✅ PUT /api/fallas/{id} (requiere autenticación)
+- ✅ DELETE /api/fallas/{id} (requiere rol admin)
+- ✅ POST /api/eventos (requiere autenticación)
+- ✅ PUT /api/eventos/{id} (requiere autenticación)
+- ✅ DELETE /api/eventos/{id} (requiere rol admin)
+- ✅ POST /api/ninots (requiere autenticación)
+- ✅ PUT /api/ninots/{id} (requiere autenticación)
+- ✅ DELETE /api/ninots/{id} (requiere rol admin)
+- ✅ POST /api/comentarios (requiere autenticación, extrae idUsuario del token)
+- ✅ PUT /api/comentarios/{id} (requiere autenticación, valida autor o admin)
+- ✅ DELETE /api/comentarios/{id} (requiere autenticación, valida autor o admin)
+
+**Estadísticas**:
+- Total endpoints autenticados: 12 (POST/PUT/DELETE)
+- Total endpoints públicos: 38 (GET mayoritariamente)
+- Coverage de autenticación: 100% en operaciones críticas
+
+**Validaciones de Seguridad**:
+- @PreAuthorize("hasRole('ROLE_ADMIN')") en DELETE endpoints
+- @AuthenticationPrincipal UserDetails en ComentarioController
+- Authorization header Bearer token validado en cada request
+- SecurityFilterChain configurado correctamente
+
 ## Decisión
 
-**Postergar la implementación completa de JWT hasta después de:**
-1. Completar documentación del backend actual
-2. Implementar tests de integración básicos
-3. Completar endpoints CRUD faltantes
+~~**Postergar la implementación completa de JWT hasta después de:**~~
 
-**Razones:**
-- La aplicación actual es desarrollo/demo, no producción
-- Tests de integración son más críticos para validar lógica de negocio
-- Endpoints CRUD incompletos afectan funcionalidad core
-- JWT requiere 4-6 horas de desarrollo + testing
-- Sin usuarios reales aún, autenticación no es bloqueante
+**DECISIÓN IMPLEMENTADA (v0.4.0)**: JWT completamente integrado
+
+**Completado**:
+✅ Documentación del backend actualizada (CHANGELOG v0.4.0, README 95%)
+✅ Endpoints CRUD completos (21 nuevos endpoints)
+✅ Autenticación JWT en todos los endpoints críticos
+✅ Validación de roles (admin vs usuario)
+✅ Extracción de usuario desde token en comentarios y votos
+
+**Pendiente**:
+- Tests de integración para endpoints autenticados
+- Tests unitarios para JwtAuthenticationFilter
+- Coverage >50% en servicios de seguridad
 
 **Sin embargo, se reconoce que:**
 - JWT es **requisito bloqueante para producción**

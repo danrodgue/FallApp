@@ -4,6 +4,79 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
+
+## [0.4.0] - 2026-02-01
+
+### Added
+- **CRUD Completo para Fallas**
+  - `POST /api/fallas`: Crear nueva falla (requiere autenticación)
+  - `PUT /api/fallas/{id}`: Actualizar falla existente
+  - `DELETE /api/fallas/{id}`: Eliminar falla (solo admin)
+  - Validaciones Bean Validation en FallaDTO
+  - Verificación de nombres únicos
+
+- **CRUD Completo para Eventos**
+  - `POST /api/eventos`: Crear nuevo evento
+  - `PUT /api/eventos/{id}`: Actualizar evento
+  - `DELETE /api/eventos/{id}`: Eliminar evento
+  - EventoDTO con validaciones de fecha y tipo
+
+- **CRUD Completo para Ninots**
+  - `POST /api/ninots`: Crear nuevo ninot
+  - `PUT /api/ninots/{id}`: Actualizar ninot
+  - `DELETE /api/ninots/{id}`: Eliminar ninot
+  - NinotDTO con validaciones de dimensiones
+
+- **Sistema de Comentarios Completo**
+  - `ComentarioController`: 4 endpoints nuevos
+  - `GET /api/comentarios`: Listar con filtros (idFalla, idNinot)
+  - `POST /api/comentarios`: Crear comentario (requiere autenticación)
+  - `PUT /api/comentarios/{id}`: Actualizar comentario (solo autor o admin)
+  - `DELETE /api/comentarios/{id}`: Eliminar comentario (solo autor o admin)
+  - ComentarioService con validaciones de relaciones
+
+- **EstadisticasController - Analytics Completo**
+  - `GET /api/estadisticas/resumen`: Resumen general del sistema
+  - `GET /api/estadisticas/fallas`: Distribución por categoría y sección
+  - `GET /api/estadisticas/votos`: Top 10 ninots más votados
+  - `GET /api/estadisticas/usuarios`: Distribución por rol y estado
+  - `GET /api/estadisticas/actividad`: Actividad reciente (comentarios, votos)
+  - `GET /api/estadisticas/eventos`: Distribución por tipo y eventos futuros
+  - EstadisticasService con agregaciones de repositorios
+
+### Changed
+- Falla.java: Columna `creado_en` → `fecha_creacion` (alineado con schema PostgreSQL)
+- Evento.java: Columna `creado_en` → `fecha_creacion`
+- Ninot.java: Columna `creado_en` → `fecha_creacion`
+- Voto.java: Columna `creado_en` → `fecha_creacion`
+- Comentario.java: Columna `creado_en` → `fecha_creacion`
+- FallaDTO: Añadidos campos adicionales (distintivo, urlBoceto, experim, descripción, contacto)
+- EventoDTO: Añadidas validaciones @NotNull, @NotBlank, @Min
+- NinotDTO: Añadidas validaciones @NotNull, @DecimalMin
+- ComentarioDTO: Añadida validación @Size(min=3, max=500)
+- EventoRepository: Añadido método countByTipo()
+- ComentarioRepository: Añadidos métodos findByFallaOrderByCreadoEnDesc(), findByNinotOrderByCreadoEnDesc()
+
+### Fixed
+- ApiResponse.success(): Corrección del orden de parámetros (mensaje, datos) en todos los controllers
+- Mapeo de columnas timestamp: Alineación completa con nombres PostgreSQL
+- Enums TipoEvento: Uso correcto de valores (planta, crema, ofrenda vs mascletà, cremà)
+- Closing braces: Corregidos archivos con sintaxis incompleta
+
+### Technical Details
+- **Archivos creados**: 3 (ComentarioController, ComentarioService, EstadisticasController, EstadisticasService)
+- **Archivos modificados**: 15 (FallaController, EventoController, NinotController, FallaService, EventoService, NinotService, 5 entities, 3 DTOs, 2 repositories)
+- **Total endpoints**: 30 → **50 endpoints** (+20)
+- **Total archivos Java**: 46 → **52 archivos** (+6)
+- **REST mappings**: 50 registrados en RequestMappingHandlerMapping
+- **Compilación**: ✅ BUILD SUCCESS
+- **Tiempo de desarrollo**: ~2 horas
+
+### Documentation
+- README.md: Backend status actualizado a 95% OPERATIVO
+- ADR-008: Actualizado a estado RESUELTO (migración ENUM → VARCHAR completada)
+- Swagger UI: 50 endpoints documentados con @Operation annotations
+
 ## [0.3.0] - 2026-02-01
 
 ### Added

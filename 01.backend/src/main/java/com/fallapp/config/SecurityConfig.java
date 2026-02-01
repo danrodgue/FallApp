@@ -66,28 +66,43 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos
+                // Endpoints públicos (sin autenticación)
                 .requestMatchers(
                     "/api/auth/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                // Endpoints de solo lectura públicos
+                // Endpoints de solo lectura públicos (exploración sin login)
                 .requestMatchers(HttpMethod.GET, "/api/fallas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/eventos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/ninots/**").permitAll()
-                // Endpoints protegidos (requieren autenticación)
-                .requestMatchers("/api/usuarios/**").authenticated()
-                .requestMatchers("/api/votos/**").authenticated()
-                .requestMatchers("/api/comentarios/**").authenticated()
-                // Endpoints de administrador
-                .requestMatchers(HttpMethod.POST, "/api/fallas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/fallas/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/comentarios/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/estadisticas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
+                
+                // Endpoints de creación (requieren autenticación, cualquier usuario)
+                .requestMatchers(HttpMethod.POST, "/api/fallas").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/eventos").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/ninots").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/comentarios").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/votos").authenticated()
+                
+                // Endpoints de actualización (requieren autenticación)
+                .requestMatchers(HttpMethod.PUT, "/api/fallas/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/eventos/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/ninots/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/comentarios/**").authenticated()
+                
+                // Endpoints de eliminación (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/api/fallas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/eventos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/eventos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/ninots/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
+                
+                // Gestión de usuarios (requiere autenticación)
+                .requestMatchers("/api/usuarios/**").authenticated()
+                
                 // Por defecto, requiere autenticación
                 .anyRequest().authenticated()
             )
@@ -103,8 +118,13 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList(
             "http://localhost:3000",
             "http://localhost:5173",
-            "http://localhost:8081"
+            "http://localhost:8081",
+            "http://35.180.21.42:8080",
+            "http://35.180.21.42:3000",
+            "http://35.180.21.42:5173"
         ));
+        // Permitir todos los orígenes en desarrollo (comentar en producción)
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

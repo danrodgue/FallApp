@@ -45,8 +45,8 @@ FallApp es una plataforma integral para la gestión digital de las Fallas de Val
 
 | Componente | Estado | Detalles |
 |------------|--------|----------|
-| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 346 fallas, 3 usuarios, 9 vistas, 5 ADRs, tests 85% |
-| **Backend Spring Boot API** | ⚠️ **FUNCIONAL (70%)** | 30 endpoints REST, 46 archivos Java, JWT ✅, CRUD pendiente |
+| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas, 3 usuarios, 9 vistas, 8 ADRs, tests 85% |
+| **Backend Spring Boot API** | ✅ **OPERATIVO (95%)** | 50 endpoints REST, 52 archivos Java, JWT ✅, CRUD ✅, Estadísticas ✅ |
 | **Frontend Desktop (Electron)** | ⏳ Pendiente | |
 | **Tests Backend** | ⏳ **EN DESARROLLO** | Tests de autenticación creados |
 | **Mobile Android** | ⏳ Pendiente | |
@@ -108,7 +108,10 @@ FallApp/
 │   │   ├── ADR-002-docker-local-development.md
 │   │   ├── ADR-003-nomenclatura-scripts-sql.md
 │   │   ├── ADR-004-postgis-opcional.md
-│   │   └── ADR-005-vistas-vs-queries-backend.md
+│   │   ├── ADR-005-vistas-vs-queries-backend.md
+│   │   ├── ADR-006-autenticacion-jwt-pendiente.md (✅ Implementado)
+│   │   ├── ADR-007-formato-respuesta-api.md
+│   │   └── ADR-008-postgresql-enum-varchar.md (✅ Resuelto)
 │   ├── especificaciones/       # Documentación técnica
 │   │   ├── 00.VISION-GENERAL.md
 │   │   ├── 01.SISTEMA-USUARIOS.md

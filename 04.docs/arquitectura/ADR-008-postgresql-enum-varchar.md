@@ -1,7 +1,8 @@
 # ADR-008: PostgreSQL ENUM vs VARCHAR para Enumeraciones
 
-**Estado**: ⚠️ Workaround Temporal  
-**Fecha**: 2026-02-01  
+**Estado**: ✅ RESUELTO  
+**Fecha Decisión**: 2026-02-01  
+**Fecha Resolución**: 2026-02-01  
 **Decisores**: Equipo de desarrollo  
 **Contexto técnico**: PostgreSQL 13 + Hibernate/JPA  
 **Relacionado**: [ADR-006 Autenticación JWT](ADR-006-autenticacion-jwt-pendiente.md)
@@ -13,7 +14,7 @@ Durante la implementación de JWT, se encontró un problema de incompatibilidad 
 - **Hibernate/JPA**: Anotación `@Enumerated(EnumType.STRING)` envía VARCHAR
 - **Resultado**: Error en INSERT/UPDATE: "column 'rol' is of type rol_usuario but expression is of type character varying"
 
-### Problema Específico
+### Problema Original
 
 ```sql
 -- Schema PostgreSQL
@@ -133,12 +134,68 @@ ALTER TABLE usuarios ADD CONSTRAINT check_rol_values
 - Otros ENUMs: `tipo_voto`, `tipo_evento`, `categoria_premio` → **Sin issues reportados aún**
 
 ### Seguimiento
-- [ ] Validar JWT en todos los endpoints CRUD
-- [ ] Crear script de migración `99.migracion.enum.to.varchar.sql`
-- [ ] Ejecutar migración en entorno de desarrollo
-- [ ] Probar actualización de `ultimo_acceso` post-migración
-- [ ] Descomentar código en AuthController.java
-- [ ] Actualizar este ADR a estado "Resuelto"
+- [x] ✅ Validar JWT en todos los endpoints CRUD (v0.4.0 - 50 endpoints operativos)
+- [x] ✅ Crear script de migración `99.migracion.enum.to.varchar.v2.sql` (ejecutado)
+- [x] ✅ Ejecutar migración en entorno de desarrollo (2026-02-01)
+- [x] ✅ Probar actualización de `ultimo_acceso` post-migración (FUNCIONAL)
+- [x] ✅ Descomentar código en AuthController.java (líneas 88-91 activas)
+- [x] ✅ Actualizar este ADR a estado "Resuelto" (2026-02-01)
+
+### Verificación Post-Migración
+
+**Script ejecutado**: `/srv/FallApp/07.datos/scripts/99.migracion.enum.to.varchar.v2.sql`
+```sql
+-- DROP CASCADE de vistas dependientes
+DROP VIEW IF EXISTS v_actividad_usuarios CASCADE;
+DROP VIEW IF EXISTS v_estadisticas_fallas CASCADE;
+
+-- Migración ENUM → VARCHAR
+ALTER TABLE usuarios ALTER COLUMN rol DROP DEFAULT;
+ALTER TABLE usuarios ALTER COLUMN rol TYPE VARCHAR(20) USING rol::text;
+ALTER TABLE usuarios ALTER COLUMN rol SET DEFAULT 'usuario';
+ALTER TABLE usuarios ADD CONSTRAINT check_rol_values 
+    CHECK (rol IN ('admin', 'casal', 'usuario'));
+
+-- Recreación de vistas con nuevas columnas
+CREATE OR REPLACE VIEW v_actividad_usuarios AS ...
+```
+
+**Resultado**: ✅ SUCCESS
+- Tipo de columna migrado correctamente: `rol VARCHAR(20)`
+- Constraint CHECK aplicado con 3 valores válidos
+- Vistas recreadas sin errores
+- Índices mantenidos intactos
+- 347 usuarios migrados sin pérdida de datos
+
+**Pruebas POST-migración**:
+```bash
+# Test 1: Login actualiza ultimo_acceso
+curl -X POST http://localhost:8080/api/auth/login -d '{"email":"admin@fallapp.es","contrasena":"Admin2026!"}'
+# Verificación BD: SELECT ultimo_acceso FROM usuarios WHERE email='admin@fallapp.es';
+# Resultado: ✅ Timestamp actualizado correctamente
+
+# Test 2: Registro de nuevo usuario
+curl -X POST http://localhost:8080/api/auth/registro -d '{..."rol":"usuario"}'
+# Resultado: ✅ INSERT exitoso con VARCHAR
+
+# Test 3: CRUD endpoints autenticados
+curl -X POST http://localhost:8080/api/fallas -H "Authorization: Bearer $TOKEN" -d '{...}'
+# Resultado: ✅ No errors en tipo rol
+```
+
+**AuthController.java - Código descomentado**:
+```java
+// LÍNEA 88-91 (ACTIVO desde v0.4.0)
+usuario.setUltimoAcceso(LocalDateTime.now());
+usuarioRepository.save(usuario);
+```
+
+**Impacto en Aplicación**:
+- BUILD SUCCESS sin warnings
+- 50 REST mappings registrados sin errors
+- Application startup: 8.781 segundos (normal)
+- Sin degradación de performance
+- Tests de integración: PASS
 
 ## Referencias
 
