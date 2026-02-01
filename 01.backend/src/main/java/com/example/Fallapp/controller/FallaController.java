@@ -29,7 +29,7 @@ public class FallaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Falla> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<Falla> obtenerPorId(@PathVariable String id) {
         Optional<Falla> falla = fallaRepository.findById(id);
         return falla.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -40,17 +40,17 @@ public class FallaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Falla> actualizar(@PathVariable Long id, @RequestBody Falla falla) {
+    public ResponseEntity<Falla> actualizar(@PathVariable String id, @RequestBody Falla falla) {
         if (!fallaRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        falla.setIdFalla(id);
+        falla.setId(id);
         Falla actualizada = fallaRepository.save(falla);
         return ResponseEntity.ok(actualizada);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable String id) {
         if (!fallaRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -63,12 +63,12 @@ public class FallaController {
         return fallaRepository.findBySeccion(seccion);
     }
     @GetMapping("/boceto/{id}")
-    public String obtenerBoceto(@PathVariable Long id) {
+    public String obtenerBoceto(@PathVariable String id) {
         return fallaRepository.findById(id).get().getBoceto();
     }
 
     @GetMapping("/ubicacion/{idFalla}")
-    public Optional<List<Double>> obtenerCoordenadasPorFalla(@PathVariable Long idFalla) {
+    public Optional<List<Double>> obtenerCoordenadasPorFalla(@PathVariable String idFalla) {
 
     return fallaRepository.findById(idFalla).map(falla -> falla.getGeo_shape().getGeometry().getCoordinates());
     }

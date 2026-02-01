@@ -1,58 +1,30 @@
 package com.example.Fallapp.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "fallas")
+@Document("fallas")
 public class Falla {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_falla")
-    private Long idFalla;
-    
-    @Column(name = "objectid")
+    private String id;
     private Long objectid;
-    
-    @Column(name = "nombre", unique = true, nullable = false)
+    private Long id_falla;
     private String nombre;
-    
-    @Column(name = "seccion", nullable = false, length = 5)
     private String seccion;
-    
-    @Column(name = "fallera")
     private String fallera;
-    
-    @Column(name = "presidente", nullable = false)
     private String presidente;
-    
-    @Column(name = "artista")
     private String artista;
-    
-    @Column(name = "lema", columnDefinition = "TEXT")
     private String lema;
-    
-    @Column(name = "anyo_fundacion", nullable = false)
     private Integer anyo_fundacion;
-    
-    @Column(name = "distintivo", length = 100)
     private String distintivo;
-    
-    @Column(name = "url_boceto", length = 500)
     private String boceto;
-    
-    @Column(name = "experim", nullable = false)
     private Integer experim;
-    
-    @Transient
     private GeoShape geo_shape;
-    
-    @Transient
     private Object geo_point_2d;
 
     // Relación ManyToOne con Artista (por id)
-    @Transient
     private String artistaId;
 
     public Falla() {
@@ -73,7 +45,7 @@ public class Falla {
                  GeoShape geo_shape,
                  Object geo_location) {
         this.objectid = objectid;
-        this.idFalla = id_Falla;
+        this.id_falla = id_Falla;
         this.nombre = nombre;
         this.seccion = seccion;
         this.fallera = fallera;
@@ -88,26 +60,12 @@ public class Falla {
         this.geo_point_2d = geo_location;
     }
 
-    public Long getIdFalla() {
-        return idFalla;
-    }
-
-    public void setIdFalla(Long idFalla) {
-        this.idFalla = idFalla;
-    }
-
     public String getId() {
-        return idFalla != null ? idFalla.toString() : null;
+        return id;
     }
 
     public void setId(String id) {
-        if (id != null) {
-            try {
-                this.idFalla = Long.parseLong(id);
-            } catch (NumberFormatException e) {
-                // Ignore if id is not a valid Long
-            }
-        }
+        this.id = id;
     }
 
     public Long getObjectid() {
@@ -119,11 +77,11 @@ public class Falla {
     }
 
     public Long getId_falla() {
-        return idFalla;
+        return id_falla;
     }
 
     public void setId_falla(Long id_falla) {
-        this.idFalla = id_falla;
+        this.id_falla = id_falla;
     }
 
     public String getNombre() {

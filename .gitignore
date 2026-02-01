@@ -1,17 +1,1 @@
 Electron/node_modules/
-
-# Maven build artifacts
-01.backend/target/
-**/target/
-
-# IDE files
-.idea/
-*.iml
-.vscode/
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-Thumbs.db

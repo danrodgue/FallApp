@@ -2,10 +2,10 @@ package com.example.Fallapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 @SpringBootApplication
-@EnableJpaRepositories("com.example.Fallapp.repository")
+@EnableMongoRepositories("com.example.Fallapp.repository")
 public class FallappApplication {
 
 	public static void main(String[] args) {
