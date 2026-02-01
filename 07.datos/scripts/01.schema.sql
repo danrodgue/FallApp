@@ -7,8 +7,16 @@
 --   - Tipos ENUM
 --   - Tablas principales
 --   - Restricciones y relaciones
+--   - Índices de performance
+--   - Triggers de auditoría
 --
 -- Ejecución: Automática al iniciar contenedor PostgreSQL
+--
+-- ADRs relacionados:
+--   - ADR-001: Justificación de PostgreSQL sobre MongoDB
+--   - ADR-003: Nomenclatura 01.schema.sql (NN.tipo.sql)
+--   - ADR-004: PostGIS deshabilitado por defecto
+--
 -- =============================================================================
 
 -- =============================================================================
@@ -22,6 +30,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS unaccent;
 
 -- PostGIS para datos geoespaciales (OPCIONAL - comentado por defecto)
+-- Ver ADR-004 para justificación: DECIMAL + B-tree es suficiente para 400 fallas
+-- Para activar: descomentar la siguiente línea
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- =============================================================================

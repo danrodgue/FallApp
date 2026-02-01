@@ -1,5 +1,25 @@
 version: "3.9"
 
+# =============================================================================
+# FallApp - Docker Compose Configuration
+# =============================================================================
+# 
+# Servicios:
+#   - PostgreSQL 13: Base de datos principal
+#   - pgAdmin 4: Interfaz de administración (desarrollo)
+#   - Backend: Spring Boot API (en desarrollo)
+#
+# ADRs relacionados:
+#   - ADR-002: Justificación de Docker para desarrollo local
+#
+# Uso:
+#   docker-compose up -d          # Iniciar servicios
+#   docker-compose down           # Detener servicios
+#   docker-compose logs postgres  # Ver logs
+#
+# Documentación: 05.docker/README.md
+# =============================================================================
+
 services:
   # =============================================================================
   # PostgreSQL - Base de datos relacional principal
@@ -25,10 +45,10 @@ services:
       - postgres_data:/var/lib/postgresql/data
       
       # Scripts de inicialización (ejecutados en orden)
-      - ./07.datos/scripts:/docker-entrypoint-initdb.d
+      - ../07.datos/scripts:/docker-entrypoint-initdb.d
       
       # Archivo de configuración personalizado (opcional)
-      - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
+      # - ./postgres.conf:/etc/postgresql/postgresql.conf:ro
     
     # Health check para verificar disponibilidad
     healthcheck:

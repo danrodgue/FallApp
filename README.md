@@ -41,7 +41,49 @@ FallApp es una plataforma integral para la gestión digital de las Fallas de Val
 - **UI**: TailwindCSS / Material Design
 - **Despliegue**: Vercel / Netlify
 
-## 📁 Estructura del Proyecto
+## � Estado del Proyecto
+
+| Componente | Estado | Detalles |
+|------------|--------|----------|
+| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 346 fallas, 3 usuarios, 9 vistas, 5 ADRs, tests 85% |
+| **Backend Spring Boot API** | ⚠️ **FUNCIONAL (70%)** | 30 endpoints REST, 46 archivos Java, JWT ✅, CRUD pendiente |
+| **Frontend Desktop (Electron)** | ⏳ Pendiente | |
+| **Tests Backend** | ⏳ **EN DESARROLLO** | Tests de autenticación creados |
+| **Mobile Android** | ⏳ Pendiente | |
+| **Docker Compose** | ✅ Operativo | PostgreSQL + pgAdmin |
+
+📋 **[Ver Checklist de Completitud](CHECKLIST.DESPLIEGUE.BD.md)** - Despliegue de Base de Datos
+
+## 🗄️ Base de Datos
+
+### Estado Actual
+- **Motor**: PostgreSQL 13 Alpine
+- **Fallas importadas**: 346 (desde datos municipales)
+- **Usuarios de prueba**: 3 (admin, demo, casal)
+- **Tablas**: 6 (usuarios, fallas, eventos, ninots, votos, comentarios)
+- **Vistas**: 9 vistas especializadas para consultas
+- **Funciones**: 2 funciones SQL reutilizables
+
+### Acceso Rápido
+
+**PostgreSQL**:
+```bash
+Host: localhost:5432
+Base de datos: fallapp
+Usuario: fallapp_user
+Password: (ver .env)
+```
+
+**pgAdmin** (interfaz web): http://localhost:5050
+
+### Documentación
+- 📋 [CHECKLIST.DESPLIEGUE.BD.md](CHECKLIST.DESPLIEGUE.BD.md) - **Checklist de completitud** (85% cobertura tests)
+- 🚀 [DESPLIEGUE.COMPLETADO.md](05.docker/DESPLIEGUE.COMPLETADO.md) - Estado completo del despliegue
+- 📐 [03.BASE-DATOS.md](04.docs/especificaciones/03.BASE-DATOS.md) - Especificación técnica
+- 🛠️ [Scripts SQL](07.datos/scripts/README.md) - Guía de scripts de inicialización
+- 🧪 [Tests](06.tests/README.md) - Suite de tests automatizados (28/34 SQL + 10/27 E2E)
+
+## �📁 Estructura del Proyecto
 
 ```
 FallApp/
@@ -61,22 +103,35 @@ FallApp/
 │   └── android/                # Código Android
 │
 ├── 04.docs/                    # Documentación del proyecto
+│   ├── arquitectura/           # ADRs (Architecture Decision Records)
+│   │   ├── ADR-001-postgresql-vs-mongodb.md
+│   │   ├── ADR-002-docker-local-development.md
+│   │   ├── ADR-003-nomenclatura-scripts-sql.md
+│   │   ├── ADR-004-postgis-opcional.md
+│   │   └── ADR-005-vistas-vs-queries-backend.md
 │   ├── especificaciones/       # Documentación técnica
-│   │   └── 03.BASE.DATOS.md   # Especificación de BD
+│   │   ├── 00.VISION-GENERAL.md
+│   │   ├── 01.SISTEMA-USUARIOS.md
+│   │   ├── 02.FALLAS.md
+│   │   └── 03.BASE-DATOS.md   # Especificación de BD
+│   ├── 01.GUIA-PROGRAMACION.md
+│   ├── 02.GUIA-PROMPTS-IA.md
 │   ├── NOMENCLATURA.FICHEROS.md # Convenciones de nombres
-│   └── README.md               # Índice de docs
+│   └── LEEME.DESARROLLADORES.md
 │
 ├── 05.docker/                  # Configuración Docker
 │   ├── docker-compose.yml      # Orquestación de servicios
 │   ├── .env.example            # Plantilla de variables
-│   ├── Dockerfile.backend      # Imagen custom backend
-│   └── README.md               # Guía Docker
+│   ├── .env                    # Configuración local (gitignored)
+│   ├── README.md               # Guía completa Docker
+│   ├── DESPLIEGUE.COMPLETADO.md # Estado del despliegue actual
+│   └── postgres_data/          # Volumen persistente (gitignored)
 │
 ├── 06.tests/                   # Pruebas automatizadas
-│   ├── unit/                   # Tests unitarios
-│   ├── integration/            # Tests de integración
-│   ├── e2e/                    # Tests end-to-end
-│   └── performance/            # Tests de carga
+│   ├── integration/            # Tests de integración SQL
+│   ├── e2e/                    # Tests end-to-end (Docker)
+│   ├── performance/            # Tests de carga
+│   └── run_tests.sh            # Script de ejecución de tests
 │
 ├── 07.datos/                   # Gestión de datos
 │   ├── raw/                    # Datos brutos (JSON, CSV)
@@ -94,10 +149,10 @@ FallApp/
 ├── 99.obsoleto/                # Código/docs deprecated
 │   └── [archivos viejos]
 │
-├── docker-compose.yml          # (Ver 05.docker/)
-├── .env.example                # (Ver 05.docker/)
+├── CHANGELOG.md                # Historial de cambios
+├── AUDITORIA.DESPLIEGUE.BD.md  # Auditoría del despliegue de BD
 ├── .gitignore                  # Archivos ignorados
-├── README.md                   # Este archivo
+└── README.md                   # Este archivo
 └── CONTRIBUTING.md             # Guía de contribución
 
 ```

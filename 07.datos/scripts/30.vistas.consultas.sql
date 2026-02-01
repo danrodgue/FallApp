@@ -3,9 +3,16 @@
 -- Vistas y consultas útiles para reportes y análisis de datos
 --
 -- Crea:
---   - Vistas para estadísticas de fallas
---   - Vistas para análisis de votos
---   - Vistas para gestión de usuarios
+--   - 9 vistas especializadas para consultas complejas
+--   - 2 funciones SQL parametrizadas y reutilizables
+--
+-- Beneficios:
+--   - Reutilización: Misma lógica en múltiples endpoints
+--   - Performance: Optimización por PostgreSQL
+--   - DRY: Sin duplicación de JOINs en backend
+--
+-- ADRs relacionados:
+--   - ADR-005: Justificación de Vistas SQL vs Queries en Backend
 --
 -- Ejecución: Después de 01.schema.sql y datos (usuarios/fallas importados)
 -- =============================================================================
