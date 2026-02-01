@@ -1,0 +1,9 @@
+com/example/Fallapp/model/Login.class
+com/example/Fallapp/FallappApplication.class
+com/example/Fallapp/repository/CustomFallaRepositoryImpl.class
+com/example/Fallapp/repository/FallaRepository.class
+com/example/Fallapp/model/Falla.class
+com/example/Fallapp/model/GeoShape.class
+com/example/Fallapp/repository/CustomFallaRepository.class
+com/example/Fallapp/controller/FallaController.class
+com/example/Fallapp/model/GeometryMap.class
