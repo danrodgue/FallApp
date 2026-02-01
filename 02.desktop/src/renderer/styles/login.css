@@ -1,0 +1,472 @@
+/* ================================
+   VARIABLES GLOBALES DEL LOGIN
+==================================*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --color-bg: #fff5f6;
+    --color-card-bg: #ffffff;
+    --color-primary: #c62828;
+    --color-primary-hover: #9b2222;
+    --color-text: #1a0a0a;
+    --color-text-light: #4a2b2b;
+    --color-text-muted: #6b7280;
+    --color-border: #e5e7eb;
+    --color-border-light: #f3f4f6;
+
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --input-radius: 10px;
+
+    --shadow-sm: 0 1px 2px rgba(198,40,40,0.04);
+    --shadow: 0 4px 12px rgba(198,40,40,0.08);
+    --shadow-md: 0 8px 24px rgba(198,40,40,0.12);
+    --shadow-lg: 0 16px 48px rgba(198,40,40,0.16);
+
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   ESTILOS SOLO PARA LA PÁGINA LOGIN
+   (Aislados por .login-page)
+==================================*/
+
+.login-page {
+    background: var(--color-bg);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.login-page * {
+    box-sizing: border-box;
+}
+
+/* ================================
+   TARJETA DEL LOGIN
+==================================*/
+
+.login-container {
+    background: var(--color-card-bg);
+    padding: var(--spacing-xl) var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    border: 1px solid var(--color-border-light);
+}
+
+.login-container h2 {
+    margin-top: 0;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-text);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+/* ================================
+   CAMPOS DEL FORMULARIO
+==================================*/
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--input-radius);
+    border: 1px solid var(--color-border);
+    font-size: 15px;
+    font-family: var(--font-family);
+    background: #ffffff;
+    color: var(--color-text);
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+
+input::placeholder {
+    color: var(--color-text-muted);
+    opacity: 0.6;
+}
+
+input:hover {
+    border-color: #d1d5db;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(198,40,40,0.1);
+    background: #ffffff;
+}
+
+/* ================================
+   BOTÓN
+==================================*/
+
+.btn {
+    width: 100%;
+    padding: 14px 20px;
+    border: none;
+    border-radius: var(--input-radius);
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 600;
+    font-size: 15px;
+    font-family: var(--font-family);
+    cursor: pointer;
+    margin-top: var(--spacing-md);
+    transition: var(--transition);
+    letter-spacing: -0.01em;
+    box-shadow: var(--shadow);
+}
+
+.btn:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow);
+}
+
+/* ================================
+   LINKS
+==================================*/
+
+.extra-links {
+    margin-top: var(--spacing-md);
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.extra-links a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.extra-links a:hover {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+}
+
+/* Mensajes de error en el login */
+.error {
+    color: #b00020;
+    margin-top: var(--spacing-md);
+    font-weight: 500;
+    font-size: 14px;
+    font-family: var(--font-family);
+    line-height: 1.5;
+    padding: var(--spacing-sm);
+    background: rgba(176,0,32,0.06);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid #b00020;
+}
+
+/* Ocultar inicialmente el contenedor de error en login (antes inline en index.html) */
+#error-msg{display:none}
+
+/* Logo de la empresa en la pantalla de login */
+.logo {
+    display: block;
+    margin: 0 auto var(--spacing-lg);
+    max-width: 160px;
+    height: auto;
+    filter: drop-shadow(0 2px 8px rgba(198,40,40,0.1));
+}
+
+/* Header rojo con logo centrado */
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.site-header .header-rect {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #9f1e1e 100%);
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: var(--spacing-md);
+    min-height: 64px;
+}
+
+/* Logo ubicado en la columna central */
+.site-header .header-rect .header-logo {
+    grid-column: 2;
+    justify-self: center;
+    max-width: 160px;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Logout en la columna derecha */
+.site-header .header-rect .header-logout { grid-column: 3; justify-self: end; }
+
+/* Evitar subrayados en el header y links globalmente (mejora estética) */
+a { text-decoration: none; }
+.site-header a, .site-header button { text-decoration: none; color: inherit; }
+
+/* espacio para que el contenido no quede debajo del header */
+.home-page {
+    padding-top: 80px;
+    background: var(--color-bg);
+    min-height: 100vh;
+}
+
+/* Botón de cerrar sesión en el header (arriba a la derecha) */
+.header-logout {
+    width: auto;
+    padding: 10px 18px;
+    min-width: 0;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 600;
+    font-size: 14px;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: -0.01em;
+    backdrop-filter: blur(10px);
+}
+
+.header-logout:hover {
+    background: rgba(255,255,255,0.24);
+    border-color: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Botones de navegación bajo el header */
+.btn-group {
+    margin-top: var(--spacing-md);
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    width: auto;
+    display: inline-block;
+    padding: 12px 20px;
+    min-width: 140px;
+    font-weight: 600;
+}
+
+/* Sección principal de acciones (cartas con imágenes) */
+.main-actions {
+    margin: var(--spacing-xl) 0;
+    padding: 0 var(--spacing-md);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    flex-wrap: wrap;
+    align-items: stretch;
+}
+
+.action-card {
+    width: 320px;
+    background: var(--color-card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--color-border-light);
+    cursor: pointer;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-border);
+}
+
+.action-card:active {
+    transform: translateY(-2px);
+}
+
+.card-content {
+    padding: var(--spacing-lg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+    font-family: var(--font-family);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+.card-description {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+    font-family: var(--font-family);
+}
+
+.card-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, #9f1e1e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.9;
+    transition: var(--transition);
+}
+
+.action-card:hover .card-image img {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+@media (max-width: 480px) {
+    .action-card {
+        width: calc(100% - 40px);
+        max-width: 340px;
+    }
+    
+    .card-image {
+        height: 160px;
+    }
+    
+    .card-content h3 {
+        font-size: 20px;
+    }
+}
+
+/* Ocultar barra de desplazamiento en `home.html` (body tiene clase .home-page) */
+.home-page {
+    overflow: hidden;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.home-page::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Estilos globales mejorados */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+/* Mejoras de accesibilidad y legibilidad */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+    color: var(--color-text);
+    margin-top: 0;
+}
+
+p {
+    margin: 0 0 var(--spacing-md) 0;
+    line-height: 1.6;
+}
+
+/* Scrollbar personalizado para navegadores modernos */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Mejoras de transiciones suaves */
+a, button {
+    transition: var(--transition);
+}
+
+/* Focus visible para accesibilidad */
+*:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>FallApp · API de Fallas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --color-bg: #fff5f6;
+      --color-card-bg: #ffffff;
+      --color-primary: #c62828;
+      --color-primary-hover: #9b2222;
+      --color-text: #1a0a0a;
+      --color-text-muted: #6b7280;
+      --color-border: #e5e7eb;
+      --color-border-light: #f3f4f6;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 12px rgba(198,40,40,0.08);
+      --shadow-md: 0 8px 24px rgba(198,40,40,0.12);
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --transition: all 0.18s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+      background: var(--color-bg);
+      color: var(--color-text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--color-primary) 0%, #9f1e1e 100%);
+      color: #fff;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: var(--spacing-md) var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-xs);
+    }
+
+    .header-title h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .header-title span {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1080px;
+      margin: var(--spacing-xl) auto var(--spacing-xl);
+      padding: 0 var(--spacing-lg);
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: var(--spacing-lg);
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--color-card-bg);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--color-border-light);
+    }
+
+    .card h2 {
+      margin: 0 0 var(--spacing-md);
+      font-size: 20px;
+      letter-spacing: -0.4px;
+    }
+
+    .muted {
+      color: var(--color-text-muted);
+      font-size: 13px;
+      margin-bottom: var(--spacing-md);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      align-items: center;
+    }
+
+    .toolbar input {
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      font-family: inherit;
+      font-size: 13px;
+      min-width: 0;
+    }
+
+    .toolbar button {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar button.secondary {
+      background: #fff;
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+      box-shadow: none;
+    }
+
+    .toolbar button:hover {
+      background: var(--color-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .toolbar button.secondary:hover {
+      background: #f9fafb;
+      box-shadow: var(--shadow);
+    }
+
+    .falla-list {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border-light);
+      background: #fff;
+      max-height: 480px;
+      overflow: auto;
+    }
+
+    .falla-item {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--color-border-light);
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: var(--spacing-sm);
+      align-items: flex-start;
+    }
+
+    .falla-item:last-child {
+      border-bottom: none;
+    }
+
+    .falla-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .falla-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .falla-meta {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .falla-meta span {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #fff6f6;
+      border: 1px solid rgba(198,40,40,0.08);
+      color: #7f1d1d;
+    }
+
+    .falla-desc {
+      font-size: 13px;
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+
+    .tag-small {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 11px;
+      color: #4b5563;
+      display: inline-block;
+      margin-left: 4px;
+    }
+
+    .panel-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field textarea {
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border);
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--spacing-sm);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--color-text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .status-dot.error {
+      background: #ef4444;
+    }
+
+    .error {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #b91c1c;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="header-inner">
+        <div class="header-title">
+          <h1>FallApp · API de Fallas</h1>
+          <span>Back-end desplegado en Render (MongoDB Atlas)</span>
+        </div>
+        <div class="badge">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">Sin comprobar</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Lista de fallas -->
+      <section class="card">
+        <h2>Fallas</h2>
+        <p class="muted">Consulta, filtra y explora las fallas disponibles en la base de datos.</p>
+
+        <div class="toolbar">
+          <input id="search-lema" placeholder="Buscar por lema...">
+          <button type="button" id="btn-buscar-lema">Buscar por lema</button>
+
+          <input id="search-seccion" placeholder="Filtrar por sección (p. ej. Especial)">
+          <button type="button" id="btn-filtrar-seccion" class="secondary">Filtrar por sección</button>
+
+          <button type="button" id="btn-recargar" class="secondary">Recargar todas</button>
+        </div>
+
+        <div id="fallas-container" class="falla-list">
+          <!-- Se rellenará por JS -->
+        </div>
+      </section>
+
+      <!-- Panel de acciones -->
+      <section class="card">
+        <h2>Acciones rápidas</h2>
+        <p class="muted">Prueba los principales endpoints de la API REST desde esta interfaz.</p>
+
+        <div class="panel-form">
+          <div class="field">
+            <label for="detalle-id">Obtener fallo por ID</label>
+            <input id="detalle-id" placeholder="ID de Mongo (_id)">
+            <button type="button" id="btn-detalle" class="secondary">Ver detalle</button>
+            <div id="detalle-error" class="error"></div>
+          </div>
+
+          <div class="field">
+            <label for="delete-id">Eliminar falla por ID</label>
+            <input id="delete-id" placeholder="ID de Mongo (_id)">
+            <button type="button" id="btn-delete" class="secondary">Eliminar</button>
+            <div id="delete-error" class="error"></div>
+          </div>
+
+          <hr>
+
+          <div class="field">
+            <label>Actualizar distintivo por idFalla (numérico)</label>
+            <input id="upd-idFalla" placeholder="idFalla (ej: 123)">
+          </div>
+          <div class="field">
+            <label for="upd-distintivo">Nuevo distintivo</label>
+            <input id="upd-distintivo" placeholder="Texto del distintivo">
+          </div>
+          <div class="form-actions">
+            <button type="button" id="btn-upd-dist" class="secondary">Actualizar distintivo</button>
+          </div>
+          <div id="upd-error" class="error"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = '/api/fallas';
+
+    const statusDot = document.getElementById('status-dot');
+    const statusText = document.getElementById('status-text');
+    const fallasContainer = document.getElementById('fallas-container');
+    const detalleError = document.getElementById('detalle-error');
+    const deleteError = document.getElementById('delete-error');
+    const updError = document.getElementById('upd-error');
+
+    async function fetchJson(url, options) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+      }
+      if (res.status === 204) return null;
+      return res.json();
+    }
+
+    function setStatus(ok, msg) {
+      statusDot.classList.toggle('error', !ok);
+      statusText.textContent = msg;
+    }
+
+    function renderFallas(fallas) {
+      fallasContainer.innerHTML = '';
+      if (!Array.isArray(fallas) || fallas.length === 0) {
+        fallasContainer.innerHTML = '<div class="falla-item"><div class="falla-main"><div class="falla-title">No hay fallas.</div><div class="falla-desc">La colección está vacía o el filtro no devolvió resultados.</div></div></div>';
+        return;
+      }
+
+      fallas.forEach(f => {
+        const item = document.createElement('div');
+        item.className = 'falla-item';
+
+        const main = document.createElement('div');
+        main.className = 'falla-main';
+
+        const title = document.createElement('div');
+        title.className = 'falla-title';
+        title.textContent = f.nombre || '(sin nombre)';
+        if (f.seccion) {
+          const s = document.createElement('span');
+          s.className = 'tag-small';
+          s.textContent = f.seccion;
+          title.appendChild(s);
+        }
+
+        const meta = document.createElement('div');
+        meta.className = 'falla-meta';
+        if (f.idFalla || f.id_falla) {
+          const span = document.createElement('span');
+          span.textContent = `idFalla: ${f.idFalla || f.id_falla}`;
+          meta.appendChild(span);
+        }
+        if (f.fallera) {
+          const span = document.createElement('span');
+          span.textContent = `Fallera: ${f.fallera}`;
+          meta.appendChild(span);
+        }
+        if (f.presidente) {
+          const span = document.createElement('span');
+          span.textContent = `Presidente: ${f.presidente}`;
+          meta.appendChild(span);
+        }
+
+        const desc = document.createElement('div');
+        desc.className = 'falla-desc';
+        desc.textContent = f.lema || f.distintivo || 'Sin lema ni distintivo.';
+
+        main.appendChild(title);
+        main.appendChild(meta);
+        main.appendChild(desc);
+
+        const extra = document.createElement('div');
+        extra.className = 'falla-extra';
+        extra.innerHTML = `
+          <div class="falla-desc">
+            <strong>_id:</strong> ${f.id || '(no cargado)'}<br>
+            <strong>Artista:</strong> ${f.artistaNombre || f.artista || '(desconocido)'}
+          </div>
+        `;
+
+        item.appendChild(main);
+        item.appendChild(extra);
+        fallasContainer.appendChild(item);
+      });
+    }
+
+    async function cargarTodas() {
+      detalleError.textContent = '';
+      deleteError.textContent = '';
+      updError.textContent = '';
+      try {
+        const fallas = await fetchJson(API_BASE);
+        renderFallas(fallas);
+        setStatus(true, 'Conectado a la API');
+      } catch (e) {
+        console.error(e);
+        fallasContainer.innerHTML = '<div class="falla-item"><div class="falla-main"><div class="falla-title">Error al cargar fallas</div><div class="falla-desc">' + e.message + '</div></div></div>';
+        setStatus(false, 'Error al conectar: ' + e.message);
+      }
+    }
+
+    async function buscarPorLema() {
+      const q = document.getElementById('search-lema').value.trim();
+      if (!q) { await cargarTodas(); return; }
+      try {
+        const fallas = await fetchJson(`${API_BASE}/buscar?lema=${encodeURIComponent(q)}`);
+        renderFallas(fallas);
+        setStatus(true, 'Búsqueda por lema OK');
+      } catch (e) {
+        console.error(e);
+        setStatus(false, 'Error búsqueda lema: ' + e.message);
+      }
+    }
+
+    async function filtrarPorSeccion() {
+      const s = document.getElementById('search-seccion').value.trim();
+      if (!s) { await cargarTodas(); return; }
+      try {
+        const fallas = await fetchJson(`${API_BASE}/seccion/${encodeURIComponent(s)}`);
+        renderFallas(fallas);
+        setStatus(true, 'Filtro por sección OK');
+      } catch (e) {
+        console.error(e);
+        setStatus(false, 'Error filtro sección: ' + e.message);
+      }
+    }
+
+    async function verDetalle() {
+      detalleError.textContent = '';
+      const id = document.getElementById('detalle-id').value.trim();
+      if (!id) {
+        detalleError.textContent = 'Introduce un _id de Mongo válido.';
+        return;
+      }
+      try {
+        const falla = await fetchJson(`${API_BASE}/${encodeURIComponent(id)}`);
+        renderFallas([falla]);
+        setStatus(true, 'Detalle obtenido');
+      } catch (e) {
+        console.error(e);
+        detalleError.textContent = e.message;
+        setStatus(false, 'Error detalle: ' + e.message);
+      }
+    }
+
+    async function eliminarFalla() {
+      deleteError.textContent = '';
+      const id = document.getElementById('delete-id').value.trim();
+      if (!id) {
+        deleteError.textContent = 'Introduce un _id de Mongo a eliminar.';
+        return;
+      }
+      if (!confirm('¿Seguro que quieres eliminar esta falla?')) return;
+      try {
+        await fetchJson(`${API_BASE}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        setStatus(true, 'Falla eliminada');
+        await cargarTodas();
+      } catch (e) {
+        console.error(e);
+        deleteError.textContent = e.message;
+        setStatus(false, 'Error eliminación: ' + e.message);
+      }
+    }
+
+    async function actualizarDistintivo() {
+      updError.textContent = '';
+      const idFalla = document.getElementById('upd-idFalla').value.trim();
+      const nuevo = document.getElementById('upd-distintivo').value.trim();
+      if (!idFalla || !nuevo) {
+        updError.textContent = 'Rellena idFalla y el nuevo distintivo.';
+        return;
+      }
+      try {
+        await fetchJson(`${API_BASE}/${encodeURIComponent(idFalla)}/distintivo?nuevoDistintivo=${encodeURIComponent(nuevo)}`, {
+          method: 'PUT'
+        });
+        setStatus(true, 'Distintivo actualizado');
+      } catch (e) {
+        console.error(e);
+        updError.textContent = e.message;
+        setStatus(false, 'Error actualización: ' + e.message);
+      }
+    }
+
+    document.getElementById('btn-recargar').addEventListener('click', cargarTodas);
+    document.getElementById('btn-buscar-lema').addEventListener('click', buscarPorLema);
+    document.getElementById('btn-filtrar-seccion').addEventListener('click', filtrarPorSeccion);
+    document.getElementById('btn-detalle').addEventListener('click', verDetalle);
+    document.getElementById('btn-delete').addEventListener('click', eliminarFalla);
+    document.getElementById('btn-upd-dist').addEventListener('click', actualizarDistintivo);
+
+    // Cargar al inicio
+    cargarTodas();
+  </script>
+</body>
+</html>
+
