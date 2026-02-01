@@ -15,9 +15,6 @@ public class Falla {
     @Column(name = "objectid")
     private Long objectid;
     
-    @Column(name = "id_falla", insertable = false, updatable = false)
-    private Long id_falla;
-    
     @Column(name = "nombre", unique = true, nullable = false)
     private String nombre;
     
@@ -76,7 +73,6 @@ public class Falla {
                  GeoShape geo_shape,
                  Object geo_location) {
         this.objectid = objectid;
-        this.id_falla = id_Falla;
         this.idFalla = id_Falla;
         this.nombre = nombre;
         this.seccion = seccion;
@@ -123,11 +119,11 @@ public class Falla {
     }
 
     public Long getId_falla() {
-        return id_falla;
+        return idFalla;
     }
 
     public void setId_falla(Long id_falla) {
-        this.id_falla = id_falla;
+        this.idFalla = id_falla;
     }
 
     public String getNombre() {
