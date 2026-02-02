@@ -103,6 +103,7 @@
   max-width: 1200px;
   margin: var(--spacing-lg) auto 0;
   padding: 0 var(--spacing-lg);
+  padding-top: 95px;
   box-sizing: border-box;
   width: 100%;
 }
@@ -350,9 +351,21 @@ input:focus, textarea:focus {
 .field{margin-top:8px}
 .form-actions{margin-top:12px;display:flex;justify-content:flex-end}
 
+/* Sobrescribir estilos del body para la página de eventos */
+body.events-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  height: auto;
+  min-height: 100vh;
+  background: var(--color-bg);
+  align-items: unset;
+}
+
 /* Estilos para que la pantalla de eventos ocupe todo el viewport */
 .events-page {
-  padding-top: 0;
+  padding-top: inherit;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -360,6 +373,7 @@ input:focus, textarea:focus {
   justify-content: flex-start;
   background: var(--color-bg);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .events-page .login-container {
@@ -375,6 +389,9 @@ input:focus, textarea:focus {
   gap: var(--spacing-md);
   background: var(--color-bg);
   box-sizing: border-box;
+  margin-top: 0;
+  margin-bottom: 0;
+  flex: 1;
 }
 
 .events-page .events-header {

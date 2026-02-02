@@ -26,7 +26,6 @@
 
 /* User screen styling */
 .user-page {
-  padding-top: 0;
   background: var(--color-bg, #fff5f6);
   min-height: 100vh;
 }
@@ -231,6 +230,8 @@
   background: var(--color-primary);
   color: white;
   border: none;
+  padding: 12px 20px;
+  box-shadow: var(--shadow);
 }
 
 .btn-primary:hover {
@@ -247,12 +248,14 @@
   background: var(--bg-muted);
   color: var(--color-text);
   border: 1px solid var(--color-border);
+  padding: 12px 20px;
 }
 
 .btn-secondary:hover {
   background: var(--color-border-light);
   border-color: var(--color-border);
   transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .btn-secondary:active {
@@ -317,6 +320,7 @@
   align-items: flex-start;
   width: 100%;
   padding-bottom: var(--spacing-xl);
+  padding-top: 95px;
 }
 
 /* Responsive design */
