@@ -55,8 +55,14 @@ class JwtTokenProviderTest {
     @DisplayName("Debe generar token JWT válido desde Authentication")
     void testGenerateTokenFromAuthentication() {
         // Given
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
+        org.springframework.security.core.userdetails.User userDetails = 
+            new org.springframework.security.core.userdetails.User(
                 "test@fallapp.es",
+                "password",
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails,
                 "password",
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
         );
@@ -252,7 +258,7 @@ class JwtTokenProviderTest {
         
         // When
         String token1 = jwtTokenProvider.generateTokenFromUsername(username);
-        Thread.sleep(100); // Esperar 100ms
+        Thread.sleep(1100); // Esperar 1.1s para diferencia en segundos (JWT iat es en segundos)
         String token2 = jwtTokenProvider.generateTokenFromUsername(username);
 
         // Then

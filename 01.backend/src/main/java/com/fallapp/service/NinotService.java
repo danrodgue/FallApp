@@ -60,64 +60,27 @@ public class NinotService {
         return new PageImpl<>(dtos, pageable, ninots.getTotalElements());
     }
     
-    /**
-     * Obtener ninots premiados
-     */
-    public Page<NinotDTO> obtenerPremiados(Pageable pageable) {
-        Page<Ninot> ninots = ninotRepository.findByPremiadoTrue(pageable);
-        List<NinotDTO> dtos = ninots.getContent().stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-        return new PageImpl<>(dtos, pageable, ninots.getTotalElements());
-    }
+
     
     /**
      * Convertir entidad Ninot a DTO
      */
     private NinotDTO convertirADTO(Ninot ninot) {
-        NinotDTO dto = new NinotDTO();
-        dto.setIdNinot(ninot.getIdNinot());
-        dto.setIdFalla(ninot.getFalla() != null ? ninot.getFalla().getIdFalla() : null);
-        dto.setNombreFalla(ninot.getFalla() != null ? ninot.getFalla().getNombre() : null);
-        dto.setNombreNinot(ninot.getNombreNinot());
-        dto.setTituloObra(ninot.getTituloObra());
-        dto.setAltura(ninot.getAlturaMetros() != null ? ninot.getAlturaMetros().doubleValue() : null);
-        dto.setAncho(ninot.getAnchoMetros() != null ? ninot.getAnchoMetros().doubleValue() : null);
-        
-        // Convertir array de imágenes a lista
-        java.util.List<String> imagenes = new java.util.ArrayList<>();
-        if (ninot.getUrlImagenPrincipal() != null) {
-            imagenes.add(ninot.getUrlImagenPrincipal());
-        }
-        if (ninot.getUrlImagenesAdicionales() != null) {
-            imagenes.addAll(java.util.Arrays.asList(ninot.getUrlImagenesAdicionales()));
-        }
-        dto.setImagenes(imagenes.isEmpty() ? null : imagenes);
-        
-        dto.setPremiado(ninot.getPremiado());
-        dto.setFechaCreacion(ninot.getCreadoEn());
-        
-        // Campos calculados
-        dto.setTotalVotos(ninot.getVotos() != null ? ninot.getVotos().size() : 0);
-        
-        return dto;
+        return NinotDTO.builder()
+                .idNinot(ninot.getIdNinot())
+                .idFalla(ninot.getFalla() != null ? ninot.getFalla().getIdFalla() : null)
+                .nombreFalla(ninot.getFalla() != null ? ninot.getFalla().getNombre() : null)
+                .nombre(ninot.getNombre())
+                .urlImagen(ninot.getUrlImagen())
+                .fechaCreacion(ninot.getFechaCreacion())
+                .build();
     }
 
     /**
      * Crear nuevo ninot asociado a una falla
      * 
-     * Validaciones:
-     * - Falla debe existir (relación obligatoria)
-     * - Nombre: @NotBlank validado en DTO
-     * - Dimensiones: @DecimalMin(0.1) para altura y ancho (en metros)
-     * - Imágenes: Array de URLs (opcional)
-     * 
-     * Conversiones:
-     * - Double → BigDecimal para altura, ancho, profundidad (precisión decimal)
-     * - String[] → String (join con comas) para imágenes
-     * 
      * @param ninotDTO DTO con datos del ninot
-     * @return NinotDTO creado con ID y totalVotos=0
+     * @return NinotDTO creado con ID
      * @throws RuntimeException Si la falla no existe
      */
     @Transactional
@@ -126,7 +89,9 @@ public class NinotService {
                 .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + ninotDTO.getIdFalla()));
 
         Ninot ninot = new Ninot();
-        mapearDTOAEntidad(ninotDTO, ninot, falla);
+        ninot.setFalla(falla);
+        ninot.setNombre(ninotDTO.getNombre());
+        ninot.setUrlImagen(ninotDTO.getUrlImagen());
         
         Ninot ninotSaved = ninotRepository.save(ninot);
         return convertirADTO(ninotSaved);
@@ -135,19 +100,9 @@ public class NinotService {
     /**
      * Actualizar ninot existente
      * 
-     * Permite modificar:
-     * - Datos básicos (nombre, artista, descripción)
-     * - Dimensiones (altura, ancho, profundidad)
-     * - Estado premiado (boolean)
-     * - Tipo premio y año premio (si premiado=true)
-     * - Array de imágenes (URLs)
-     * - Falla asociada (reasignación permitida)
-     * 
-     * Nota: Los votos NO se modifican aquí (usar endpoint /api/votos)
-     * 
      * @param id ID del ninot a actualizar
      * @param ninotDTO DTO con nuevos valores
-     * @return NinotDTO actualizado con totalVotos calculado
+     * @return NinotDTO actualizado
      * @throws RuntimeException Si ninot o falla no existen
      */
     @Transactional
@@ -158,7 +113,9 @@ public class NinotService {
         Falla falla = fallaRepository.findById(ninotDTO.getIdFalla())
                 .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + ninotDTO.getIdFalla()));
 
-        mapearDTOAEntidad(ninotDTO, ninot, falla);
+        ninot.setFalla(falla);
+        ninot.setNombre(ninotDTO.getNombre());
+        ninot.setUrlImagen(ninotDTO.getUrlImagen());
         
         Ninot ninotActualizado = ninotRepository.save(ninot);
         return convertirADTO(ninotActualizado);
@@ -166,14 +123,6 @@ public class NinotService {
 
     /**
      * Eliminar ninot del sistema
-     * 
-     * IMPORTANTE - Efectos Cascada:
-     * - Votos asociados: Eliminados (ON DELETE CASCADE)
-     * - Comentarios: Eliminados (ON DELETE CASCADE)
-     * 
-     * Restricciones:
-     * - Solo rol ADMIN (validado en controller)
-     * - Operación irreversible
      * 
      * @param id ID del ninot a eliminar
      * @throws RuntimeException Si el ninot no existe
@@ -185,30 +134,4 @@ public class NinotService {
         
         ninotRepository.delete(ninot);
     }
-
-    /**
-     * Mapear DTO a entidad
-     */
-    private void mapearDTOAEntidad(NinotDTO dto, Ninot entidad, Falla falla) {
-        entidad.setFalla(falla);
-        entidad.setNombreNinot(dto.getNombreNinot());
-        entidad.setTituloObra(dto.getTituloObra());
-        
-        if (dto.getAltura() != null) {
-            entidad.setAlturaMetros(java.math.BigDecimal.valueOf(dto.getAltura()));
-        }
-        if (dto.getAncho() != null) {
-            entidad.setAnchoMetros(java.math.BigDecimal.valueOf(dto.getAncho()));
-        }
-        
-        // Manejar imágenes
-        if (dto.getImagenes() != null && !dto.getImagenes().isEmpty()) {
-            entidad.setUrlImagenPrincipal(dto.getImagenes().get(0));
-            if (dto.getImagenes().size() > 1) {
-                String[] adicionales = dto.getImagenes().subList(1, dto.getImagenes().size()).toArray(new String[0]);
-                entidad.setUrlImagenesAdicionales(adicionales);
-            }
-        }
-        
-        entidad.setPremiado(dto.getPremiado() != null ? dto.getPremiado() : false);
-    }}
+}

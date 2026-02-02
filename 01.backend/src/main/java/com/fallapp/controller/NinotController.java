@@ -29,7 +29,7 @@ public class NinotController {
     public ResponseEntity<ApiResponse<Page<NinotDTO>>> obtenerTodos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "creadoEn") String sort) {
+            @RequestParam(defaultValue = "fechaCreacion") String sort) {
         
         size = Math.min(size, 100);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
@@ -63,21 +63,6 @@ public class NinotController {
         return ResponseEntity.ok(ApiResponse.success(ninots));
     }
     
-    /**
-     * GET /api/ninots/premiados - Obtener ninots premiados
-     */
-    @GetMapping("/premiados")
-    public ResponseEntity<ApiResponse<Page<NinotDTO>>> obtenerPremiados(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        
-        size = Math.min(size, 100);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("creadoEn").descending());
-        
-        Page<NinotDTO> ninots = ninotService.obtenerPremiados(pageable);
-        return ResponseEntity.ok(ApiResponse.success(ninots));
-    }
-
     /**
      * POST /api/ninots - Crear nuevo ninot
      * Requiere autenticación (admin o usuario de la falla)

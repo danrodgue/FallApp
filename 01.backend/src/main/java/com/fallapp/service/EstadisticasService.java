@@ -99,9 +99,6 @@ public class EstadisticasService {
         // Usuarios activos
         resumen.put("usuariosActivos", usuarioRepository.findByActivoTrue().size());
         
-        // Ninots premiados
-        resumen.put("ninotsPremiados", ninotRepository.countByPremiadoTrue());
-        
         // Fecha generación
         resumen.put("fechaGeneracion", LocalDateTime.now());
         
@@ -141,26 +138,6 @@ public class EstadisticasService {
         Map<String, Object> estadisticas = new HashMap<>();
         
         estadisticas.put("totalVotos", votoRepository.count());
-        
-        // Ninots más votados (top 10)
-        var topNinots = ninotRepository.findAll().stream()
-                .sorted((n1, n2) -> Integer.compare(
-                        n2.getVotos() != null ? n2.getVotos().size() : 0,
-                        n1.getVotos() != null ? n1.getVotos().size() : 0
-                ))
-                .limit(10)
-                .map(ninot -> {
-                    Map<String, Object> ninotInfo = new HashMap<>();
-                    ninotInfo.put("idNinot", ninot.getIdNinot());
-                    ninotInfo.put("nombreNinot", ninot.getNombreNinot());
-                    ninotInfo.put("nombreFalla", ninot.getFalla() != null ? ninot.getFalla().getNombre() : null);
-                    ninotInfo.put("totalVotos", ninot.getVotos() != null ? ninot.getVotos().size() : 0);
-                    ninotInfo.put("premiado", ninot.getPremiado());
-                    return ninotInfo;
-                })
-                .toList();
-        
-        estadisticas.put("top10Ninots", topNinots);
         
         return estadisticas;
     }
@@ -217,7 +194,7 @@ public class EstadisticasService {
                     Map<String, Object> info = new HashMap<>();
                     info.put("idVoto", voto.getIdVoto());
                     info.put("usuario", voto.getUsuario() != null ? voto.getUsuario().getNombreCompleto() : null);
-                    info.put("ninot", voto.getNinot() != null ? voto.getNinot().getNombreNinot() : null);
+                    info.put("falla", voto.getFalla() != null ? voto.getFalla().getNombre() : null);
                     info.put("fecha", voto.getCreadoEn());
                     return info;
                 })

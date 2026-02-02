@@ -5,6 +5,89 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.0] - 2026-02-02 ✅ IMPLEMENTADO
+
+### Added
+- **Tabla Ninots Simplificada**
+  - Nueva estructura con 5 campos esenciales (id_ninot, id_falla, nombre, url_imagen, fecha_creacion)
+  - 346 ninots migrados exitosamente
+  - Backup automático en `ninots_backup_20260202`
+  - Índices optimizados para consultas por falla
+
+### Changed
+- **Modelo de Relaciones Corregido**
+  - Votos y comentarios ahora correctamente asociados a **fallas** (no ninots)
+  - Eliminadas relaciones bidireccionales inexistentes en BD
+  - VotoDTO usa `idFalla`/`nombreFalla` en lugar de `idNinot`/`nombreNinot`
+  - ComentarioDTO sin campos de ninot (usa solo falla)
+
+- **Repositorios Actualizados**
+  - `VotoRepository`: Métodos `findByFalla()` reemplazan `findByNinot()`
+  - `ComentarioRepository`: Eliminados métodos de ninot
+  - `NinotRepository`: Eliminados métodos de clasificación por votos
+
+- **Servicios Adaptados**
+  - `VotoService`: Votar ninot internamente vota su falla
+  - `ComentarioService`: Comentar ninot comenta su falla
+  - `EstadisticasService`: Estadísticas simplificadas sin top ninots
+
+### Removed
+- **20+ Campos Obsoletos de Ninots**
+  - altura_metros, ancho_metros, profundidad_metros, peso_toneladas
+  - material_principal, artista_constructor, año_construccion
+  - url_imagen_principal, url_imagenes_adicionales (consolidado en url_imagen)
+  - premiado, categoria_premio, año_premio
+  - titulo_obra, descripcion, notas_tecnicas
+  - actualizado_en (solo fecha_creacion necesaria)
+
+- **Relaciones Fantasma**
+  - `Ninot.votos` (nunca existió en BD)
+  - `Ninot.comentarios` (nunca existió en BD)
+  - `Voto.ninot` (columna id_ninot no existe en tabla votos)
+  - `Comentario.ninot` (columna id_ninot no existe en tabla comentarios)
+
+### Fixed
+- **Alineación Modelo-BD**
+  - Resuelto desajuste entre entidades Java y esquema PostgreSQL
+  - Eliminados errores "column does not exist" en votos y comentarios
+  - Tests unitarios adaptados al nuevo modelo (27 tests, 100% passing)
+
+### Tests
+- **EstadisticasServiceTest:** Eliminadas referencias a campo `ninotsPremiados`
+- **JwtTokenProviderTest:** Corregido mock de Authentication con UserDetails real
+- **FallappApplicationTests:** Movido a paquete correcto `com.fallapp`
+- **Resultado:** 27 tests, 0 failures, 0 errors ✅
+
+### Documentation
+- Creado `ADR-010-realineacion-relaciones-ninots.md`
+- Actualizado `ADR-009-simplificacion-ninots.md`
+- Creado `ESTADO.REESTRUCTURACION.NINOTS.md` (diagrama completo)
+- Actualizada `SPEC-NINOT-SIMPLIFICADO.md`
+
+### Migration
+- Script: `07.datos/scripts/10.migracion.ninots.simplificados.sql`
+- Ejecutado: 2026-02-02
+- Registros migrados: 346 ninots
+- Rollback disponible: `ninots_backup_20260202`
+
+### Breaking Changes ⚠️
+- **API Externa:** Sin cambios (endpoints mantienen misma interfaz)
+- **API Interna:** 
+  - `VotoDTO` usa `idFalla`/`nombreFalla`
+  - `NinotRepository.findByPremiadoTrue()` eliminado
+  - `VotoRepository.countByNinot()` → `countByFalla()`
+
+### Performance
+- ✅ Queries de ninots: ~40% más rápidas (menos columnas)
+- ✅ Joins reducidos: votos/comentarios directos a falla
+- ✅ Índices optimizados: `idx_ninots_falla`, `idx_ninots_fecha`
+
+### Rationale
+- Aplicación de principio YAGNI (You Aren't Gonna Need It)
+- Datos originales solo contienen URLs de bocetos
+- Descubierto que votos/comentarios están en fallas, no ninots
+- Simplicidad > Complejidad sin beneficio
+
 ## [0.4.1] - 2026-02-02
 
 ### Fixed

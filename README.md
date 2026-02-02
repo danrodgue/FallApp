@@ -45,10 +45,10 @@ FallApp es una plataforma integral para la gestión digital de las Fallas de Val
 
 | Componente | Estado | Detalles |
 |------------|--------|----------|
-| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas, 3 usuarios, 9 vistas, 8 ADRs, tests 85% |
-| **Backend Spring Boot API** | ✅ **OPERATIVO (95%)** | 50 endpoints REST, 52 archivos Java, JWT ✅, CRUD ✅, Estadísticas ✅ |
+| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas, 346 ninots, 3 usuarios, 9 vistas, 10 ADRs, tests 85% |
+| **Backend Spring Boot API** | ✅ **OPERATIVO v0.5.0** | 50 endpoints REST, 52 archivos Java, JWT ✅, CRUD ✅, Ninots simplificados ✅ |
 | **Frontend Desktop (Electron)** | ⏳ Pendiente | |
-| **Tests Backend** | ⏳ **EN DESARROLLO** | Tests de autenticación creados |
+| **Tests Backend** | ✅ **COMPLETADO** | 27 tests unitarios, 100% passing (0 failures, 0 errors) |
 | **Mobile Android** | ⏳ Pendiente | |
 | **Docker Compose** | ✅ Operativo | PostgreSQL + pgAdmin |
 

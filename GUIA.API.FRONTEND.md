@@ -1,7 +1,7 @@
 # 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
 
-**Versión:** 0.4.1  
-**Fecha:** 2026-02-01  
+**Versión:** 0.5.0  
+**Fecha:** 2026-02-02  
 **IP Pública AWS:** http://35.180.21.42:8080  
 **Entorno:** Desarrollo
 
@@ -797,7 +797,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 }
 ```
 
-**Request (comentario en ninot):**
+**Request (comentario en falla a través de ninot):**
 ```json
 {
   "idUsuario": 5,
@@ -805,6 +805,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
   "contenido": "Este ninot merece el premio, muy crítico y artístico"
 }
 ```
+
+**Nota importante v0.5.0:** Los comentarios en ninots se almacenan en la **falla** asociada, no en el ninot directamente.
 
 **Validaciones:**
 - `idUsuario`: Obligatorio (debe coincidir con usuario autenticado)
@@ -840,8 +842,10 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ### VOTOS
 
-#### POST /api/votos - Votar por un ninot
+#### POST /api/votos - Votar por una falla (a través de ninot)
 **Autenticación:** Requerida
+
+**Nota importante v0.5.0:** Los votos se registran en la **falla** asociada al ninot, no en el ninot directamente. Esto es por diseño del esquema de base de datos.
 
 **Request:**
 ```json
@@ -857,8 +861,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 - `"ARTISTICO"`
 
 **Validaciones:**
-- Usuario solo puede votar 1 vez por ninot por tipo
-- `idNinot` debe existir
+- Usuario solo puede votar 1 vez por falla por tipo
+- `idNinot` debe existir (internamente se vota su falla)
 - `tipoVoto` debe ser uno de los 3 valores permitidos
 
 **Response (201 Created):**
@@ -870,8 +874,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
     "idVoto": 789,
     "idUsuario": 5,
     "nombreUsuario": "María García",
-    "idNinot": 15,
-    "nombreNinot": "El Influencer",
+    "idFalla": 23,
+    "nombreFalla": "Falla Convento Jerusalén",
     "tipoVoto": "ARTISTICO",
     "fechaCreacion": "2026-02-01T19:05:00"
   }
@@ -882,7 +886,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 ```json
 {
   "exito": false,
-  "mensaje": "Ya has votado por este ninot con tipo ARTISTICO",
+  "mensaje": "Ya has votado por esta falla con tipo ARTISTICO",
   "datos": null
 }
 ```
@@ -894,7 +898,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ---
 
-#### GET /api/votos/ninot/{idNinot} - Votos de un ninot
+#### GET /api/votos/falla/{idFalla} - Votos de una falla
 **Autenticación:** Requerida
 
 ---

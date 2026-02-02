@@ -101,13 +101,14 @@ public class ComentarioService {
     }
     
     /**
-     * Obtener comentarios por ninot
+     * Obtener comentarios por ninot (ahora por su falla)
      */
     public List<ComentarioDTO> obtenerPorNinot(Long idNinot) {
         Ninot ninot = ninotRepository.findById(idNinot)
                 .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + idNinot));
+        Falla falla = ninot.getFalla();
         
-        return comentarioRepository.findByNinotOrderByCreadoEnDesc(ninot).stream()
+        return comentarioRepository.findByFallaOrderByCreadoEnDesc(falla).stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
@@ -142,12 +143,6 @@ public class ComentarioService {
             Falla falla = fallaRepository.findById(comentarioDTO.getIdFalla())
                     .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + comentarioDTO.getIdFalla()));
             comentario.setFalla(falla);
-        }
-        
-        if (comentarioDTO.getIdNinot() != null) {
-            Ninot ninot = ninotRepository.findById(comentarioDTO.getIdNinot())
-                    .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + comentarioDTO.getIdNinot()));
-            comentario.setNinot(ninot);
         }
         
         Comentario comentarioSaved = comentarioRepository.save(comentario);
@@ -190,8 +185,6 @@ public class ComentarioService {
                 .nombreUsuario(comentario.getUsuario() != null ? comentario.getUsuario().getNombreCompleto() : null)
                 .idFalla(comentario.getFalla() != null ? comentario.getFalla().getIdFalla() : null)
                 .nombreFalla(comentario.getFalla() != null ? comentario.getFalla().getNombre() : null)
-                .idNinot(comentario.getNinot() != null ? comentario.getNinot().getIdNinot() : null)
-                .nombreNinot(comentario.getNinot() != null ? comentario.getNinot().getNombreNinot() : null)
                 .contenido(comentario.getContenido())
                 .fechaCreacion(comentario.getCreadoEn())
                 .fechaActualizacion(comentario.getActualizadoEn())
