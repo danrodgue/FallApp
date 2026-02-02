@@ -9,10 +9,21 @@
 </head>
 <body class="events-page">
      <script src="../js/config.js"></script>
+     
+     <header class="site-header">
+          <div class="header-rect">
+               <a href="home.html" class="btn header-back-btn">← Volver</a>
+               <img src="../renderer/src/img/fallap_logo.png" class="logo header-logo" alt="FallApp logo">
+               <div></div>
+          </div>
+     </header>
+
+     <!-- Espaciador para compensar el header fijo -->
+     <div class="header-spacer"></div>
+
      <div class="events-center">
           <div class="modal-card falla-container">
                <div class="falla-header">
-                    <a href="home.html" class="btn-back">← Volver</a>
                     <div class="falla-title">
                          <h2>Información de la falla</h2>
                          <div class="falla-meta muted">Detalles, estado y edición rápida</div>
@@ -26,9 +37,9 @@
                               
                               <!-- Sección de imagen de la falla -->
                               <div class="falla-image-section">
-                                   <label>Imagen de la falla</label>
+                                   <label>Ubicación de la falla</label>
                                    <div class="falla-image-container">
-                                        <img id="fallaImagen" src="../renderer/src/img/fallap_logo.png" alt="Imagen de la falla" onerror="this.style.display='none'">
+                                        <img id="fallaImagen" src="../renderer/src/img/mapa.jpg" alt="Imagen de la falla" onerror="this.style.display='none'">
                                         <div class="falla-image-placeholder" id="fallaImagePlaceholder">
                                              <span>Sin imagen disponible</span>
                                         </div>
@@ -48,11 +59,11 @@
 
                               <div class="form-row">
                                    <div class="field">
-                                        <label>Ubicación</label>
+                                        <label>Nombre del Casal</label>
                                         <input id="fallaUbicacion" name="ubicacion" disabled />
                                    </div>
                                    <div class="field">
-                                        <label>Tipo</label>
+                                        <label>Agrupación</label>
                                         <input id="fallaTipo" name="tipo" disabled />
                                    </div>
                               </div>
@@ -60,22 +71,6 @@
                               <div class="field">
                                    <label>Descripción</label>
                                    <textarea id="fallaDescripcion" name="descripcion" rows="6" disabled></textarea>
-                              </div>
-
-                              <div class="form-row">
-                                   <div class="field">
-                                        <label>Estado</label>
-                                        <select id="fallaEstado" name="estado" disabled>
-                                             <option value="abierta">Abierta</option>
-                                             <option value="en_progreso">En progreso</option>
-                                             <option value="resuelta">Resuelta</option>
-                                             <option value="cerrada">Cerrada</option>
-                                        </select>
-                                   </div>
-                                   <div class="field">
-                                        <label>Reportado por</label>
-                                        <input id="fallaReportadoPor" name="reportado_por" disabled />
-                                   </div>
                               </div>
 
                               <div class="form-actions">
@@ -86,10 +81,6 @@
                     </div>
 
                     <aside class="falla-side">
-                         <div class="status-block">
-                              <div class="status-label">Estado actual</div>
-                              <div id="statusChip" class="meta-chip">Abierta</div>
-                         </div>
                          <div class="info-block">
                               <h4>Resumen</h4>
                               <p class="muted" id="sideSummary">Breve resumen de la incidencia mostrado aquí.</p>

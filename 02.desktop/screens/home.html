@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Página de inicio - FallApp</title>
+  <link rel="stylesheet" href="../css/login.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+<body class="login-page home-page">
+        <script src="../js/config.js"></script>
+
+    <header class="site-header">
+        <div class="header-rect">
+            <button id="profileBtn" class="btn header-profile">Mi Perfil</button>
+            <img src="../renderer/src/img/fallap_logo.png" class="logo header-logo" alt="FallApp logo">
+            <button id="logout" class="btn header-logout">Cerrar sesión</button>
+        </div>
+    </header>
+
+    <!-- Espaciador para compensar el header fijo -->
+    <div class="header-spacer"></div>
+
+    <!-- Modal de Perfil de Usuario -->
+    <div id="profileModal" class="profile-modal">
+        <div class="profile-modal-overlay"></div>
+        <div class="profile-modal-content">
+            <div class="profile-modal-header">
+                <h2>Mi Perfil</h2>
+                <button id="closeProfileBtn" class="profile-close-btn">&times;</button>
+            </div>
+            
+            <div class="profile-modal-body">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar">
+                        <span id="profileAvatarInitials">--</span>
+                    </div>
+                    <p class="avatar-hint muted">Avatar del usuario</p>
+                </div>
+
+                <div class="profile-info-grid">
+                    <div class="profile-info-item">
+                        <label>Nombre de Usuario</label>
+                        <p id="modalUserEmail">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Nombre Completo</label>
+                        <p id="modalUserNombreCompleto">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Correo Electrónico</label>
+                        <p id="modalUserEmailDisplay">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Teléfono</label>
+                        <p id="modalUserTelefono">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Rol</label>
+                        <p id="modalUserRol">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Estado</label>
+                        <p id="modalUserEstado">-</p>
+                    </div>
+                    <div class="profile-info-item full-width">
+                        <label>Dirección</label>
+                        <p id="modalUserDireccion">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Ciudad</label>
+                        <p id="modalUserCiudad">-</p>
+                    </div>
+                    <div class="profile-info-item">
+                        <label>Código Postal</label>
+                        <p id="modalUserCodigoPostal">-</p>
+                    </div>
+                </div>
+
+                <div class="profile-modal-footer">
+                    <a href="user.html" class="btn btn-primary-modal">Editar Perfil Completo</a>
+                    <button id="closeProfileBtnFooter" class="btn btn-secondary-modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-actions">
+        <a href="screen1.html" class="action-card">
+            <div class="card-content">
+                <h3>Próximamente...</h3>
+                <p class="card-description">Funcionalidad en desarrollo</p>
+            </div>
+            <div class="card-image">
+                <img src="../renderer/src/img/fallap_logo.png" alt="Próximamente" onerror="this.style.display='none'">
+            </div>
+        </a>
+        <a href="info.html" class="action-card">
+            <div class="card-content">
+                <h3>Información Falla</h3>
+                <p class="card-description">Consulta y gestiona información de fallas</p>
+            </div>
+            <div class="card-image">
+                <img src="../renderer/src/img/casal.jpg" alt="Información Falla" onerror="this.style.display='none'">
+            </div>
+        </a>
+        <a href="events.html" class="action-card">
+            <div class="card-content">
+                <h3>Eventos</h3>
+                <p class="card-description">Gestiona eventos y actividades</p>
+            </div>
+            <div class="card-image">
+                <img src="../renderer/src/img/mapa.jpg" alt="Eventos" onerror="this.style.display='none'">
+            </div>
+        </a>
+    </div>
+
+    <script src="../js/home.js"></script>
+</body>
+</html>

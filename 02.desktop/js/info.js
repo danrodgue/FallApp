@@ -2,10 +2,23 @@
 // Usar window.fetch si está disponible en el renderer; si no, intentar require('node-fetch')
 let nf = null; // not used in renderer anymore; main process handles HTTP
 document.addEventListener('DOMContentLoaded', function () {
+   // Configurar botón de logout
+   const logoutBtn = document.getElementById('logout');
+   if (logoutBtn) {
+      logoutBtn.addEventListener('click', function() {
+         try {
+            localStorage.removeItem('fallapp_user');
+         } catch (e) {
+            console.error('Error removing user:', e);
+         }
+         window.location.href = '../js/index.html';
+      });
+   }
+
    const params = new URLSearchParams(window.location.search);
    const id = params.get('id') || '';
    // Base del backend (Spring Boot): ajusta puerto si es necesario
-   window._recurso = window._recurso || 'http://127.0.0.1:8080/api/fallas';
+   window._recurso = window._recurso || 'http://localhost/api/fallas';
 
    // Cargar datos desde backend si hay id, si no, usar stub
    if (id) {
@@ -32,11 +45,9 @@ function loadFallaById(id) {
       const ejemplo = {
          id: 'sample-123',
          fecha: new Date().toISOString().slice(0,16),
-         ubicacion: 'Calle Falsa 123',
-         tipo: 'Caída',
-         descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.',
-         estado: 'abierta',
-         reportado_por: 'Juan Pérez'
+         nombre: 'Calle Falsa 123',
+         agrupacion: 'Caída',
+         descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.'
       };
       populateForm(ejemplo);
       return;
@@ -64,11 +75,51 @@ function populateForm(data) {
    el('fallaUbicacion').value = data.ubicacion || '';
    el('fallaTipo').value = data.tipo || '';
    el('fallaDescripcion').value = data.descripcion || '';
-   el('fallaEstado').value = data.estado || 'abierta';
-   el('fallaReportadoPor').value = data.reportado_por || '';
    // Actualizar side panel
-   const sc = document.getElementById('statusChip'); if(sc) sc.textContent = (data.estado || 'abierta');
-   const side = document.getElementById('sideSummary'); if(side) side.textContent = (data.descripcion||'').slice(0,140) + (data.descripcion && data.descripcion.length>140? '...':'' );
+   const side = document.getElementById('sideSummary');
+   if (side) side.textContent = (data.descripcion || '').slice(0, 140) + (data.descripcion && data.descripcion.length > 140 ? '...' : '');
+
+   // Imagen (si viene desde backend)
+   const img = document.getElementById('fallaImagen');
+   const placeholder = document.getElementById('fallaImagePlaceholder');
+   const imageUrl = normalizeImageUrl(data);
+   if (img) {
+      if (imageUrl) {
+         img.src = imageUrl;
+         img.style.display = 'block';
+         if (placeholder) placeholder.style.display = 'none';
+      } else {
+         img.style.display = 'none';
+         if (placeholder) placeholder.style.display = 'flex';
+      }
+   }
+}
+
+function normalizeImageUrl(data) {
+   if (!data) return '';
+
+   // Acepta varios nombres posibles
+   let candidate = data.imagen || data.imagenUrl || data.boceto || data.mapImage || '';
+
+   // Si viene como objeto (ej. { url, base64 })
+   if (candidate && typeof candidate === 'object') {
+      candidate = candidate.url || candidate.base64 || '';
+   }
+
+   if (!candidate || typeof candidate !== 'string') return '';
+
+   // Si ya es un data URL o URL válida
+   if (/^data:image\//i.test(candidate)) return candidate;
+   if (/^https?:\/\//i.test(candidate)) return candidate;
+   if (candidate.startsWith('/') || candidate.startsWith('../')) return candidate;
+
+   // Asumir base64 puro (png por defecto)
+   const base64Like = /^[A-Za-z0-9+/]+={0,2}$/;
+   if (base64Like.test(candidate)) {
+      return `data:image/png;base64,${candidate}`;
+   }
+
+   return candidate;
 }
 
 function saveFalla() {
@@ -78,8 +129,6 @@ function saveFalla() {
       ubicacion: document.getElementById('fallaUbicacion').value,
       tipo: document.getElementById('fallaTipo').value,
       descripcion: document.getElementById('fallaDescripcion').value,
-      estado: document.getElementById('fallaEstado').value,
-      reportado_por: document.getElementById('fallaReportadoPor').value
    };
 
    // Si tiene id => actualizar (PUT), si no => crear (POST)
@@ -90,7 +139,6 @@ function saveFalla() {
    if (window.api && window.api.saveFalla) {
       window.api.saveFalla(payload).then(json => {
          alert('Cambios guardados');
-         const sc = document.getElementById('statusChip'); if(sc) sc.textContent = json.estado || payload.estado;
          const side = document.getElementById('sideSummary'); if(side) side.textContent = (json.descripcion||payload.descripcion||'').slice(0,140) + ((json.descripcion||payload.descripcion) && (json.descripcion||payload.descripcion).length>140? '...':'');
          setEditMode(false);
          if (json.id) document.getElementById('fallaId').value = json.id;
@@ -110,7 +158,7 @@ window._falla = { loadFallaById, populateForm, saveFalla };
 
 // ------------------ Edit mode helpers ------------------
 function setEditMode(enabled){
-   const fields = ['fallaFecha','fallaUbicacion','fallaTipo','fallaDescripcion','fallaEstado','fallaReportadoPor'];
+   const fields = ['fallaFecha','fallaUbicacion','fallaTipo','fallaDescripcion'];
    fields.forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.disabled = !enabled; });
    const saveBtn = document.getElementById('saveBtn'); const editBtn = document.getElementById('editBtn');
    if(saveBtn) saveBtn.style.display = enabled? 'inline-block':'none';

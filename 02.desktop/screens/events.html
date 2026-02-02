@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Eventos - FallApp</title>
+  <link rel="stylesheet" href="../css/login.css">
+  <link rel="stylesheet" href="../css/events.css">
+</head>
+
+<body class="login-page events-page">
+  <script src="../js/config.js"></script>
+  
+  <header class="site-header">
+    <div class="header-rect">
+      <a href="home.html" class="btn header-back-btn">← Volver</a>
+      <img src="../renderer/src/img/fallap_logo.png" class="logo header-logo" alt="FallApp logo">
+      <button id="logout" class="btn header-logout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Espaciador para compensar el header fijo -->
+  <div class="header-spacer"></div>
+
+  <div class="login-container">
+    <div class="events-center">
+      <div class="events-header">
+        <div>
+          <h1 class="events-title">Eventos</h1>
+          <div class="muted">Gestiona los eventos: crea, edita, elimina y visualiza detalles.</div>
+        </div>
+        <div class="header-actions">
+          <button id="btn-new" class="btn-primary">Nuevo evento</button>
+        </div>
+      </div>
+
+      <div class="search-wrapper">
+        <input id="search" placeholder="Buscar por nombre, lugar o creador">
+      </div>
+
+      <div id="events" class="events-list" aria-live="polite">
+        <!-- Eventos renderizados aquí -->
+      </div>
+      <div id="empty" class="muted">No hay eventos.</div>
+    </div>
+
+    <!-- Modal formulario -->
+    <div id="modal" class="modal" role="dialog" aria-modal="true">
+      <div class="modal-card" role="document">
+        <div class="modal-header">
+          <h3 id="modal-title">Nuevo evento</h3>
+          <button id="modal-close" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <form id="event-form">
+          <input type="hidden" id="event-id">
+          <div class="form-row">
+            <label>
+              Nombre
+              <input id="name" required>
+            </label>
+            <label>
+              Creador
+              <input id="creator" placeholder="Usuario que crea el evento" required readonly class="readonly-creator">
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>
+              Fecha
+              <input id="date" type="date" required>
+            </label>
+            <label>
+              Hora
+              <input id="time" type="time" required>
+            </label>
+          </div>
+
+          <div class="field">
+            <label>
+              Lugar
+              <input id="place" required>
+            </label>
+          </div>
+
+          <div class="field">
+            <label>
+              Descripción
+              <textarea id="description" rows="4"></textarea>
+            </label>
+          </div>
+
+          <div class="field">
+            <label>
+              Foto
+              <input type="file" id="photo" accept="image/*">
+            </label>
+
+            <img id="photo-preview" style="display:none; margin-top:10px; max-width:200px;">
+          </div>
+
+          <div class="form-actions">
+            <button type="button" id="btn-cancel" class="btn-secondary">Cancelar</button>
+            <button type="submit" id="btn-save" class="btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="../js/events.js"></script>
+  </div>
+</body>
+
+</html>

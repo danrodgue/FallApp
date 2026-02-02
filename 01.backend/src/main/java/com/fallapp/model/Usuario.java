@@ -61,6 +61,15 @@ public class Usuario {
     @Column(name = "telefono", length = 20)
     private String telefono;
 
+    @Column(name = "direccion", length = 255)
+    private String direccion;
+
+    @Column(name = "ciudad", length = 100)
+    private String ciudad;
+
+    @Column(name = "codigo_postal", length = 10)
+    private String codigoPostal;
+
     /**
      * Enum para roles de usuario
      */

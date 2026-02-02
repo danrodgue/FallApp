@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+     <meta charset="UTF-8">
+     <title>Mi Perfil - FallApp</title>
+     <link rel="stylesheet" href="../css/login.css">
+     <link rel="stylesheet" href="../css/user.css">
+     <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body class="events-page user-page">
+     <script src="../js/config.js"></script>
+     
+     <header class="site-header">
+          <div class="header-rect">
+               <a href="home.html" class="btn header-back-btn">← Volver</a>
+               <img src="../renderer/src/img/fallap_logo.png" class="logo header-logo" alt="FallApp logo">
+               <button id="logout" class="btn header-logout">Cerrar sesión</button>
+          </div>
+     </header>
+
+     <!-- Espaciador para compensar el header fijo -->
+     <div class="header-spacer"></div>
+
+     <div class="events-center">
+          <div class="modal-card user-container">
+               <div class="user-header">
+                    <div class="user-title">
+                         <h2>Mi Perfil</h2>
+                         <div class="user-meta muted">Información de tu cuenta</div>
+                    </div>
+               </div>
+
+               <div class="user-body">
+                    <div class="user-main">
+                         <form id="userForm">
+                              <div class="user-avatar-section">
+                                   <div class="avatar-container">
+                                        <div class="avatar-placeholder" id="avatarPlaceholder">
+                                             <span id="avatarInitials">--</span>
+                                        </div>
+                                   </div>
+                                   <p class="avatar-hint muted">Avatar del usuario</p>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>ID</label>
+                                        <input id="userId" name="id" readonly />
+                                   </div>
+                                   <div class="field">
+                                        <label>Estado</label>
+                                        <input id="userEstado" name="estado" readonly />
+                                   </div>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Nombre de Usuario</label>
+                                        <input id="userName" name="username" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Correo Electrónico</label>
+                                        <input id="userEmail" name="email" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Nombre Completo</label>
+                                        <input id="userNombreCompleto" name="nombreCompleto" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Teléfono</label>
+                                        <input id="userTelefono" name="telefono" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Rol</label>
+                                        <input id="userRol" name="rol" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Fecha de Registro</label>
+                                        <input id="userFechaRegistro" name="fechaRegistro" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="field">
+                                   <label>Dirección</label>
+                                   <input id="userDireccion" name="direccion" disabled />
+                              </div>
+
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Ciudad</label>
+                                        <input id="userCiudad" name="ciudad" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Código Postal</label>
+                                        <input id="userCodigoPostal" name="codigoPostal" disabled />
+                                   </div>
+                              </div>
+
+                              <div class="form-actions">
+                                   <button type="button" class="btn-primary" id="editBtn">Editar Perfil</button>
+                                   <button type="button" class="btn-secondary" id="saveBtn" style="display:none;">Guardar Cambios</button>
+                                   <button type="button" class="btn-secondary" id="cancelBtn" style="display:none;">Cancelar</button>
+                              </div>
+                         </form>
+                    </div>
+
+                    <aside class="user-side">
+                         <div class="info-block">
+                              <h4>Cuenta Activa</h4>
+                              <p class="muted" id="sideStatus">Información del estado de tu cuenta.</p>
+                         </div>
+                    </aside>
+               </div>
+          </div>
+     </div>
+
+     <script src="../js/user.js"></script>
+</body>
+</html>
