@@ -29,7 +29,7 @@ public class NinotController {
     public ResponseEntity<ApiResponse<Page<NinotDTO>>> obtenerTodos(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "fechaCreacion") String sort) {
+            @RequestParam(defaultValue = "creadoEn") String sort) {
         
         size = Math.min(size, 100);
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort).descending());
@@ -72,7 +72,7 @@ public class NinotController {
             @RequestParam(defaultValue = "20") int size) {
         
         size = Math.min(size, 100);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fechaCreacion").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("creadoEn").descending());
         
         Page<NinotDTO> ninots = ninotService.obtenerPremiados(pageable);
         return ResponseEntity.ok(ApiResponse.success(ninots));

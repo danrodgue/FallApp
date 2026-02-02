@@ -63,7 +63,7 @@ public class Ninot {
     @Column(name = "artista_constructor", length = 255)
     private String artistaConstructor;
 
-    @Column(name = "anyo_construccion")
+    @Column(name = "año_construccion")
     private Integer anyoConstruccion;
 
     @Column(name = "premiado", nullable = false)
