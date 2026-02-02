@@ -5,6 +5,24 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.1] - 2026-02-02
+
+### Fixed
+- **Mapeo de Columnas en Entidad Ninot**
+  - Corregido `@Column(name)` de `anyo_construccion` a `año_construccion`
+  - Alineado con esquema PostgreSQL real después de migración
+  - Resuelve error JDBC: "column n1_0.anyo_construccion does not exist"
+  
+- **Ordenamiento en NinotController**
+  - Cambiado parámetro por defecto de `fechaCreacion` a `creadoEn`
+  - Corregido ordenamiento en endpoint `/api/ninots/premiados`
+  - Ahora utiliza el nombre correcto del campo de la entidad
+
+### Impact
+- 7 endpoints de ninots previamente bloqueados ahora funcionales
+- CRUD completo de ninots operativo
+- Sistema de votaciones y comentarios por ninot desbloqueado
+
 ## [0.4.0] - 2026-02-01
 
 ### Added
