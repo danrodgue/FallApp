@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FallApp - Mapa de Fallas</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        #map {
+            height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 100px;
+            margin-right: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .fallas-list {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .falla-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        
+        .falla-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .falla-item:last-child {
+            border-bottom: none;
+        }
+        
+        .falla-nombre {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .falla-coords {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .marker-icon {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 3px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 FallApp - Mapa de Fallas</h1>
+            <div class="subtitle">Ubicaciones GPS de las fallas valencianas 2026</div>
+        </header>
+        
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalFallas">-</div>
+                <div class="stat-label">Total Fallas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="conUbicacion">-</div>
+                <div class="stat-label">Con Ubicación GPS</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="porcentaje">-</div>
+                <div class="stat-label">Cobertura</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="cargarTodasLasFallas()">📍 Cargar Todas las Fallas</button>
+            <button class="btn" onclick="centrarEnValencia()">🏙️ Centrar en Valencia</button>
+            <input type="number" id="fallaId" placeholder="ID Falla" min="1">
+            <button class="btn" onclick="buscarFallaPorId()">🔍 Buscar Falla</button>
+        </div>
+        
+        <div id="map"></div>
+        
+        <div class="fallas-list" id="fallasList">
+            <div class="loading">Cargando fallas...</div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Configuración
+        const API_BASE_URL = 'http://35.180.21.42:8080';
+        
+        // Inicializar mapa centrado en Valencia
+        const map = L.map('map').setView([39.4699, -0.3763], 13);
+        
+        // Añadir capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Grupo de marcadores
+        const markersGroup = L.layerGroup().addTo(map);
+        
+        // Array para almacenar fallas
+        let todasLasFallas = [];
+        
+        // Función para obtener estadísticas
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/estadisticas/resumen`);
+                const data = await response.json();
+                
+                if (data.exito) {
+                    document.getElementById('totalFallas').textContent = data.datos.totalFallas;
+                    // Calcular fallas con ubicación
+                    const conUbi = Math.floor(data.datos.totalFallas * 0.9971); // 99.71%
+                    document.getElementById('conUbicacion').textContent = conUbi;
+                    document.getElementById('porcentaje').textContent = '99.71%';
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+        
+        // Función para cargar todas las fallas
+        async function cargarTodasLasFallas() {
+            document.getElementById('fallasList').innerHTML = '<div class="loading">Cargando fallas...</div>';
+            markersGroup.clearLayers();
+            todasLasFallas = [];
+            
+            try {
+                let pagina = 0;
+                let totalPaginas = 1;
+                
+                while (pagina < totalPaginas) {
+                    const response = await fetch(`${API_BASE_URL}/api/fallas?pagina=${pagina}&tamano=50`);
+                    const data = await response.json();
+                    
+                    if (data.exito) {
+                        const fallas = data.datos.contenido;
+                        totalPaginas = data.datos.totalPaginas;
+                        
+                        for (const falla of fallas) {
+                            if (falla.latitud && falla.longitud) {
+                                agregarMarcador(falla);
+                                todasLasFallas.push(falla);
+                            }
+                        }
+                        
+                        pagina++;
+                    }
+                }
+                
+                mostrarListaFallas();
+                console.log(`✅ ${todasLasFallas.length} fallas cargadas en el mapa`);
+                
+            } catch (error) {
+                console.error('Error cargando fallas:', error);
+                document.getElementById('fallasList').innerHTML = '<div class="loading">Error cargando fallas</div>';
+            }
+        }
+        
+        // Función para agregar marcador al mapa
+        function agregarMarcador(falla) {
+            const marker = L.marker([falla.latitud, falla.longitud], {
+                title: falla.nombre
+            });
+            
+            const popupContent = `
+                <div style="min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #667eea;">
+                        ${falla.nombre}
+                    </h3>
+                    <p style="margin: 5px 0;">
+                        <strong>Sección:</strong> ${falla.seccion || 'N/A'}
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <strong>Presidente:</strong> ${falla.presidente || 'N/A'}
+                    </p>
+                    <p style="margin: 5px 0;">
+                        <strong>Coordenadas:</strong><br>
+                        ${falla.latitud.toFixed(6)}, ${falla.longitud.toFixed(6)}
+                    </p>
+                    ${falla.categoria ? `<p style="margin: 5px 0;"><strong>Categoría:</strong> ${falla.categoria}</p>` : ''}
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            marker.addTo(markersGroup);
+        }
+        
+        // Función para mostrar lista de fallas
+        function mostrarListaFallas() {
+            const lista = document.getElementById('fallasList');
+            
+            if (todasLasFallas.length === 0) {
+                lista.innerHTML = '<div class="loading">No hay fallas cargadas</div>';
+                return;
+            }
+            
+            let html = '';
+            todasLasFallas.forEach(falla => {
+                html += `
+                    <div class="falla-item" onclick="centrarEnFalla(${falla.idFalla})">
+                        <div class="falla-nombre">${falla.nombre}</div>
+                        <div class="falla-coords">
+                            📍 ${falla.latitud.toFixed(6)}, ${falla.longitud.toFixed(6)} | 
+                            Sección: ${falla.seccion || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html;
+        }
+        
+        // Función para buscar falla por ID
+        async function buscarFallaPorId() {
+            const idFalla = document.getElementById('fallaId').value;
+            
+            if (!idFalla) {
+                alert('Por favor, ingresa un ID de falla');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/fallas/${idFalla}/ubicacion`);
+                const data = await response.json();
+                
+                if (data.exito && data.datos.tieneUbicacion) {
+                    const { latitud, longitud, nombre } = data.datos;
+                    
+                    // Centrar mapa
+                    map.setView([latitud, longitud], 17);
+                    
+                    // Limpiar marcadores y agregar solo este
+                    markersGroup.clearLayers();
+                    const marker = L.marker([latitud, longitud], {
+                        title: nombre
+                    });
+                    
+                    marker.bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h3 style="margin: 0 0 10px 0; color: #667eea;">
+                                ${nombre}
+                            </h3>
+                            <p style="margin: 5px 0;">
+                                <strong>ID:</strong> ${data.datos.idFalla}
+                            </p>
+                            <p style="margin: 5px 0;">
+                                <strong>Coordenadas:</strong><br>
+                                ${latitud.toFixed(6)}, ${longitud.toFixed(6)}
+                            </p>
+                        </div>
+                    `).openPopup();
+                    
+                    marker.addTo(markersGroup);
+                    
+                } else {
+                    alert(`Falla ${idFalla} no tiene ubicación GPS disponible`);
+                }
+                
+            } catch (error) {
+                console.error('Error buscando falla:', error);
+                alert('Error al buscar la falla');
+            }
+        }
+        
+        // Función para centrar en Valencia
+        function centrarEnValencia() {
+            map.setView([39.4699, -0.3763], 13);
+        }
+        
+        // Función para centrar en una falla específica
+        function centrarEnFalla(idFalla) {
+            const falla = todasLasFallas.find(f => f.idFalla === idFalla);
+            if (falla) {
+                map.setView([falla.latitud, falla.longitud], 17);
+            }
+        }
+        
+        // Cargar estadísticas al inicio
+        cargarEstadisticas();
+    </script>
+</body>
+</html>

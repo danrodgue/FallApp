@@ -1,7 +1,7 @@
 # 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
 
-**Versión:** 0.4.1  
-**Fecha:** 2026-02-01  
+**Versión:** 0.5.0  
+**Fecha:** 2026-02-02  
 **IP Pública AWS:** http://35.180.21.42:8080  
 **Entorno:** Desarrollo
 
@@ -56,6 +56,13 @@ http://localhost:8080
 
 ## 🔑 Autenticación JWT
 
+> ✅ **ACTUALIZADO 2026-02-03**: Sistema de autenticación JWT completamente funcional con encriptación BCrypt validada.
+> 
+> **Estado**: ✅ OPERATIVO  
+> **Encriptación**: BCrypt (hashing unidireccional seguro)  
+> **Algoritmo JWT**: HS512  
+> **Duración Token**: 24 horas (86400 segundos)
+
 ### 1. Registro de Usuario
 
 **Endpoint:** `POST /api/auth/registro`  
@@ -74,9 +81,14 @@ http://localhost:8080
 
 **Validaciones:**
 - `email`: Formato válido, único en el sistema
-- `contrasena`: Mínimo 6 caracteres
+- `contrasena`: Mínimo 6 caracteres (encriptada con BCrypt automáticamente)
 - `nombreCompleto`: Entre 3 y 200 caracteres
 - `idFalla`: Opcional, para asociar usuario a una falla
+
+**Seguridad:**
+- Las contraseñas se encriptan con BCrypt antes de almacenarse
+- No se almacenan contraseñas en texto plano
+- El sistema utiliza hashing unidireccional (no se pueden "desencriptar")
 
 #### Response (201 Created)
 ```json
@@ -115,6 +127,12 @@ http://localhost:8080
   "contrasena": "miPassword123"
 }
 ```
+
+**Proceso de Autenticación:**
+1. El sistema busca el usuario por email
+2. Compara el hash BCrypt de la contraseña proporcionada con el almacenado
+3. Si coinciden, genera un token JWT válido por 24 horas
+4. Devuelve el token y los datos del usuario
 
 #### Response (200 OK)
 ```json
@@ -167,7 +185,12 @@ curl -X POST http://35.180.21.42:8080/api/fallas \
   -d '{"nombre":"Nueva Falla","seccion":"8A","presidente":"Juan García",...}'
 ```
 
-**Duración del Token:** 24 horas (86400 segundos)
+**Características del Token:**
+- **Duración:** 24 horas (86400 segundos)
+- **Algoritmo:** HS512
+- **Tipo:** Bearer
+- **Renovación:** Solicitar nuevo login antes de expiración
+- **Validación:** El backend verifica firma y expiración en cada petición
 
 ---
 
@@ -284,6 +307,51 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
     "longitud": -0.3763,
     "categoria": "ESPECIAL",
     "totalEventos": 12
+  }
+}
+```
+
+---
+
+#### GET /api/fallas/{id}/ubicacion - Obtener ubicación GPS de una falla
+**Autenticación:** No requerida  
+**Path Param:** `id` (Long)  
+**Descripción:** Retorna únicamente las coordenadas GPS de una falla específica. Útil para mapas y geolocalización sin cargar todos los datos de la falla.
+
+**Ejemplo:** `GET /api/fallas/95/ubicacion`
+
+**Response:**
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": {
+    "idFalla": 95,
+    "nombre": "Plaza Sant Miquel-Vicent Iborra",
+    "latitud": 39.47682454,
+    "longitud": -0.38087859,
+    "tieneUbicacion": true
+  }
+}
+```
+
+**Campos:**
+- `idFalla`: ID de la falla
+- `nombre`: Nombre de la falla
+- `latitud`: Coordenada GPS latitud (WGS84)
+- `longitud`: Coordenada GPS longitud (WGS84)
+- `tieneUbicacion`: Booleano indicando si tiene coordenadas disponibles
+
+**Ejemplo de uso en JavaScript:**
+```javascript
+async function obtenerUbicacionFalla(idFalla) {
+  const response = await fetch(`${API_BASE_URL}/api/fallas/${idFalla}/ubicacion`);
+  const data = await response.json();
+  
+  if (data.exito && data.datos.tieneUbicacion) {
+    const { latitud, longitud, nombre } = data.datos;
+    // Usar en mapa (ej: Leaflet, Google Maps)
+    mostrarEnMapa(latitud, longitud, nombre);
   }
 }
 ```
@@ -797,7 +865,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 }
 ```
 
-**Request (comentario en ninot):**
+**Request (comentario en falla a través de ninot):**
 ```json
 {
   "idUsuario": 5,
@@ -805,6 +873,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
   "contenido": "Este ninot merece el premio, muy crítico y artístico"
 }
 ```
+
+**Nota importante v0.5.0:** Los comentarios en ninots se almacenan en la **falla** asociada, no en el ninot directamente.
 
 **Validaciones:**
 - `idUsuario`: Obligatorio (debe coincidir con usuario autenticado)
@@ -840,8 +910,10 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ### VOTOS
 
-#### POST /api/votos - Votar por un ninot
+#### POST /api/votos - Votar por una falla (a través de ninot)
 **Autenticación:** Requerida
+
+**Nota importante v0.5.0:** Los votos se registran en la **falla** asociada al ninot, no en el ninot directamente. Esto es por diseño del esquema de base de datos.
 
 **Request:**
 ```json
@@ -857,8 +929,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 - `"ARTISTICO"`
 
 **Validaciones:**
-- Usuario solo puede votar 1 vez por ninot por tipo
-- `idNinot` debe existir
+- Usuario solo puede votar 1 vez por falla por tipo
+- `idNinot` debe existir (internamente se vota su falla)
 - `tipoVoto` debe ser uno de los 3 valores permitidos
 
 **Response (201 Created):**
@@ -870,8 +942,8 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
     "idVoto": 789,
     "idUsuario": 5,
     "nombreUsuario": "María García",
-    "idNinot": 15,
-    "nombreNinot": "El Influencer",
+    "idFalla": 23,
+    "nombreFalla": "Falla Convento Jerusalén",
     "tipoVoto": "ARTISTICO",
     "fechaCreacion": "2026-02-01T19:05:00"
   }
@@ -882,7 +954,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 ```json
 {
   "exito": false,
-  "mensaje": "Ya has votado por este ninot con tipo ARTISTICO",
+  "mensaje": "Ya has votado por esta falla con tipo ARTISTICO",
   "datos": null
 }
 ```
@@ -894,7 +966,7 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ---
 
-#### GET /api/votos/ninot/{idNinot} - Votos de un ninot
+#### GET /api/votos/falla/{idFalla} - Votos de una falla
 **Autenticación:** Requerida
 
 ---
