@@ -1,5 +1,7 @@
 # Gestión de Usuarios de la Base de Datos
 
+> ✅ **ACTUALIZADO 2026-02-03**: Sistema BCrypt completamente funcional y validado en producción.
+
 ## 📋 Descripción General
 
 Este documento describe cómo gestionar los usuarios de FallApp desde el servidor, incluyendo la visualización, creación, modificación y eliminación de cuentas de usuario.
@@ -14,17 +16,19 @@ Las contraseñas en FallApp están protegidas con **BCrypt**, un algoritmo de **
 - **Irreversible**: No existe forma matemática de obtener la contraseña original desde el hash
 - **Por diseño**: Esta es una característica de seguridad intencional, no un error
 - **Incluso con acceso a la BD**: Ni siquiera con acceso directo a PostgreSQL se puede recuperar la contraseña
+- ✅ **VALIDADO**: Sistema operativo desde 2026-02-03 (backend recompilado y reiniciado)
 
 ### ¿Cómo funciona BCrypt?
 
 ```
 Contraseña: "admin123"
         ↓
-   BCrypt Hash
+   BCrypt Hash (Algoritmo unidireccional)
         ↓
 "$2a$10$nOUIs5kJ7naTuTFkBy1veuK0kSxUFXfuaOKdOLAQ"
 
 ❌ No existe operación inversa
+✅ Sistema validado 2026-02-03
 ```
 
 Cada vez que un usuario hace login:

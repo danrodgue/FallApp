@@ -1,14 +1,24 @@
 # 📱 Resumen: Documentación de Autenticación Móvil Android
 
-**Fecha:** 2026-02-03  
+**Fecha Creación:** 2026-02-03  
+**Última Actualización:** 2026-02-03 (Backend validado)  
 **Versión:** 0.5.3  
 **Objetivo:** Documentar implementación de JWT en aplicación móvil Android
+
+> ✅ **ACTUALIZADO 2026-02-03**: Backend JWT y BCrypt completamente funcional. Sistema validado en producción.
 
 ---
 
 ## 🎯 Objetivo
 
 Proporcionar documentación completa para que cualquier desarrollador Android pueda implementar autenticación JWT conectándose a la API Spring Boot de FallApp usando **solo email y contraseña**.
+
+### Estado del Sistema (2026-02-03)
+- ✅ Backend API operativo en http://35.180.21.42:8080
+- ✅ JWT funcional (algoritmo HS512, 24h)
+- ✅ BCrypt validado (backend recompilado y reiniciado)
+- ✅ Endpoints /auth/registro y /auth/login operativos
+- ✅ Tests exitosos: registro + login
 
 ---
 
@@ -28,11 +38,12 @@ Proporcionar documentación completa para que cualquier desarrollador Android pu
 - Links a documentación detallada
 
 **Características Clave:**
-- ✅ Explicación de JWT y cómo funciona
+- ✅ Explicación de JWT y cómo funciona (HS512, 24h)
 - ✅ Niveles de acceso (Público, Autenticado, Admin)
 - ✅ Almacenamiento seguro con EncryptedSharedPreferences
 - ✅ Renovación y expiración de tokens (24h)
 - ✅ URLs para emulador vs producción
+- ✅ Backend validado 2026-02-03
 
 ---
 

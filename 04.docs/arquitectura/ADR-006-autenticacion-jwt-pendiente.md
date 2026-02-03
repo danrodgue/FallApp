@@ -1,11 +1,14 @@
-# ADR-006: Autenticación JWT - Implementado
+# ADR-006: Autenticación JWT - Implementado y Validado
 
-**Estado**: ✅ Implementado  
+**Estado**: ✅ Implementado y Operativo  
 **Fecha Decisión**: 2026-02-01  
 **Fecha Implementación**: 2026-02-01  
+**Última Actualización**: 2026-02-03 (Validación encriptación BCrypt)  
 **Decisores**: Equipo de desarrollo  
 **Contexto técnico**: Backend Spring Boot + PostgreSQL  
 **Relacionado**: [ADR-007 Formato Respuesta API](ADR-007-formato-respuesta-api.md)
+
+> ✅ **ACTUALIZADO 2026-02-03**: Sistema JWT completamente funcional con encriptación BCrypt validada en producción.
 
 ## Contexto Original
 
@@ -15,7 +18,7 @@ El backend Spring Boot implementado incluía Spring Security y dependencias JWT 
 - `VotoController`: Recibía idUsuario como parámetro en lugar de extraerlo del token
 - SecurityConfig: Configuración básica sin filtros JWT
 
-## Estado Implementado (2026-02-01)
+## Estado Implementado (2026-02-01, Validado 2026-02-03)
 
 ### ✅ Completado
 - **JwtTokenProvider.java** (145 líneas): Generación, validación y extracción de claims
@@ -23,17 +26,19 @@ El backend Spring Boot implementado incluía Spring Security y dependencias JWT 
 - **UserDetailsServiceImpl.java** (72 líneas): Carga usuarios desde UsuarioRepository
 - **RolUsuarioConverter.java** (29 líneas): AttributeConverter para enum PostgreSQL
 - **SecurityConfig**: AuthenticationManager bean, DaoAuthenticationProvider, JWT filter chain
-- **AuthController**: Login con autenticación BCrypt, registro con password hashing
+- **AuthController**: Login con autenticación BCrypt, registro con password hashing ✅ **FUNCIONAL**
 - **VotoController**: Usa @AuthenticationPrincipal UserDetails (no más idUsuario en params)
 - **application.properties**: jwt.secret ampliado a 82 caracteres (656 bits)
 
-### ✅ Funcionalidad Validada
-- POST /api/auth/login → Retorna JWT token válido (188 caracteres)
-- GET /api/usuarios (con token) → 200 OK con datos
-- GET /api/usuarios (sin token) → 403 Forbidden
-- POST /api/votos (con token) → Usuario extraído del token correctamente
-- BCrypt password verification funcionando
-- Token expiration: 24 horas (86400000 ms)
+### ✅ Funcionalidad Validada (2026-02-03)
+- ✅ POST /api/auth/login → Retorna JWT token válido (algoritmo HS512)
+- ✅ POST /api/auth/registro → Crea usuario con BCrypt hash, retorna JWT
+- ✅ GET /api/usuarios (con token) → 200 OK con datos
+- ✅ GET /api/usuarios (sin token) → 403 Forbidden
+- ✅ POST /api/votos (con token) → Usuario extraído del token correctamente
+- ✅ BCrypt password verification → **OPERATIVO** (correcciones aplicadas 03-02-2026)
+- ✅ Token expiration: 24 horas (86400 segundos)
+- ✅ Backend recompilado con Java 17 y reiniciado vía systemd
 
 ### ✅ v0.4.0 - CRUD Endpoints con Autenticación (2026-02-01)
 

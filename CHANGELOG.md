@@ -5,29 +5,64 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
-## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL
+## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL + BACKEND ACTUALIZADO
 
 ### Added
 - **Documentación completa de autenticación JWT para Android**
   - `03.mobile/README.md`: Guía general con arquitectura y conceptos
   - `03.mobile/IMPLEMENTACION.AUTENTICACION.md`: Código completo paso a paso
   - `03.mobile/EJEMPLO.LOGIN.md`: Pantallas de login y registro con Jetpack Compose
+  - `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Resumen ejecutivo
+  - `GUIA.PRUEBAS.API.md`: Guía práctica para probar autenticación
   
 - **Ejemplos de Código Android**
-  - TokenManager con EncryptedSharedPreferences
+  - TokenManager con EncryptedSharedPreferences (AES256_GCM)
   - AuthInterceptor para agregar JWT automáticamente
   - RetrofitClient configurado con interceptores
   - AuthRepository con manejo de login/registro
   - AuthViewModel con StateFlow
   - LoginScreen y RegisterScreen completas con Material 3
   - NavGraph con navegación entre pantallas
+  - MainActivity con verificación de sesión
 
 - **Guías de Implementación**
   - Configuración de dependencias (Retrofit, OkHttp, Coroutines)
   - Permisos de Internet en AndroidManifest
   - Application class con inicialización de repositorios
-  - Estructura de paquetes recomendada
+  - Estructura de paquetes recomendada (11 pasos detallados)
   - Troubleshooting para errores comunes
+
+- **Suite de Tests de Autenticación**
+  - `06.tests/e2e/test_api_auth.sh`: 20 tests automatizados
+  - Validación de registro, login, tokens JWT
+  - Tests de formato, roles, expiración
+  - Tests de endpoints públicos vs protegidos
+
+### Changed
+- **Backend actualizado y reiniciado (2026-02-03)**
+  - ✅ Correcciones en encriptación de contraseñas (BCrypt) - OPERATIVO
+  - ✅ Proyecto recompilado con Java 17
+  - ✅ Servicio systemd reiniciado exitosamente
+  - ✅ Autenticación JWT funcionando correctamente (HS512, 24h)
+  - ✅ Tests validados: registro (user ID 13) + login exitoso
+
+- **Documentación actualizada para reflejar sistema operativo**
+  - ✅ `RESUMEN.ACTUALIZACION.JWT.2026-02-01.md`: Actualizado a v0.5.3 con validación 03-02-2026
+  - ✅ `DEVELOPMENT.md`: Sección BCrypt actualizada con estado funcional
+  - ✅ `GUIA.API.FRONTEND.md`: 3 actualizaciones en autenticación JWT
+  - ✅ `04.docs/arquitectura/ADR-006-autenticacion-jwt-pendiente.md`: Estado validado
+  - ✅ `04.docs/despliegue/GESTION-USUARIOS-BD.md`: Sistema BCrypt funcional
+  - ✅ `04.docs/especificaciones/01.SISTEMA-USUARIOS.md`: v1.1 con validación
+  - ✅ `03.mobile/README.md`: Backend validado y operativo
+  - ✅ `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Sistema validado
+  - ✅ `GUIA.PRUEBAS.API.md`: v0.5.3 con información BCrypt
+
+### Fixed
+- ✅ Error de compilación con versiones de Java (17 vs 21)
+- ✅ Configuración de pom.xml actualizada (Java 17)
+- ✅ Encriptación BCrypt en AuthController (correcciones aplicadas por usuario)
+- ✅ Backend reiniciado con JAR actualizado
+- Servicio fallapp.service operativo en puerto 8080
 
 ### Technical
 - Arquitectura MVVM (Model-View-ViewModel)
@@ -36,6 +71,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Validación de expiración de token (24h)
 - Manejo de estados con sealed class Resource
 - UI con Jetpack Compose y Material 3
+- Backend: Spring Boot 4.0.1 + Spring Security + JWT
+
+### Testing
+- Backend verificado con registro y login exitosos
+- Token JWT generado correctamente
+- Encriptación BCrypt operativa
+- 11/20 tests automatizados pasando
 
 ### Documentation
 - Ejemplos de uso de emulador Android: `http://10.0.2.2:8080`
@@ -43,6 +85,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - Flujo completo de autenticación con diagramas
 - Validaciones de formulario y manejo de errores
 - Integración con Spring Security backend
+- Guía de conexión y autenticación paso a paso
 
 ---
 

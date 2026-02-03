@@ -1,8 +1,10 @@
 # 🔐 Guía Práctica: Probar Autenticación API - FallApp
 
-**Fecha:** 2026-02-03  
-**Versión:** 0.5.2  
-**URL Base:** http://localhost:8080 (o http://35.180.21.42:8080)
+**Fecha Creación:** 2026-02-03  
+**Última Actualización:** 2026-02-03 (Validación BCrypt)  
+**Versión:** 0.5.3  
+**URL Base:** http://localhost:8080 (o http://35.180.21.42:8080)  
+**Estado:** ✅ Sistema JWT y BCrypt completamente funcional
 
 ---
 
@@ -25,6 +27,13 @@
 - ✅ Dura **24 horas** (86400 segundos)
 - ✅ Debe incluirse en el header `Authorization: Bearer TOKEN`
 - ✅ Permite acceder a endpoints protegidos
+- ✅ **Algoritmo**: HS512 (validado 2026-02-03)
+
+### Seguridad de Contraseñas
+- ✅ **BCrypt**: Hashing unidireccional (no encriptación reversible)
+- ✅ **Validado**: Sistema operativo desde 2026-02-03
+- ✅ **Backend**: Recompilado con Java 17 y reiniciado
+- ✅ No se almacenan contraseñas en texto plano
 
 ### Niveles de Acceso
 

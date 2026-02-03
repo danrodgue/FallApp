@@ -41,7 +41,7 @@ public class AuthController {
     @Operation(summary = "Registrar nuevo usuario")
     public ResponseEntity<ApiResponse<LoginResponse>> registrar(@Valid @RequestBody RegistroRequest request) {
         // Encriptar contraseña
-        request.setContrasena(passwordEncoder.encode(request.getContrasena()));
+        //request.setContrasena(passwordEncoder.encode(request.getContrasena()));
         
         // Crear usuario
         UsuarioDTO usuario = usuarioService.registrar(request);

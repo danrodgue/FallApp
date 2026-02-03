@@ -1,9 +1,12 @@
 # 📱 FallApp Mobile - Aplicación Android
 
-**Versión:** 0.5.2  
-**Fecha:** 2026-02-03  
+**Versión:** 0.5.3  
+**Fecha Creación:** 2026-02-03  
+**Última Actualización:** 2026-02-03 (Validación backend)  
 **Framework:** Jetpack Compose + Kotlin  
-**Autenticación:** JWT (Spring Security)
+**Autenticación:** JWT (Spring Security) - ✅ OPERATIVO
+
+> ✅ **ACTUALIZADO 2026-02-03**: Backend JWT validado y operativo. Sistema BCrypt funcional.
 
 ---
 
@@ -23,6 +26,12 @@
 
 Esta aplicación móvil Android se conecta a la API REST de FallApp utilizando autenticación JWT (JSON Web Token) mediante Spring Security.
 
+### Estado del Backend (2026-02-03)
+- ✅ API REST operativa en http://35.180.21.42:8080
+- ✅ Autenticación JWT funcional (algoritmo HS512, 24h)
+- ✅ Encriptación BCrypt validada en producción
+- ✅ Endpoints de registro y login operativos
+
 ### Características Principales
 
 - ✅ **Login con usuario/contraseña** (email + password)
@@ -36,8 +45,8 @@ Esta aplicación móvil Android se conecta a la API REST de FallApp utilizando a
 ### Flujo de Autenticación
 
 ```
-Usuario → Login Screen → API (/auth/login) → JWT Token → 
-→ Guardar Token → Navegar a Home → Todas las requests incluyen token
+Usuario → Login Screen → API (/auth/login) → JWT Token (HS512) → 
+→ Guardar Token (Encrypted) → Navegar a Home → Todas las requests incluyen token
 ```
 
 ---

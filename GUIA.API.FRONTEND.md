@@ -56,6 +56,13 @@ http://localhost:8080
 
 ## 🔑 Autenticación JWT
 
+> ✅ **ACTUALIZADO 2026-02-03**: Sistema de autenticación JWT completamente funcional con encriptación BCrypt validada.
+> 
+> **Estado**: ✅ OPERATIVO  
+> **Encriptación**: BCrypt (hashing unidireccional seguro)  
+> **Algoritmo JWT**: HS512  
+> **Duración Token**: 24 horas (86400 segundos)
+
 ### 1. Registro de Usuario
 
 **Endpoint:** `POST /api/auth/registro`  
@@ -74,9 +81,14 @@ http://localhost:8080
 
 **Validaciones:**
 - `email`: Formato válido, único en el sistema
-- `contrasena`: Mínimo 6 caracteres
+- `contrasena`: Mínimo 6 caracteres (encriptada con BCrypt automáticamente)
 - `nombreCompleto`: Entre 3 y 200 caracteres
 - `idFalla`: Opcional, para asociar usuario a una falla
+
+**Seguridad:**
+- Las contraseñas se encriptan con BCrypt antes de almacenarse
+- No se almacenan contraseñas en texto plano
+- El sistema utiliza hashing unidireccional (no se pueden "desencriptar")
 
 #### Response (201 Created)
 ```json
@@ -115,6 +127,12 @@ http://localhost:8080
   "contrasena": "miPassword123"
 }
 ```
+
+**Proceso de Autenticación:**
+1. El sistema busca el usuario por email
+2. Compara el hash BCrypt de la contraseña proporcionada con el almacenado
+3. Si coinciden, genera un token JWT válido por 24 horas
+4. Devuelve el token y los datos del usuario
 
 #### Response (200 OK)
 ```json
@@ -167,7 +185,12 @@ curl -X POST http://35.180.21.42:8080/api/fallas \
   -d '{"nombre":"Nueva Falla","seccion":"8A","presidente":"Juan García",...}'
 ```
 
-**Duración del Token:** 24 horas (86400 segundos)
+**Características del Token:**
+- **Duración:** 24 horas (86400 segundos)
+- **Algoritmo:** HS512
+- **Tipo:** Bearer
+- **Renovación:** Solicitar nuevo login antes de expiración
+- **Validación:** El backend verifica firma y expiración en cada petición
 
 ---
 

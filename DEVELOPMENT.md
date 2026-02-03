@@ -38,7 +38,10 @@ fallapp-users
 # - casal@fallapp.es / casal123 (rol: casal)
 
 # ⚠️ IMPORTANTE: Las contraseñas están protegidas con BCrypt
+# ✅ ACTUALIZADO 2026-02-03: Encriptación BCrypt completamente funcional
+# ✅ Backend recompilado y reiniciado con correcciones
 # No se pueden "desencriptar" - es un hash unidireccional por seguridad
+# El sistema valida comparando hashes, nunca almacena contraseñas en texto plano
 ```
 
 **Documentación completa:** [04.docs/despliegue/GESTION-USUARIOS-BD.md](04.docs/despliegue/GESTION-USUARIOS-BD.md)
