@@ -1558,7 +1558,7 @@ curl -X POST http://35.180.21.42:8080/api/auth/registro \
 curl -X POST http://35.180.21.42:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
+    "email": "test@example.com"
     "contrasena": "password123"
   }'
 
