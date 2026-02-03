@@ -1,6 +1,9 @@
 /* ================================
-   VARIABLES GLOBALES DEL LOGIN
+   LOGIN.CSS - ESTILOS BASE GLOBALES
+   Variables CSS, componentes comunes (botones, header, modal, inputs)
+   Importado por: index.css, home.css, events.css, user.css, info.css
 ==================================*/
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
@@ -53,17 +56,28 @@
     font-family: var(--font-family);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
+    overflow: hidden;
 }
 
-.login-page * {
-    box-sizing: border-box;
+.login-page:not(.home-page)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background-image: url('../renderer/src/img/fondo.png');
+    background-size: cover;
+    background-position: center bottom;
+    opacity: 0.15;
+    z-index: 0;
+    pointer-events: none;
 }
-
-/* ================================
-   TARJETA DEL LOGIN
-==================================*/
 
 .login-container {
+    position: relative;
+    z-index: 1;
     background: var(--color-card-bg);
     padding: var(--spacing-xl) var(--spacing-lg);
     border-radius: var(--radius-lg);
@@ -72,15 +86,19 @@
     max-width: 400px;
     text-align: center;
     border: 1px solid var(--color-border-light);
-    margin-top: auto;
+    margin-top: 0;
     margin-bottom: auto;
+}
+
+.login-page * {
+    box-sizing: border-box;
 }
 
 .login-container h2 {
     margin-top: 0;
     margin-bottom: var(--spacing-lg);
     color: var(--color-text);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.5px;
     line-height: 1.2;
@@ -140,19 +158,23 @@ input:focus {
 
 .btn {
     width: 100%;
-    padding: 14px 20px;
+    padding: 10px 20px;
     border: none;
     border-radius: var(--input-radius);
     background: var(--color-primary);
     color: #fff;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
     font-family: var(--font-family);
     cursor: pointer;
     margin-top: var(--spacing-md);
     transition: var(--transition);
     letter-spacing: -0.01em;
     box-shadow: var(--shadow);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn:hover {
@@ -263,8 +285,9 @@ input:focus {
 .header-back-btn,
 .header-logout {
     width: auto;
-    padding: 10px 18px;
+    padding: 10px 20px;
     min-width: 0;
+    min-height: 32px;
     background: rgba(255,255,255,0.2);
     color: #fff;
     border-radius: var(--radius-sm);
@@ -276,6 +299,9 @@ input:focus {
     transition: var(--transition);
     letter-spacing: -0.01em;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .header-profile:hover,
@@ -323,6 +349,7 @@ a { text-decoration: none; }
     padding: 12px 20px;
     min-width: 140px;
     font-weight: 600;
+    font-size: 14px;
 }
 
 /* Sección principal de acciones (cartas con imágenes) */
@@ -462,6 +489,13 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--color-text);
     margin-top: 0;
 }
+
+h1 { font-size: 32px; }
+h2 { font-size: 26px; }
+h3 { font-size: 20px; }
+h4 { font-size: 16px; }
+h5 { font-size: 14px; }
+h6 { font-size: 13px; }
 
 p {
     margin: 0 0 var(--spacing-md) 0;

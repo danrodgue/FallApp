@@ -1,0 +1,9 @@
+/* ================================
+   INDEX.CSS - ESTILOS PARA INDEX.HTML (LOGIN)
+   Importa login.css para obtener variables y componentes globales
+   Contiene solo estilos específicos de la página de login
+==================================*/
+
+@import url('login.css');
+
+/* Estilos específicos para index.html */
