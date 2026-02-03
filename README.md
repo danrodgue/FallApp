@@ -45,14 +45,48 @@ FallApp es una plataforma integral para la gestión digital de las Fallas de Val
 
 | Componente | Estado | Detalles |
 |------------|--------|----------|
-| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas, 346 ninots, 3 usuarios, 9 vistas, 10 ADRs, tests 85% |
-| **Backend Spring Boot API** | ✅ **OPERATIVO v0.5.0** | 50 endpoints REST, 52 archivos Java, JWT ✅, CRUD ✅, Ninots simplificados ✅ |
+| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas (253 con ubicación GPS), 346 ninots, 4 usuarios, 9 vistas, tests 85% |
+| **Backend Spring Boot API** | ✅ **OPERATIVO v0.5.0** | 50 endpoints REST, JWT ✅, CRUD ✅, Ubicaciones GPS ✅, **Servicio systemd** ✅ |
+| **Despliegue Automático** | ✅ **CONFIGURADO** | Servicio systemd con autoarranque y reinicio automático |
 | **Frontend Desktop (Electron)** | ⏳ Pendiente | |
 | **Tests Backend** | ✅ **COMPLETADO** | 27 tests unitarios, 100% passing (0 failures, 0 errors) |
 | **Mobile Android** | ⏳ Pendiente | |
 | **Docker Compose** | ✅ Operativo | PostgreSQL + pgAdmin |
 
 📋 **[Ver Checklist de Completitud](CHECKLIST.DESPLIEGUE.BD.md)** - Despliegue de Base de Datos
+
+### 🚀 API Backend en Producción
+
+**Estado actual:** ✅ **OPERATIVO** en http://35.180.21.42:8080
+
+**Servicio systemd:**
+- ✅ Autoarranque al iniciar el sistema
+- ✅ Reinicio automático en caso de fallos  
+- ✅ Logs centralizados con journald
+- ✅ Script de monitoreo rápido: `fallapp-status`
+- ✅ Gestión de usuarios: `fallapp-users`
+
+**Comandos útiles:**
+```bash
+# Ver estado del servicio
+sudo systemctl status fallapp
+fallapp-status
+
+# Ver usuarios de la base de datos
+fallapp-users
+
+# Reiniciar backend
+sudo systemctl restart fallapp
+
+# Ver logs en tiempo real
+sudo journalctl -u fallapp -f
+```
+
+**Documentación:**
+- [Servicio Systemd](04.docs/despliegue/SERVICIO-SYSTEMD.md)
+- [Gestión de Usuarios BD](04.docs/despliegue/GESTION-USUARIOS-BD.md)
+
+**Documentación:** [04.docs/despliegue/SERVICIO-SYSTEMD.md](04.docs/despliegue/SERVICIO-SYSTEMD.md)
 
 ## 🗄️ Base de Datos
 

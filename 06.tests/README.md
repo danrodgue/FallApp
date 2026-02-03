@@ -11,12 +11,15 @@ Suite de tests automatizados para validar la infraestructura de Base de Datos Po
 │   ├── test_01_schema_creation.sql      # ✅ 9/9 PASS
 │   ├── test_02_data_integrity.sql       # ✅ 10/10 PASS
 │   ├── test_03_views_functions.sql      # ⚠️ 7/10 PASS
-│   └── test_04_triggers.sql             # ⚠️ 2/5 PASS
+│   ├── test_04_triggers.sql             # ⚠️ 2/5 PASS
+│   └── test_05_ubicaciones_gps.sql      # ✅ Tests GPS [NUEVO v0.5.2]
 ├── e2e/                      # Tests End-to-End (bash)
 │   ├── test_docker_compose.sh           # 10 tests
 │   ├── test_postgres_connection.sh      # ✅ 10/10 PASS
-│   └── test_data_persistence.sh         # 7 tests
-└── performance/              # Tests de rendimiento (futuro)
+│   ├── test_data_persistence.sh         # 7 tests
+│   └── test_api_ubicaciones.sh          # ✅ 20 tests [NUEVO v0.5.2]
+└── performance/              # Tests de rendimiento
+    └── test_ubicaciones_performance.sh  # ✅ 6 tests [NUEVO v0.5.2]
 ```
 
 ## 🚀 Ejecución Rápida
@@ -53,6 +56,10 @@ sudo docker exec -i fallapp-postgres psql -U fallapp_user -d fallapp \
 # Test 04: Triggers (5 tests)
 sudo docker exec -i fallapp-postgres psql -U fallapp_user -d fallapp \
   < 06.tests/integration/test_04_triggers.sql
+
+# Test 05: Ubicaciones GPS (9 tests) [NUEVO v0.5.2]
+sudo docker exec -i fallapp-postgres psql -U fallapp_user -d fallapp \
+  < 06.tests/integration/test_05_ubicaciones_gps.sql
 ```
 
 #### Tests E2E (Bash)
@@ -68,17 +75,28 @@ bash test_postgres_connection.sh
 
 # Test E2E: Data Persistence (7 tests)
 bash test_data_persistence.sh
+
+# Test E2E: API Ubicaciones (20 tests) [NUEVO v0.5.2] ⭐
+bash test_api_ubicaciones.sh
+```
+
+#### Tests de Performance (Bash)
+
+```bash
+cd /srv/FallApp/06.tests/performance
+
+# Test Performance: Endpoint Ubicaciones (6 tests) [NUEVO v0.5.2]
+bash test_ubicaciones_performance.sh
 ```
 
 ## 📊 Cobertura de Tests
 
 | Categoría | Tests | PASS | Estado | Cobertura |
 |-----------|-------|------|--------|-----------|
-| **Integration SQL** | 34 | 28 | ⚠️ | 82% |
-| **E2E Bash** | 27 | 10 | ⚠️ | 37%* |
-| **TOTAL** | 61 | 38 | ✅ | **~85%** |
-
-\* Solo 1 de 3 tests E2E ejecutados completamente (requieren cleanup previo)
+| **Integration SQL** | 43 | 37 | ✅ | 86% |
+| **E2E Bash** | 47 | 30 | ⚠️ | 64% |
+| **Performance** | 6 | 6 | ✅ | 100% |
+| **TOTAL** | 96 | 73 | ✅ | **~76%** |
 
 ### Tests de Integración (SQL)
 
@@ -95,6 +113,28 @@ bash test_data_persistence.sh
 - ⚠️ **test_04_triggers.sql**: 2/5 PASS (40%)
   - Errores de sintaxis psql (\gset con variables)
   - Triggers funcionan correctamente en uso real
+
+- ✅ **test_05_ubicaciones_gps.sql**: 9/9 PASS (100%) [NUEVO v0.5.2]
+  - Columnas GPS, cobertura 99%+, rangos válidos, precisión decimal, consistencia
+
+### Tests E2E (Bash)
+
+- ✅ **test_postgres_connection.sh**: 10/10 PASS (100%)
+  - Contenedor, conexión, esquema, seed data, performance básico
+
+- ⚠️ **test_docker_compose.sh**: 10 tests (requiere cleanup previo)
+  - Tests de infraestructura Docker
+
+- ⚠️ **test_data_persistence.sh**: 7 tests (requiere cleanup previo)
+  - Tests de persistencia de datos
+
+- ✅ **test_api_ubicaciones.sh**: 20/20 PASS (100%) [NUEVO v0.5.2]
+  - Conectividad, estructura JSON, validación GPS, casos especiales, acceso público
+
+### Tests de Performance (Bash)
+
+- ✅ **test_ubicaciones_performance.sh**: 6/6 PASS (100%) [NUEVO v0.5.2]
+  - Tiempo de respuesta, carga secuencial, concurrencia, tamaño, carga pesada, recursos
 
 ### Tests E2E (Bash)
 
@@ -165,9 +205,11 @@ LINE 1: ...SET nombre_usuario = 'UPDATED' WHERE id_usuario = :id_usuario;
 - [ ] Cleanup script para tests E2E: `docker-compose down -v` automático
 
 ### Medio Plazo
-- [ ] Tests de performance en `06.tests/performance/`
+- [x] Tests de performance en `06.tests/performance/` ✅ v0.5.2
+- [x] Tests de API REST para ubicaciones GPS ✅ v0.5.2
 - [ ] Integración con CI/CD (GitHub Actions)
 - [ ] Tests de carga (JMeter / Apache Bench)
+- [ ] Tests unitarios backend (JUnit/Spring Boot Test)
 
 ## 📚 Documentación Relacionada
 
@@ -210,6 +252,7 @@ Para reportar issues con tests: crear issue en GitHub con etiqueta `tests`
 
 ---
 
-**Última actualización**: 2024-02-01  
+**Última actualización**: 2026-02-03  
+**Versión**: v0.5.2  
 **Mantenedor**: Equipo FallApp  
-**Cobertura actual**: ~85% (28/34 SQL + 10/27 E2E)
+**Cobertura actual**: ~76% (37/43 SQL + 30/47 E2E + 6/6 Performance)

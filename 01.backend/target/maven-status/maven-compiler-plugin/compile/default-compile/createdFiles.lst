@@ -18,6 +18,7 @@ com/fallapp/security/UserDetailsServiceImpl.class
 com/fallapp/dto/NinotDTO$NinotDTOBuilder.class
 com/fallapp/config/SecurityConfig.class
 com/fallapp/config/RolUsuarioConverter.class
+com/fallapp/dto/UbicacionDTO$UbicacionDTOBuilder.class
 com/fallapp/dto/ApiResponse.class
 com/fallapp/dto/VotoDTO$VotoDTOBuilder.class
 com/fallapp/security/JwtTokenProvider.class
@@ -40,6 +41,7 @@ com/fallapp/model/Falla.class
 com/fallapp/repository/VotoRepository.class
 com/fallapp/service/UsuarioService.class
 com/fallapp/service/NinotService.class
+com/fallapp/dto/UbicacionDTO.class
 com/fallapp/exception/ResourceNotFoundException.class
 com/fallapp/controller/ComentarioController.class
 com/fallapp/exception/GlobalExceptionHandler.class

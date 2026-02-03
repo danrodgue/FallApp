@@ -5,6 +5,118 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL
+
+### Added
+- **Documentación completa de autenticación JWT para Android**
+  - `03.mobile/README.md`: Guía general con arquitectura y conceptos
+  - `03.mobile/IMPLEMENTACION.AUTENTICACION.md`: Código completo paso a paso
+  - `03.mobile/EJEMPLO.LOGIN.md`: Pantallas de login y registro con Jetpack Compose
+  
+- **Ejemplos de Código Android**
+  - TokenManager con EncryptedSharedPreferences
+  - AuthInterceptor para agregar JWT automáticamente
+  - RetrofitClient configurado con interceptores
+  - AuthRepository con manejo de login/registro
+  - AuthViewModel con StateFlow
+  - LoginScreen y RegisterScreen completas con Material 3
+  - NavGraph con navegación entre pantallas
+
+- **Guías de Implementación**
+  - Configuración de dependencias (Retrofit, OkHttp, Coroutines)
+  - Permisos de Internet en AndroidManifest
+  - Application class con inicialización de repositorios
+  - Estructura de paquetes recomendada
+  - Troubleshooting para errores comunes
+
+### Technical
+- Arquitectura MVVM (Model-View-ViewModel)
+- Almacenamiento seguro con AES256_GCM
+- Interceptor HTTP agrega token automáticamente
+- Validación de expiración de token (24h)
+- Manejo de estados con sealed class Resource
+- UI con Jetpack Compose y Material 3
+
+### Documentation
+- Ejemplos de uso de emulador Android: `http://10.0.2.2:8080`
+- Diferencias entre desarrollo y producción
+- Flujo completo de autenticación con diagramas
+- Validaciones de formulario y manejo de errores
+- Integración con Spring Security backend
+
+---
+
+## [0.5.2] - 2026-02-03 ✅ UBICACIONES GPS COMPLETAS + ENDPOINT
+
+### Added
+- **346/347 fallas con ubicación GPS completa** (99.7% cobertura)
+  - Script mejorado `actualizar_ubicaciones_mejorado.py` con matching normalizado de nombres
+  - Solo 1 falla sin ubicación (ID 162: "Sin nombre" - creada manualmente)
+  - 1 falla de testing excluida (ID 442)
+  - Mapeo correcto de campos: JSON `geo_point_2d.{lat,lon}` → PostgreSQL `ubicacion_{lat,lon}`
+
+- **Nuevo Endpoint GET /api/fallas/{id}/ubicacion**
+  - Retorna únicamente coordenadas GPS de una falla específica
+  - Respuesta optimizada sin datos completos de la falla
+  - Campo `tieneUbicacion` para indicar disponibilidad de coordenadas
+  - Documentación con ejemplos de uso en JavaScript/Leaflet
+  - Endpoints públicos (sin autenticación requerida)
+
+- **UbicacionDTO**
+  - Nuevo DTO específico para ubicaciones geográficas
+  - Campos: idFalla, nombre, latitud, longitud, tieneUbicacion
+  - Documentación Swagger integrada
+
+### Changed
+- Configuración backend actualizada a Java 21 (compatible con Spring Boot 4.0.1)
+- Plugin Maven Compiler configurado explícitamente para Java 17
+- Backend recompilado y reiniciado con nuevos cambios
+- Guía API actualizada con ejemplos de uso del endpoint de ubicación
+
+### Technical
+- Script Python con normalización de nombres (acentos, caracteres especiales)
+- Matching flexible entre nombres de BD y JSON
+- Commits individuales por falla para tolerancia a errores
+- Verificación completa: 346 fallas con ubicacion_lat/lon IS NOT NULL
+
+### Documentation
+- GUIA.API.FRONTEND.md: Sección del endpoint `/ubicacion` con ejemplos
+- Ejemplos de integración con Leaflet.js y Google Maps
+- Scripts: actualizar_ubicaciones_fallas.py (antiguo), actualizar_ubicaciones_mejorado.py (nuevo)
+- 04.docs/ejemplos/mapa-fallas.html: Ejemplo completo de mapa interactivo
+
+### Testing
+- **test_05_ubicaciones_gps.sql**: 9 tests de integridad (SQL)
+  - Validación columnas, cobertura 99%+, rangos GPS, precisión decimal, consistencia
+- **test_api_ubicaciones.sh**: 20 tests E2E (bash)
+  - Conectividad, estructura JSON, validación datos, casos especiales, acceso público
+- **test_ubicaciones_performance.sh**: 6 tests de rendimiento (bash)
+  - Tiempo respuesta, carga secuencial, concurrencia, tamaño respuesta, carga pesada
+- Cobertura total: 35 tests nuevos (96 tests totales, 76% cobertura)
+
+---
+
+## [0.5.1] - 2026-02-03 ✅ UBICACIONES GPS
+
+### Added
+- **253 fallas con ubicación geográfica GPS** (72.9% cobertura)
+  - Campos `ubicacion_lat` y `ubicacion_lon` poblados desde JSON fuente
+  - API devuelve coordenadas en `latitud` y `longitud`
+  - Script Python `actualizar_ubicaciones_fallas.py` para actualizaciones
+  - Documentación completa en `07.datos/ACTUALIZACION.UBICACIONES.FALLAS.md`
+  
+### Changed
+- Backend reiniciado para reflejar datos de ubicación
+- Sistema operativo continuo (PostgreSQL + API sin interrupciones)
+
+### Statistics
+- Total fallas: 347
+- Con ubicación: 253 (72.9%)
+- Sin ubicación: 94 (27.1%)
+- Fuente: `falles-fallas.json` (351 registros del ayuntamiento)
+
+---
+
 ## [0.5.0] - 2026-02-02 ✅ IMPLEMENTADO
 
 ### Added

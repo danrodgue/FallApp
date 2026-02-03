@@ -739,8 +739,35 @@ open http://localhost:8080/swagger-ui.html
 - **ADRs**: [04.docs/arquitectura/](../04.docs/arquitectura/)
 - **Scripts BD**: [07.datos/scripts/](../07.datos/scripts/)
 - **Tests E2E**: [06.tests/](../06.tests/)
+- **Despliegue**: [04.docs/despliegue/](../04.docs/despliegue/)
+
+---
+
+## 🚀 Despliegue en Producción
+
+### Servicio Systemd
+
+El backend está configurado como un servicio systemd para:
+- ✅ Autoarranque al iniciar el sistema
+- ✅ Reinicio automático en caso de fallos
+- ✅ Gestión centralizada de logs
+
+**Comandos básicos:**
+```bash
+# Ver estado
+sudo systemctl status fallapp
+fallapp-status
+
+# Reiniciar servicio
+sudo systemctl restart fallapp
+
+# Ver logs en tiempo real
+sudo journalctl -u fallapp -f
+```
+
+**Documentación completa:** [SERVICIO-SYSTEMD.md](../04.docs/despliegue/SERVICIO-SYSTEMD.md)
 
 ---
 
 **Estado**: ⚠️ Funcional pero incompleto (52% de endpoints)  
-**Última actualización**: 2026-02-01
+**Última actualización**: 2026-02-02

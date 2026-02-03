@@ -290,6 +290,51 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ---
 
+#### GET /api/fallas/{id}/ubicacion - Obtener ubicación GPS de una falla
+**Autenticación:** No requerida  
+**Path Param:** `id` (Long)  
+**Descripción:** Retorna únicamente las coordenadas GPS de una falla específica. Útil para mapas y geolocalización sin cargar todos los datos de la falla.
+
+**Ejemplo:** `GET /api/fallas/95/ubicacion`
+
+**Response:**
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": {
+    "idFalla": 95,
+    "nombre": "Plaza Sant Miquel-Vicent Iborra",
+    "latitud": 39.47682454,
+    "longitud": -0.38087859,
+    "tieneUbicacion": true
+  }
+}
+```
+
+**Campos:**
+- `idFalla`: ID de la falla
+- `nombre`: Nombre de la falla
+- `latitud`: Coordenada GPS latitud (WGS84)
+- `longitud`: Coordenada GPS longitud (WGS84)
+- `tieneUbicacion`: Booleano indicando si tiene coordenadas disponibles
+
+**Ejemplo de uso en JavaScript:**
+```javascript
+async function obtenerUbicacionFalla(idFalla) {
+  const response = await fetch(`${API_BASE_URL}/api/fallas/${idFalla}/ubicacion`);
+  const data = await response.json();
+  
+  if (data.exito && data.datos.tieneUbicacion) {
+    const { latitud, longitud, nombre } = data.datos;
+    // Usar en mapa (ej: Leaflet, Google Maps)
+    mostrarEnMapa(latitud, longitud, nombre);
+  }
+}
+```
+
+---
+
 #### GET /api/fallas/buscar - Buscar fallas por texto
 **Autenticación:** No requerida  
 **Query Param:** `texto` (String)
