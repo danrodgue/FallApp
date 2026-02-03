@@ -1,0 +1,50 @@
+package com.fallapp.features.fallas.di
+
+import com.fallapp.features.fallas.data.api.FallasApiService
+import com.fallapp.features.fallas.data.repository.FallasRepositoryImpl
+import com.fallapp.features.fallas.domain.repository.FallasRepository
+import com.fallapp.features.fallas.domain.usecase.*
+import com.fallapp.features.fallas.presentation.detail.FallaDetailViewModel
+import com.fallapp.features.fallas.presentation.list.FallasListViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.dsl.module
+
+/**
+ * Módulo de Koin para la feature Fallas.
+ * Provee todas las dependencias (API, Repository, UseCases, ViewModels).
+ */
+val fallasModule = module {
+    
+    // Data Layer - API
+    single { FallasApiService(httpClient = get()) }
+    
+    // Data Layer - Repository
+    single<FallasRepository> {
+        FallasRepositoryImpl(
+            apiService = get(),
+            fallaDao = get(),
+            networkMonitor = get()
+        )
+    }
+    
+    // Domain Layer - Use Cases
+    factory { GetFallasUseCase(repository = get()) }
+    factory { GetFallaByIdUseCase(repository = get()) }
+    factory { SearchFallasUseCase(repository = get()) }
+    factory { GetFallasByCategoriaUseCase(repository = get()) }
+    
+    // Presentation Layer - ViewModels
+    viewModel {
+        FallasListViewModel(
+            getFallasUseCase = get(),
+            searchFallasUseCase = get(),
+            getFallasByCategoriaUseCase = get()
+        )
+    }
+    
+    viewModel {
+        FallaDetailViewModel(
+            getFallaByIdUseCase = get()
+        )
+    }
+}
