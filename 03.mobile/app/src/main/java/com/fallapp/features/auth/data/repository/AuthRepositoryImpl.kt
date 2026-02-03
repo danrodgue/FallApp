@@ -59,7 +59,7 @@ class AuthRepositoryImpl(
                     idUsuario = user.idUsuario,
                     email = user.email,
                     nombreCompleto = loginData.usuario.nombreCompleto,
-                    rol = Rol.valueOf(user.rol.name),
+                    rol = Rol.valueOf(user.rol.name.uppercase()),
                     idFalla = user.idFalla,
                     nombreFalla = loginData.usuario.nombreFalla,
                     ultimoAcceso = LocalDateTime.now()

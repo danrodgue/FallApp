@@ -55,7 +55,9 @@ Este módulo contiene las aplicaciones Android del proyecto FallApp:
 │   ├── 01.APP-ADMIN-SPEC.md          # Especificación App Admin
 │   ├── 02.APP-USER-SPEC.md           # Especificación App User
 │   ├── 03.PROMPT-GENERACION-IA.md    # Prompts para IA
-│   └── 04.PLANTILLA-ERRORES.md       # Registro de errores
+│   ├── 04.PLANTILLA-ERRORES.md       # Registro de errores
+│   ├── MAPA.OSM.md                   # 🗺️ Implementación de mapa con OpenStreetMap
+│   └── TEMA-COLORES.md               # 🎨 Sistema de tema y paleta de colores
 │
 ├── app/
 │   ├── src/main/
@@ -135,8 +137,12 @@ Este módulo contiene las aplicaciones Android del proyecto FallApp:
 | Base de datos local | Room |
 | DI | Koin |
 | Async | Coroutines + Flow |
-| Mapas | Google Maps Compose |
+| Mapas | **OpenStreetMap (osmdroid)** - Sin API Key |
 | Imágenes | Coil |
+
+**Ver documentación detallada:**
+- 🗺️ [Mapa con OpenStreetMap](docs/MAPA.OSM.md) - Implementación de osmdroid y marcadores personalizados
+- 🎨 [Tema y Colores](docs/TEMA-COLORES.md) - Paleta coincidente con desktop
 
 ---
 

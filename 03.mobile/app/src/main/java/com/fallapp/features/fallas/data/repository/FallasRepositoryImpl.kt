@@ -11,6 +11,7 @@ import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.repository.FallasRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlin.math.*
@@ -34,14 +35,11 @@ class FallasRepositoryImpl(
         emit(Result.Loading)
 
         try {
-            // Si hay conexión, intenta obtener desde API
-            var isConnected = false
-            networkMonitor.isConnected.collect { connected ->
-                isConnected = connected
-                return@collect
-            }
+            // Verificar conexión (usar first() en lugar de collect para no bloquearse)
+            val isConnected = networkMonitor.isConnected.first()
             
             if (isConnected && (forceRefresh || shouldRefresh())) {
+                // Hay conexión, obtener desde API
                 val dtos = apiService.getAllFallas()
                 
                 // Guarda en caché local

@@ -17,39 +17,37 @@ fun FallaDto.toDomain(): Falla {
         idFalla = idFalla,
         nombre = nombre,
         seccion = seccion,
-        categoria = Categoria.fromString(categoria),
+        categoria = Categoria.fromString(categoria ?: "sin_categoria"),
         ubicacion = Ubicacion(
-            direccion = direccion,
-            ciudad = ciudad,
-            provincia = provincia,
-            codigoPostal = codigoPostal,
+            direccion = null,  // No viene en la API
+            ciudad = "Valencia",  // Por defecto Valencia
+            provincia = "Valencia",
+            codigoPostal = null,
             latitud = latitud,
             longitud = longitud
         ),
         descripcion = descripcion,
-        historia = historia,
-        imagenes = imagenes ?: emptyList(),
+        historia = null,  // No viene en la API actual
+        imagenes = emptyList(),  // No viene en la API actual
         contacto = if (hasContactInfo()) {
             Contacto(
-                telefono = telefono,
-                email = email,
-                web = web,
-                facebook = facebook,
-                twitter = twitter,
-                instagram = instagram
+                telefono = telefonoContacto,
+                email = emailContacto,
+                web = webOficial,
+                facebook = null,
+                twitter = null,
+                instagram = null
             )
         } else null,
-        estadisticas = if (hasStatistics()) {
-            Estadisticas(
-                numeroSocios = numeroSocios ?: 0,
-                numeroNinots = numeroNinots ?: 0,
-                numeroEventos = numeroEventos ?: 0,
-                presupuestoTotal = presupuestoTotal,
-                anyoFundacion = anyoFundacion
-            )
-        } else null,
+        estadisticas = Estadisticas(
+            numeroSocios = totalMiembros,
+            numeroNinots = totalNinots,
+            numeroEventos = totalEventos,
+            presupuestoTotal = null,
+            anyoFundacion = anyoFundacion
+        ),
         fechaCreacion = fechaCreacion?.let { parseDateTime(it) },
-        activa = activa
+        activa = true  // Por defecto activa
     )
 }
 
@@ -60,26 +58,26 @@ fun FallaDto.toEntity(): FallaEntity {
         idFalla = idFalla,
         nombre = nombre,
         seccion = seccion,
-        categoria = mapDomainCategoriaToEntity(Categoria.fromString(categoria)),
-        presidente = null,
-        fallera = null,
-        artista = null,
-        anyoFundacion = anyoFundacion,
-        lema = null,
+        categoria = mapDomainCategoriaToEntity(Categoria.fromString(categoria ?: "sin_categoria")),
+        presidente = presidente ?: "Desconocido",
+        fallera = fallera,
+        artista = artista,
+        anyoFundacion = anyoFundacion ?: 0,
+        lema = lema,
         descripcion = descripcion,
-        distintivo = null,
-        experim = false,
+        distintivo = distintivo,
+        experim = experim ?: false,
         latitud = latitud ?: 0.0,
         longitud = longitud ?: 0.0,
-        webOficial = web,
-        telefonoContacto = telefono,
-        emailContacto = email,
-        urlBoceto = null,
-        totalEventos = numeroEventos ?: 0,
-        totalNinots = numeroNinots ?: 0,
-        totalMiembros = numeroSocios ?: 0,
+        webOficial = webOficial,
+        telefonoContacto = telefonoContacto,
+        emailContacto = emailContacto,
+        urlBoceto = urlBoceto,
+        totalEventos = totalEventos,
+        totalNinots = totalNinots,
+        totalMiembros = totalMiembros,
         fechaCreacion = fechaCreacion?.let { parseDateTime(it) } ?: now,
-        fechaActualizacion = now,
+        fechaActualizacion = fechaActualizacion?.let { parseDateTime(it) } ?: now,
         lastSyncTime = now
     )
 }
@@ -126,14 +124,7 @@ fun FallaEntity.toDomain(): Falla {
 
 // Helpers privados
 private fun FallaDto.hasContactInfo(): Boolean {
-    return telefono != null || email != null || web != null ||
-            facebook != null || twitter != null || instagram != null
-}
-
-private fun FallaDto.hasStatistics(): Boolean {
-    return numeroSocios != null || numeroNinots != null ||
-            numeroEventos != null || presupuestoTotal != null ||
-            anyoFundacion != null
+    return telefonoContacto != null || emailContacto != null || webOficial != null
 }
 
 private fun parseDateTime(dateString: String): LocalDateTime? {
@@ -156,6 +147,7 @@ private fun mapDomainCategoriaToEntity(domainCategoria: Categoria): EntityCatego
         Categoria.SEGUNDA -> EntityCategoria.SEGUNDA_A
         Categoria.TERCERA -> EntityCategoria.TERCERA_A
         Categoria.INFANTIL -> EntityCategoria.INFANTIL_PRIMERA
+        Categoria.SIN_CATEGORIA -> EntityCategoria.SIN_CATEGORIA
     }
 }
 
@@ -167,5 +159,6 @@ private fun mapEntityCategoriaToDomain(entityCategoria: EntityCategoria): Catego
         EntityCategoria.TERCERA_A, EntityCategoria.TERCERA_B -> Categoria.TERCERA
         EntityCategoria.CUARTA, EntityCategoria.QUINTA -> Categoria.TERCERA
         EntityCategoria.INFANTIL_ESPECIAL, EntityCategoria.INFANTIL_PRIMERA -> Categoria.INFANTIL
+        EntityCategoria.SIN_CATEGORIA -> Categoria.SIN_CATEGORIA
     }
 }

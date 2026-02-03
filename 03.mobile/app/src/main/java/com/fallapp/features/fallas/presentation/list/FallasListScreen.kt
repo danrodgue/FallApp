@@ -173,7 +173,14 @@ private fun CategoriaFilter(
             FilterChip(
                 selected = selectedCategoria == categoria,
                 onClick = { onCategoriaSelected(categoria) },
-                label = { Text(categoria.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                label = { 
+                    Text(
+                        when (categoria) {
+                            Categoria.SIN_CATEGORIA -> "Sin Categoría"
+                            else -> categoria.name.lowercase().replaceFirstChar { it.uppercase() }
+                        }
+                    ) 
+                }
             )
         }
     }

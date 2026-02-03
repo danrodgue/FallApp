@@ -1,5 +1,7 @@
 package com.fallapp.features.fallas.data.api
 
+import com.fallapp.core.network.ApiResponse
+import com.fallapp.core.network.PaginatedResponse
 import com.fallapp.features.fallas.data.dto.FallaDto
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -17,14 +19,22 @@ class FallasApiService(
     }
 
     /**
-     * Obtiene todas las fallas desde la API.
-     * GET /api/fallas
+     * Obtiene todas las fallas desde la API con paginación.
+     * GET /api/fallas?pagina=0&tamano=100
      * 
-     * @return Lista de FallaDto
+     * @param pagina número de página (0-indexed)
+     * @param tamano elementos por página
+     * @return Lista de FallaDto del contenido paginado
      * @throws Exception si hay error de red o parseo
      */
-    suspend fun getAllFallas(): List<FallaDto> {
-        return httpClient.get(BASE_PATH).body()
+    suspend fun getAllFallas(pagina: Int = 0, tamano: Int = 100): List<FallaDto> {
+        val response: ApiResponse<PaginatedResponse<FallaDto>> = httpClient.get(BASE_PATH) {
+            parameter("pagina", pagina)
+            parameter("tamano", tamano)
+        }.body()
+        
+        // Extraer el contenido de la respuesta paginada
+        return response.datos?.contenido ?: emptyList()
     }
 
     /**
@@ -37,7 +47,8 @@ class FallasApiService(
      */
     suspend fun getFallaById(id: Long): FallaDto? {
         return try {
-            httpClient.get("$BASE_PATH/$id").body()
+            val response: ApiResponse<FallaDto> = httpClient.get("$BASE_PATH/$id").body()
+            response.datos
         } catch (e: Exception) {
             null
         }

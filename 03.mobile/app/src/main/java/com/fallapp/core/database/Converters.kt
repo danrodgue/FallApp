@@ -143,7 +143,8 @@ enum class Categoria {
     CUARTA,
     QUINTA,
     INFANTIL_ESPECIAL,
-    INFANTIL_PRIMERA
+    INFANTIL_PRIMERA,
+    SIN_CATEGORIA
 }
 
 enum class TipoEvento {
@@ -170,5 +171,6 @@ enum class TipoVoto {
 enum class Rol {
     FALLERO,
     ADMIN,
-    CASAL
+    CASAL,
+    USUARIO  // Usuario regular sin falla asignada
 }

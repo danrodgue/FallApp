@@ -29,6 +29,9 @@ sealed class Screen(val route: String) {
     // Ninots
     data object NinotsList : Screen("ninots_list")
     
+    // Mapa
+    data object Map : Screen("map")
+    
     // Profile
     data object Profile : Screen("profile")
 }

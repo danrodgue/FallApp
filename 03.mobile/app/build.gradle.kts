@@ -43,6 +43,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     
     kotlinOptions {
@@ -101,10 +102,8 @@ dependencies {
     // Kotlinx Serialization
     implementation(libs.kotlinx.serialization.json)
     
-    // Google Maps
-    implementation(libs.google.maps.android)
-    implementation(libs.google.maps.compose)
-    implementation(libs.google.play.services.location)
+    // OSMDroid (OpenStreetMap - sin API key)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
     
     // Coil (Image Loading)
     implementation(libs.coil.compose)
@@ -128,4 +127,7 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    
+    // Core Library Desugaring (para java.time.* en API < 26)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

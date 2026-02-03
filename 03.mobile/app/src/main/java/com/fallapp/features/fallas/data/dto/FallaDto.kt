@@ -5,33 +5,32 @@ import kotlinx.serialization.Serializable
 /**
  * DTO para la respuesta de la API GET /api/fallas
  * Mapea exactamente la estructura JSON del backend.
+ * 
+ * Actualizado 2026-02-03 para coincidir con la respuesta real de la API.
  */
 @Serializable
 data class FallaDto(
     val idFalla: Long,
     val nombre: String,
     val seccion: String,
-    val categoria: String?,
-    val direccion: String?,
-    val ciudad: String,
-    val provincia: String,
-    val codigoPostal: String?,
-    val latitud: Double?,
-    val longitud: Double?,
-    val telefono: String?,
-    val email: String?,
-    val web: String?,
-    val facebook: String?,
-    val twitter: String?,
-    val instagram: String?,
-    val descripcion: String?,
-    val historia: String?,
-    val imagenes: List<String>? = null,
-    val numeroSocios: Int? = null,
-    val numeroNinots: Int? = null,
-    val numeroEventos: Int? = null,
-    val presupuestoTotal: Double? = null,
+    val fallera: String? = null,
+    val presidente: String? = null,
+    val artista: String? = null,
+    val lema: String? = null,
     val anyoFundacion: Int? = null,
-    val fechaCreacion: String?,
-    val activa: Boolean = true
+    val distintivo: String? = null,
+    val urlBoceto: String? = null,
+    val experim: Boolean? = null,
+    val latitud: Double? = null,
+    val longitud: Double? = null,
+    val descripcion: String? = null,
+    val webOficial: String? = null,
+    val telefonoContacto: String? = null,
+    val emailContacto: String? = null,
+    val categoria: String? = null,
+    val totalEventos: Int = 0,
+    val totalNinots: Int = 0,
+    val totalMiembros: Int = 0,
+    val fechaCreacion: String? = null,
+    val fechaActualizacion: String? = null
 )

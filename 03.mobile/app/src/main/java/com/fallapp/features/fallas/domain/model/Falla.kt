@@ -52,17 +52,20 @@ enum class Categoria {
     PRIMERA,
     SEGUNDA,
     TERCERA,
-    INFANTIL;
+    INFANTIL,
+    SIN_CATEGORIA;
 
     companion object {
         fun fromString(value: String?): Categoria {
-            return when (value?.uppercase()) {
+            return when (value?.uppercase()?.replace("-", "_")) {
                 "ESPECIAL" -> ESPECIAL
                 "PRIMERA", "PRIMERA_A", "PRIMERA_B" -> PRIMERA
                 "SEGUNDA", "SEGUNDA_A", "SEGUNDA_B" -> SEGUNDA
                 "TERCERA", "TERCERA_A", "TERCERA_B" -> TERCERA
                 "INFANTIL" -> INFANTIL
-                else -> TERCERA
+                "SIN_CATEGORIA", "SINCATEGORIA" -> SIN_CATEGORIA
+                null, "" -> SIN_CATEGORIA
+                else -> SIN_CATEGORIA
             }
         }
     }

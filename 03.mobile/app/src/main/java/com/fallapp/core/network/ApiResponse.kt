@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
  * @property exito Indica si la operación fue exitosa
  * @property mensaje Mensaje descriptivo de la operación
  * @property datos Datos de respuesta (null en caso de error)
- * @property timestamp Timestamp ISO 8601 de la respuesta
+ * @property timestamp Timestamp ISO 8601 de la respuesta (opcional)
  * 
  * @author Equipo FallApp
  * @since 1.0.0
@@ -29,7 +29,7 @@ data class ApiResponse<T>(
     val exito: Boolean,
     val mensaje: String? = null,
     val datos: T? = null,
-    val timestamp: String
+    val timestamp: String? = null
 )
 
 /**

@@ -6,10 +6,12 @@ import com.fallapp.core.di.databaseModule
 import com.fallapp.core.di.networkModule
 import com.fallapp.features.auth.di.authModule
 import com.fallapp.features.fallas.di.fallasModule
+import com.fallapp.features.map.di.mapModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
+import com.fallapp.user.BuildConfig
 
 /**
  * Clase principal de la aplicación FallApp User.
@@ -41,7 +43,8 @@ class FallAppApplication : Application() {
                 databaseModule,
                 appModule,
                 authModule,    // ← Auth feature module
-                fallasModule   // ← Fallas feature module
+                fallasModule,  // ← Fallas feature module
+                mapModule      // ← Map feature module
             )
         }
     }

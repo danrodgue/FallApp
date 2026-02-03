@@ -22,6 +22,7 @@ import com.fallapp.features.auth.presentation.login.LoginScreen
 import com.fallapp.features.auth.presentation.register.RegisterScreen
 import com.fallapp.features.fallas.presentation.detail.FallaDetailScreen
 import com.fallapp.features.fallas.presentation.list.FallasListScreen
+import com.fallapp.features.map.presentation.MapScreen
 
 /**
  * Grafo de navegación principal de la aplicación.
@@ -79,6 +80,9 @@ fun NavGraph(
                 },
                 onViewFallas = {
                     navController.navigate(Screen.FallasList.route)
+                },
+                onViewMap = {
+                    navController.navigate(Screen.Map.route)
                 }
             )
         }
@@ -107,6 +111,18 @@ fun NavGraph(
                 )
             }
         }
+        
+        // Mapa de Fallas
+        composable(Screen.Map.route) {
+            MapScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onFallaClick = { fallaId ->
+                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                }
+            )
+        }
     }
 }
 
@@ -116,7 +132,8 @@ fun NavGraph(
 @Composable
 private fun HomeScreenPlaceholder(
     onLogout: () -> Unit,
-    onViewFallas: () -> Unit
+    onViewFallas: () -> Unit,
+    onViewMap: () -> Unit
 ) {
     Scaffold { padding ->
         Box(
@@ -142,6 +159,10 @@ private fun HomeScreenPlaceholder(
                 
                 Button(onClick = onViewFallas) {
                     Text("Ver Fallas")
+                }
+                
+                Button(onClick = onViewMap) {
+                    Text("Ver Mapa")
                 }
                 
                 Button(onClick = onLogout) {
