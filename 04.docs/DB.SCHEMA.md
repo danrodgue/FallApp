@@ -1,9 +1,40 @@
 # 🗄️ Esquema de Base de Datos - FallApp
 
 **Base de Datos:** PostgreSQL 13  
-**Fecha de Actualización:** 2026-02-03  
+**Fecha de Actualización:** 2026-02-04  
 **Total de Tablas:** 7  
-**Versión del Esquema:** 1.0
+**Versión del Esquema:** 1.1  
+**Última Migración:** Reestructuración completa de FALLAS + nuevos campos USUARIOS
+
+---
+
+## ✅ Actualización 2026-02-04
+
+### Cambios Aplicados:
+
+1. **TABLA FALLAS - Reestructuración Completa**
+   - ✅ Eliminados 347 registros antiguos con NULLs
+   - ✅ Insertados 351 registros completos del JSON original
+   - ✅ 100% de fallas con coordenadas GPS (antes 99.71%)
+   - ✅ 91.2% con fallera mayor o infantil asignada
+   - ✅ Campos lema, artista, distintivo completados
+
+2. **TABLA USUARIOS - Nuevos Campos**
+   - ✅ `direccion` VARCHAR(255)
+   - ✅ `ciudad` VARCHAR(100)
+   - ✅ `codigo_postal` VARCHAR(10)
+   - ✅ Índice agregado: `idx_usuarios_ciudad`
+
+### Estadísticas Actuales:
+
+| Tabla | Registros | Completitud GPS | Datos Completos |
+|-------|-----------|-----------------|-----------------|
+| FALLAS | 351 | 100% (351/351) | 98.5% promedio |
+| USUARIOS | 13 | N/A | 100% (campos obligatorios) |
+| NINOTS | 346 | N/A | 100% |
+| EVENTOS | 0 | N/A | - |
+| VOTOS | 0 | N/A | - |
+| COMENTARIOS | 0 | N/A | - |
 
 ---
 
@@ -113,12 +144,13 @@ erDiagram
 ```
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                    BASE DE DATOS: fallapp (PostgreSQL 13)                 ║
-║                              7 Tablas - 706 Registros                     ║
+║                              7 Tablas - 710 Registros                     ║
+║                        ✅ Actualizado: 2026-02-04                         ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
                                  ┏━━━━━━━━━━━┓
                         ┌────────┨  FALLAS   ┠────────┐
-                        │        ┃ [347 reg] ┃        │
+                        │        ┃ [351 reg] ┃        │
                         │        ┗━━━━━┯━━━━━┛        │
                         │              │              │
          ┌──────────────┴───┐      ┌──┴───┐     ┌────┴─────┐
@@ -142,8 +174,8 @@ erDiagram
 
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║ RELACIONES PRINCIPALES:                                                   ║
-║  • FALLAS: Tabla central (1:N con todas las demás)                       ║
-║  • USUARIOS: Asociados a fallas, crean eventos y comentarios             ║
+║  • FALLAS: Tabla central - 351 registros con 100% GPS                    ║
+║  • USUARIOS: 13 registros, nuevos campos de dirección añadidos           ║
 ║  • COMENTARIOS: Pueden responder a otros comentarios (árbol)             ║
 ║  • VOTOS: Únicos por usuario+falla+tipo                                  ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
@@ -155,8 +187,8 @@ erDiagram
 
 ```mermaid
 graph TB
-    F[🎭 FALLAS<br/>347 registros<br/>Tabla Central]
-    U[👥 USUARIOS<br/>13 registros]
+    F[🎭 FALLAS<br/>351 registros<br/>Tabla Central<br/>✅ 100% GPS]
+    U[👥 USUARIOS<br/>13 registros<br/>+ Nuevos campos dirección]
     E[📅 EVENTOS<br/>0 registros]
     N[🎨 NINOTS<br/>346 registros]
     C[💬 COMENTARIOS<br/>0 registros]

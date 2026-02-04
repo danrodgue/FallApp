@@ -104,6 +104,7 @@ public class UsuarioService {
 
     /**
      * Convertir entidad a DTO (público para uso en controllers)
+     * Actualizado: 2026-02-04 - Incluye nuevos campos de dirección
      */
     public UsuarioDTO convertirADTO(Usuario usuario) {
         return UsuarioDTO.builder()
@@ -114,6 +115,10 @@ public class UsuarioService {
                 .idFalla(usuario.getFalla() != null ? usuario.getFalla().getIdFalla() : null)
                 .nombreFalla(usuario.getFalla() != null ? usuario.getFalla().getNombre() : null)
                 .activo(usuario.getActivo())
+                .telefono(usuario.getTelefono())
+                .direccion(usuario.getDireccion())
+                .ciudad(usuario.getCiudad())
+                .codigoPostal(usuario.getCodigoPostal())
                 .fechaCreacion(usuario.getFechaRegistro())
                 .fechaActualizacion(usuario.getUltimoAcceso())
                 .build();

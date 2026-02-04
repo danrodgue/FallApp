@@ -113,19 +113,28 @@ public class FallaService {
     }
 
     /**
-     * Convertir entidad a DTO
+     * Convertir entidad a DTO con TODOS los campos
+     * Actualizado: 2026-02-04 - Incluye todos los campos del JSON original
      */
     private FallaDTO convertirADTO(Falla falla) {
         return FallaDTO.builder()
                 .idFalla(falla.getIdFalla())
                 .nombre(falla.getNombre())
                 .seccion(falla.getSeccion())
+                .fallera(falla.getFallera())
                 .presidente(falla.getPresidente())
                 .artista(falla.getArtista())
                 .lema(falla.getLema())
                 .anyoFundacion(falla.getAnyoFundacion())
+                .distintivo(falla.getDistintivo())
+                .urlBoceto(falla.getUrlBoceto())
+                .experim(falla.getExperim())
                 .latitud(falla.getUbicacionLat() != null ? falla.getUbicacionLat().doubleValue() : null)
                 .longitud(falla.getUbicacionLon() != null ? falla.getUbicacionLon().doubleValue() : null)
+                .descripcion(falla.getDescripcion())
+                .webOficial(falla.getWebOficial())
+                .telefonoContacto(falla.getTelefonoContacto())
+                .emailContacto(falla.getEmailContacto())
                 .categoria(falla.getCategoria() != null ? falla.getCategoria().name() : null)
                 .totalEventos(falla.getEventos() != null ? falla.getEventos().size() : 0)
                 .totalNinots(falla.getNinots() != null ? falla.getNinots().size() : 0)
