@@ -14,6 +14,9 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     
+    // Main Screen con Bottom Navigation
+    data object Main : Screen("main")
+    
     // Main
     data object Home : Screen("home")
     

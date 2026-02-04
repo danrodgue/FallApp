@@ -139,7 +139,31 @@ private fun parseDateTime(dateString: String): LocalDateTime? {
     }
 }
 
-// Mapeo entre enums Domain y Entity
+// ========== MAPPERS DE VOTOS ==========
+
+// DTO -> Domain Model
+fun VotoDto.toDomain(): com.fallapp.features.fallas.domain.model.Voto {
+    return com.fallapp.features.fallas.domain.model.Voto(
+        idVoto = idVoto,
+        idUsuario = idUsuario,
+        nombreUsuario = nombreUsuario,
+        idFalla = idFalla,
+        nombreFalla = nombreFalla,
+        tipoVoto = com.fallapp.features.fallas.domain.model.TipoVoto.valueOf(tipoVoto),
+        fechaCreacion = parseDateTime(fechaCreacion)
+    )
+}
+
+// Domain Model -> DTO Request
+fun com.fallapp.features.fallas.domain.model.VotoRequest.toDto(): VotoRequestDto {
+    return VotoRequestDto(
+        idNinot = idNinot,
+        tipoVoto = tipoVoto.name
+    )
+}
+
+// ========== MAPEO ENTRE ENUMS ==========
+
 private fun mapDomainCategoriaToEntity(domainCategoria: Categoria): EntityCategoria {
     return when (domainCategoria) {
         Categoria.ESPECIAL -> EntityCategoria.ESPECIAL

@@ -48,7 +48,8 @@ fun NavGraph(
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    // Navegar a la pantalla principal con bottom navigation
+                    navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
@@ -68,6 +69,11 @@ fun NavGraph(
                     navController.popBackStack()
                 }
             )
+        }
+        
+        // Main Screen con Bottom Navigation
+        composable(Screen.Main.route) {
+            MainScreen(navController = navController)
         }
         
         // Home (placeholder por ahora)

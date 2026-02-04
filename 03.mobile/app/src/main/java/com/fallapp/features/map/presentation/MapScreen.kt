@@ -52,6 +52,8 @@ import org.osmdroid.views.overlay.Marker
 fun MapScreen(
     onBackClick: () -> Unit,
     onFallaClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    hideBackButton: Boolean = false,
     viewModel: MapViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -72,12 +74,15 @@ fun MapScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text("Mapa de Fallas") },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, "Volver")
+                    if (!hideBackButton) {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, "Volver")
+                        }
                     }
                 }
             )
