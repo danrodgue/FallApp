@@ -2,6 +2,7 @@ package com.fallapp.service;
 
 import com.fallapp.dto.FallaDTO;
 import com.fallapp.dto.PaginatedResponse;
+import com.fallapp.dto.UbicacionDTO;
 import com.fallapp.model.Falla;
 import com.fallapp.exception.ResourceNotFoundException;
 import com.fallapp.repository.FallaRepository;
@@ -87,6 +88,28 @@ public class FallaService {
         Page<Falla> page = fallaRepository.findByCategoria(cat, pageable);
         
         return construirRespuestaPaginada(page);
+    }
+
+    /**
+     * Obtener ubicación GPS de una falla por su ID
+     * 
+     * @param id ID de la falla
+     * @return DTO con datos de ubicación (latitud, longitud)
+     * @throws ResourceNotFoundException si la falla no existe
+     */
+    public UbicacionDTO obtenerUbicacion(Long id) {
+        Falla falla = fallaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", id));
+        
+        boolean tieneUbicacion = falla.getUbicacionLat() != null && falla.getUbicacionLon() != null;
+        
+        return UbicacionDTO.builder()
+                .idFalla(falla.getIdFalla())
+                .nombre(falla.getNombre())
+                .latitud(falla.getUbicacionLat() != null ? falla.getUbicacionLat().doubleValue() : null)
+                .longitud(falla.getUbicacionLon() != null ? falla.getUbicacionLon().doubleValue() : null)
+                .tieneUbicacion(tieneUbicacion)
+                .build();
     }
 
     /**

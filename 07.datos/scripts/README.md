@@ -249,13 +249,57 @@ CREATE EXTENSION unaccent;
 EOF
 ```
 
+---
+
+## 🐍 Scripts Python - Gestión de Datos
+
+### `actualizar_ubicaciones_fallas.py` ✅ (Ejecutar después de cargar datos)
+
+**Actualización de coordenadas GPS de fallas desde JSON fuente**
+
+**Requisitos**:
+- Python 3
+- psycopg2-binary: `pip3 install psycopg2-binary`
+- PostgreSQL corriendo (Docker)
+- Archivo: `07.datos/raw/falles-fallas.json`
+
+**Ejecución**:
+```bash
+cd /srv/FallApp
+python3 07.datos/scripts/actualizar_ubicaciones_fallas.py
+```
+
+**Resultado**:
+- ✅ **253 fallas actualizadas** con ubicación GPS (72.9% cobertura)
+- ✅ Commits individuales (idempotente y seguro)
+- ✅ Reporte detallado de estadísticas
+
+**Verificación**:
+```bash
+# En Base de Datos
+docker exec fallapp-postgres psql -U fallapp_user -d fallapp -c \
+  "SELECT COUNT(*) FROM fallas WHERE ubicacion_lat IS NOT NULL;"
+
+# En API
+curl -s http://localhost:8080/api/fallas/95 | jq '.datos | {lat: .latitud, lon: .longitud}'
+```
+
+**Documentación completa**: [../ACTUALIZACION.UBICACIONES.FALLAS.md](../ACTUALIZACION.UBICACIONES.FALLAS.md)
+
+**Estado actual**:
+- Total fallas: 347
+- Con ubicación: 253 (72.9%)
+- Sin ubicación: 94 (27.1%)
+- Fuente: OpenData Valencia (351 registros)
+
+---
+
 ## 📚 Referencias
 
 - [Documentación de Base de Datos](../especificaciones/03.BASE.DATOS.md)
 - [Nomenclatura de Ficheros](../NOMENCLATURA.FICHEROS.md)
 - [Docker Compose Config](../../05.docker/README.md)
 - [PostgreSQL Docs](https://www.postgresql.org/docs/13/)
-
-## 👤 Autoría
+- [Actualización Ubicaciones GPS](../ACTUALIZACION.UBICACIONES.FALLAS.md) ⭐ **NUEVO**
 
 Scripts creados para FallApp - Plataforma de Fallas Falleras de Valencia

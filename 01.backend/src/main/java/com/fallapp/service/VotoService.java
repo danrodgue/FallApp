@@ -2,6 +2,7 @@ package com.fallapp.service;
 
 import com.fallapp.dto.VotoDTO;
 import com.fallapp.dto.CrearVotoRequest;
+import com.fallapp.model.Falla;
 import com.fallapp.model.Ninot;
 import com.fallapp.model.Usuario;
 import com.fallapp.model.Voto;
@@ -42,16 +43,20 @@ public class VotoService {
         Ninot ninot = ninotRepository.findById(request.getIdNinot())
                 .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", request.getIdNinot()));
 
-        // Verificar que el usuario no haya votado ya este ninot con este tipo
+        // Verificar que el usuario no haya votado ya esta falla con este tipo
         Voto.TipoVoto tipo = Voto.TipoVoto.valueOf(request.getTipoVoto());
-        if (votoRepository.existsByUsuarioAndNinotAndTipoVoto(usuario, ninot, tipo)) {
-            throw new BadRequestException("Ya has votado este ninot con el tipo: " + request.getTipoVoto());
+        Falla falla = ninotRepository.findById(request.getIdNinot())
+                .map(Ninot::getFalla)
+                .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", request.getIdNinot()));
+        
+        if (votoRepository.existsByUsuarioAndFallaAndTipoVoto(usuario, falla, tipo)) {
+            throw new BadRequestException("Ya has votado esta falla con el tipo: " + request.getTipoVoto());
         }
 
         // Crear el voto
         Voto voto = new Voto();
         voto.setUsuario(usuario);
-        voto.setNinot(ninot);
+        voto.setFalla(falla);
         voto.setTipoVoto(tipo);
 
         Voto guardado = votoRepository.save(voto);
@@ -79,8 +84,9 @@ public class VotoService {
     public List<VotoDTO> obtenerVotosNinot(Long idNinot) {
         Ninot ninot = ninotRepository.findById(idNinot)
                 .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", idNinot));
+        Falla falla = ninot.getFalla();
         
-        return votoRepository.findByNinot(ninot, Pageable.unpaged())
+        return votoRepository.findByFalla(falla, Pageable.unpaged())
                 .stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
@@ -109,8 +115,8 @@ public class VotoService {
                 .idVoto(voto.getIdVoto())
                 .idUsuario(voto.getUsuario().getIdUsuario())
                 .nombreUsuario(voto.getUsuario().getNombreCompleto())
-                .idNinot(voto.getNinot().getIdNinot())
-                .nombreNinot(voto.getNinot().getNombreNinot())
+                .idFalla(voto.getFalla().getIdFalla())
+                .nombreFalla(voto.getFalla().getNombre())
                 .tipoVoto(voto.getTipoVoto().name())
                 .fechaCreacion(voto.getCreadoEn())
                 .build();

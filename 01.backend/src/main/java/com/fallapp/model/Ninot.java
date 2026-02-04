@@ -7,15 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Entidad Ninot
+ * Entidad Ninot (Versión Simplificada v2.0)
  * Tabla: ninots
+ * 
+ * Propósito: Almacenar imágenes de ninots/bocetos asociados a fallas
+ * Nota: Solo contiene campos con datos reales disponibles
+ * 
+ * @version 2.0
+ * @since 2026-02-02
  */
 @Entity
 @Table(name = "ninots")
@@ -34,59 +38,14 @@ public class Ninot {
     @NotNull(message = "La falla es obligatoria")
     private Falla falla;
 
-    @Column(name = "nombre_ninot", nullable = false, length = 255)
-    @NotBlank(message = "El nombre del ninot es obligatorio")
-    private String nombreNinot;
+    @Column(name = "nombre", length = 255)
+    private String nombre;  // Opcional
 
-    @Column(name = "titulo_obra", nullable = false, length = 255)
-    @NotBlank(message = "El título de la obra es obligatorio")
-    private String tituloObra;
-
-    @Column(name = "descripcion", columnDefinition = "TEXT")
-    private String descripcion;
-
-    @Column(name = "altura_metros", precision = 6, scale = 2)
-    private BigDecimal alturaMetros;
-
-    @Column(name = "ancho_metros", precision = 6, scale = 2)
-    private BigDecimal anchoMetros;
-
-    @Column(name = "material_principal", length = 100)
-    private String materialPrincipal;
-
-    @Column(name = "url_imagen_principal", length = 500)
-    private String urlImagenPrincipal;
-
-    @Column(name = "url_imagenes_adicionales", columnDefinition = "TEXT[]")
-    private String[] urlImagenesAdicionales;
-
-    @Column(name = "artista_constructor", length = 255)
-    private String artistaConstructor;
-
-    @Column(name = "año_construccion")
-    private Integer anyoConstruccion;
-
-    @Column(name = "premiado", nullable = false)
-    private Boolean premiado = false;
-
-    @Column(name = "categoria_premio", length = 100)
-    private String categoriaPremio;
-
-    @Column(name = "notas_tecnicas", columnDefinition = "TEXT")
-    private String notasTecnicas;
+    @Column(name = "url_imagen", nullable = false, length = 500)
+    @NotBlank(message = "La URL de la imagen es obligatoria")
+    private String urlImagen;
 
     @CreationTimestamp
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
-    private LocalDateTime creadoEn;
-
-    @UpdateTimestamp
-    @Column(name = "actualizado_en")
-    private LocalDateTime actualizadoEn;
-
-    // Relaciones
-    @OneToMany(mappedBy = "ninot", cascade = CascadeType.ALL, orphanRemoval = false)
-    private List<Voto> votos;
-
-    @OneToMany(mappedBy = "ninot", cascade = CascadeType.ALL, orphanRemoval = false)
-    private List<Comentario> comentarios;
+    private LocalDateTime fechaCreacion;
 }

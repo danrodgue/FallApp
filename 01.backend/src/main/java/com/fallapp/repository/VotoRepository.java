@@ -1,6 +1,6 @@
 package com.fallapp.repository;
 
-import com.fallapp.model.Ninot;
+import com.fallapp.model.Falla;
 import com.fallapp.model.Usuario;
 import com.fallapp.model.Voto;
 import org.springframework.data.domain.Page;
@@ -25,9 +25,9 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     Page<Voto> findByUsuario(Usuario usuario, Pageable pageable);
 
     /**
-     * Buscar votos por ninot
+     * Buscar votos por falla
      */
-    Page<Voto> findByNinot(Ninot ninot, Pageable pageable);
+    Page<Voto> findByFalla(Falla falla, Pageable pageable);
 
     /**
      * Buscar votos por tipo
@@ -35,25 +35,25 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     Page<Voto> findByTipoVoto(Voto.TipoVoto tipoVoto, Pageable pageable);
 
     /**
-     * Buscar voto específico de usuario a ninot con tipo
+     * Buscar voto específico de usuario a falla con tipo
      */
-    Optional<Voto> findByUsuarioAndNinotAndTipoVoto(
+    Optional<Voto> findByUsuarioAndFallaAndTipoVoto(
             Usuario usuario, 
-            Ninot ninot, 
+            Falla falla, 
             Voto.TipoVoto tipoVoto);
 
     /**
-     * Verificar si usuario ya votó ninot con tipo específico
+     * Verificar si usuario ya votó falla con tipo específico
      */
-    boolean existsByUsuarioAndNinotAndTipoVoto(
+    boolean existsByUsuarioAndFallaAndTipoVoto(
             Usuario usuario, 
-            Ninot ninot, 
+            Falla falla, 
             Voto.TipoVoto tipoVoto);
 
     /**
-     * Contar votos por ninot
+     * Contar votos por falla
      */
-    long countByNinot(Ninot ninot);
+    long countByFalla(Falla falla);
 
     /**
      * Contar votos por tipo

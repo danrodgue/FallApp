@@ -1,0 +1,142 @@
+package com.fallapp.core.navigation
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.fallapp.features.fallas.presentation.list.FallasListScreen
+import com.fallapp.features.map.presentation.MapScreen
+import com.fallapp.features.votos.presentation.VotosScreen
+
+/**
+ * Pantalla principal con Bottom Navigation Bar.
+ * 
+ * Contiene las principales secciones de la app:
+ * - Mapa
+ * - Lista de Fallas
+ * - Home
+ * - Perfil
+ */
+@Composable
+fun MainScreen(
+    navController: NavHostController
+) {
+    var selectedItem by rememberSaveable { mutableIntStateOf(0) }
+    
+    val items = listOf(
+        BottomNavItem("Mapa", Icons.Default.LocationOn),
+        BottomNavItem("Fallas", Icons.Default.List),
+        BottomNavItem("Votos", Icons.Default.Star),
+        BottomNavItem("Perfil", Icons.Default.Person)
+    )
+    
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                items.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.label) },
+                        label = { Text(item.label) },
+                        selected = selectedItem == index,
+                        onClick = { selectedItem = index }
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        when (selectedItem) {
+            0 -> MapScreen(
+                onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
+                onFallaClick = { fallaId ->
+                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                },
+                modifier = Modifier.padding(padding),
+                hideBackButton = true
+            )
+            1 -> FallasListScreen(
+                onFallaClick = { fallaId ->
+                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                },
+                onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
+                modifier = Modifier.padding(padding),
+                hideBackButton = true
+            )
+            2 -> VotosScreen(
+                onFallaClick = { fallaId ->
+                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                },
+                modifier = Modifier.padding(padding)
+            )
+            3 -> ProfileTab(
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                modifier = Modifier.padding(padding)
+            )
+        }
+    }
+}
+
+/**
+ * Item de Bottom Navigation.
+ */
+private data class BottomNavItem(
+    val label: String,
+    val icon: ImageVector
+)
+
+/**
+ * Tab de Perfil (placeholder).
+ */
+@Composable
+private fun ProfileTab(
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Perfil de Usuario",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(
+                text = "Información del usuario aparecerá aquí",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Button(onClick = onLogout) {
+                Text("Cerrar Sesión")
+            }
+        }
+    }
+}
