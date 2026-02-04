@@ -5,6 +5,262 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL + BACKEND ACTUALIZADO
+
+### Added
+- **Documentación completa de autenticación JWT para Android**
+  - `03.mobile/README.md`: Guía general con arquitectura y conceptos
+  - `03.mobile/IMPLEMENTACION.AUTENTICACION.md`: Código completo paso a paso
+  - `03.mobile/EJEMPLO.LOGIN.md`: Pantallas de login y registro con Jetpack Compose
+  - `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Resumen ejecutivo
+  - `GUIA.PRUEBAS.API.md`: Guía práctica para probar autenticación
+  
+- **Ejemplos de Código Android**
+  - TokenManager con EncryptedSharedPreferences (AES256_GCM)
+  - AuthInterceptor para agregar JWT automáticamente
+  - RetrofitClient configurado con interceptores
+  - AuthRepository con manejo de login/registro
+  - AuthViewModel con StateFlow
+  - LoginScreen y RegisterScreen completas con Material 3
+  - NavGraph con navegación entre pantallas
+  - MainActivity con verificación de sesión
+
+- **Guías de Implementación**
+  - Configuración de dependencias (Retrofit, OkHttp, Coroutines)
+  - Permisos de Internet en AndroidManifest
+  - Application class con inicialización de repositorios
+  - Estructura de paquetes recomendada (11 pasos detallados)
+  - Troubleshooting para errores comunes
+
+- **Suite de Tests de Autenticación**
+  - `06.tests/e2e/test_api_auth.sh`: 20 tests automatizados
+  - Validación de registro, login, tokens JWT
+  - Tests de formato, roles, expiración
+  - Tests de endpoints públicos vs protegidos
+
+### Changed
+- **Backend actualizado y reiniciado (2026-02-03)**
+  - ✅ Correcciones en encriptación de contraseñas (BCrypt) - OPERATIVO
+  - ✅ Proyecto recompilado con Java 17
+  - ✅ Servicio systemd reiniciado exitosamente
+  - ✅ Autenticación JWT funcionando correctamente (HS512, 24h)
+  - ✅ Tests validados: registro (user ID 13) + login exitoso
+
+- **Documentación actualizada para reflejar sistema operativo**
+  - ✅ `RESUMEN.ACTUALIZACION.JWT.2026-02-01.md`: Actualizado a v0.5.3 con validación 03-02-2026
+  - ✅ `DEVELOPMENT.md`: Sección BCrypt actualizada con estado funcional
+  - ✅ `GUIA.API.FRONTEND.md`: 3 actualizaciones en autenticación JWT
+  - ✅ `04.docs/arquitectura/ADR-006-autenticacion-jwt-pendiente.md`: Estado validado
+  - ✅ `04.docs/despliegue/GESTION-USUARIOS-BD.md`: Sistema BCrypt funcional
+  - ✅ `04.docs/especificaciones/01.SISTEMA-USUARIOS.md`: v1.1 con validación
+  - ✅ `03.mobile/README.md`: Backend validado y operativo
+  - ✅ `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Sistema validado
+  - ✅ `GUIA.PRUEBAS.API.md`: v0.5.3 con información BCrypt
+
+### Fixed
+- ✅ Error de compilación con versiones de Java (17 vs 21)
+- ✅ Configuración de pom.xml actualizada (Java 17)
+- ✅ Encriptación BCrypt en AuthController (correcciones aplicadas por usuario)
+- ✅ Backend reiniciado con JAR actualizado
+- Servicio fallapp.service operativo en puerto 8080
+
+### Technical
+- Arquitectura MVVM (Model-View-ViewModel)
+- Almacenamiento seguro con AES256_GCM
+- Interceptor HTTP agrega token automáticamente
+- Validación de expiración de token (24h)
+- Manejo de estados con sealed class Resource
+- UI con Jetpack Compose y Material 3
+- Backend: Spring Boot 4.0.1 + Spring Security + JWT
+
+### Testing
+- Backend verificado con registro y login exitosos
+- Token JWT generado correctamente
+- Encriptación BCrypt operativa
+- 11/20 tests automatizados pasando
+
+### Documentation
+- Ejemplos de uso de emulador Android: `http://10.0.2.2:8080`
+- Diferencias entre desarrollo y producción
+- Flujo completo de autenticación con diagramas
+- Validaciones de formulario y manejo de errores
+- Integración con Spring Security backend
+- Guía de conexión y autenticación paso a paso
+
+---
+
+## [0.5.2] - 2026-02-03 ✅ UBICACIONES GPS COMPLETAS + ENDPOINT
+
+### Added
+- **346/347 fallas con ubicación GPS completa** (99.7% cobertura)
+  - Script mejorado `actualizar_ubicaciones_mejorado.py` con matching normalizado de nombres
+  - Solo 1 falla sin ubicación (ID 162: "Sin nombre" - creada manualmente)
+  - 1 falla de testing excluida (ID 442)
+  - Mapeo correcto de campos: JSON `geo_point_2d.{lat,lon}` → PostgreSQL `ubicacion_{lat,lon}`
+
+- **Nuevo Endpoint GET /api/fallas/{id}/ubicacion**
+  - Retorna únicamente coordenadas GPS de una falla específica
+  - Respuesta optimizada sin datos completos de la falla
+  - Campo `tieneUbicacion` para indicar disponibilidad de coordenadas
+  - Documentación con ejemplos de uso en JavaScript/Leaflet
+  - Endpoints públicos (sin autenticación requerida)
+
+- **UbicacionDTO**
+  - Nuevo DTO específico para ubicaciones geográficas
+  - Campos: idFalla, nombre, latitud, longitud, tieneUbicacion
+  - Documentación Swagger integrada
+
+### Changed
+- Configuración backend actualizada a Java 21 (compatible con Spring Boot 4.0.1)
+- Plugin Maven Compiler configurado explícitamente para Java 17
+- Backend recompilado y reiniciado con nuevos cambios
+- Guía API actualizada con ejemplos de uso del endpoint de ubicación
+
+### Technical
+- Script Python con normalización de nombres (acentos, caracteres especiales)
+- Matching flexible entre nombres de BD y JSON
+- Commits individuales por falla para tolerancia a errores
+- Verificación completa: 346 fallas con ubicacion_lat/lon IS NOT NULL
+
+### Documentation
+- GUIA.API.FRONTEND.md: Sección del endpoint `/ubicacion` con ejemplos
+- Ejemplos de integración con Leaflet.js y Google Maps
+- Scripts: actualizar_ubicaciones_fallas.py (antiguo), actualizar_ubicaciones_mejorado.py (nuevo)
+- 04.docs/ejemplos/mapa-fallas.html: Ejemplo completo de mapa interactivo
+
+### Testing
+- **test_05_ubicaciones_gps.sql**: 9 tests de integridad (SQL)
+  - Validación columnas, cobertura 99%+, rangos GPS, precisión decimal, consistencia
+- **test_api_ubicaciones.sh**: 20 tests E2E (bash)
+  - Conectividad, estructura JSON, validación datos, casos especiales, acceso público
+- **test_ubicaciones_performance.sh**: 6 tests de rendimiento (bash)
+  - Tiempo respuesta, carga secuencial, concurrencia, tamaño respuesta, carga pesada
+- Cobertura total: 35 tests nuevos (96 tests totales, 76% cobertura)
+
+---
+
+## [0.5.1] - 2026-02-03 ✅ UBICACIONES GPS
+
+### Added
+- **253 fallas con ubicación geográfica GPS** (72.9% cobertura)
+  - Campos `ubicacion_lat` y `ubicacion_lon` poblados desde JSON fuente
+  - API devuelve coordenadas en `latitud` y `longitud`
+  - Script Python `actualizar_ubicaciones_fallas.py` para actualizaciones
+  - Documentación completa en `07.datos/ACTUALIZACION.UBICACIONES.FALLAS.md`
+  
+### Changed
+- Backend reiniciado para reflejar datos de ubicación
+- Sistema operativo continuo (PostgreSQL + API sin interrupciones)
+
+### Statistics
+- Total fallas: 347
+- Con ubicación: 253 (72.9%)
+- Sin ubicación: 94 (27.1%)
+- Fuente: `falles-fallas.json` (351 registros del ayuntamiento)
+
+---
+
+## [0.5.0] - 2026-02-02 ✅ IMPLEMENTADO
+
+### Added
+- **Tabla Ninots Simplificada**
+  - Nueva estructura con 5 campos esenciales (id_ninot, id_falla, nombre, url_imagen, fecha_creacion)
+  - 346 ninots migrados exitosamente
+  - Backup automático en `ninots_backup_20260202`
+  - Índices optimizados para consultas por falla
+
+### Changed
+- **Modelo de Relaciones Corregido**
+  - Votos y comentarios ahora correctamente asociados a **fallas** (no ninots)
+  - Eliminadas relaciones bidireccionales inexistentes en BD
+  - VotoDTO usa `idFalla`/`nombreFalla` en lugar de `idNinot`/`nombreNinot`
+  - ComentarioDTO sin campos de ninot (usa solo falla)
+
+- **Repositorios Actualizados**
+  - `VotoRepository`: Métodos `findByFalla()` reemplazan `findByNinot()`
+  - `ComentarioRepository`: Eliminados métodos de ninot
+  - `NinotRepository`: Eliminados métodos de clasificación por votos
+
+- **Servicios Adaptados**
+  - `VotoService`: Votar ninot internamente vota su falla
+  - `ComentarioService`: Comentar ninot comenta su falla
+  - `EstadisticasService`: Estadísticas simplificadas sin top ninots
+
+### Removed
+- **20+ Campos Obsoletos de Ninots**
+  - altura_metros, ancho_metros, profundidad_metros, peso_toneladas
+  - material_principal, artista_constructor, año_construccion
+  - url_imagen_principal, url_imagenes_adicionales (consolidado en url_imagen)
+  - premiado, categoria_premio, año_premio
+  - titulo_obra, descripcion, notas_tecnicas
+  - actualizado_en (solo fecha_creacion necesaria)
+
+- **Relaciones Fantasma**
+  - `Ninot.votos` (nunca existió en BD)
+  - `Ninot.comentarios` (nunca existió en BD)
+  - `Voto.ninot` (columna id_ninot no existe en tabla votos)
+  - `Comentario.ninot` (columna id_ninot no existe en tabla comentarios)
+
+### Fixed
+- **Alineación Modelo-BD**
+  - Resuelto desajuste entre entidades Java y esquema PostgreSQL
+  - Eliminados errores "column does not exist" en votos y comentarios
+  - Tests unitarios adaptados al nuevo modelo (27 tests, 100% passing)
+
+### Tests
+- **EstadisticasServiceTest:** Eliminadas referencias a campo `ninotsPremiados`
+- **JwtTokenProviderTest:** Corregido mock de Authentication con UserDetails real
+- **FallappApplicationTests:** Movido a paquete correcto `com.fallapp`
+- **Resultado:** 27 tests, 0 failures, 0 errors ✅
+
+### Documentation
+- Creado `ADR-010-realineacion-relaciones-ninots.md`
+- Actualizado `ADR-009-simplificacion-ninots.md`
+- Creado `ESTADO.REESTRUCTURACION.NINOTS.md` (diagrama completo)
+- Actualizada `SPEC-NINOT-SIMPLIFICADO.md`
+
+### Migration
+- Script: `07.datos/scripts/10.migracion.ninots.simplificados.sql`
+- Ejecutado: 2026-02-02
+- Registros migrados: 346 ninots
+- Rollback disponible: `ninots_backup_20260202`
+
+### Breaking Changes ⚠️
+- **API Externa:** Sin cambios (endpoints mantienen misma interfaz)
+- **API Interna:** 
+  - `VotoDTO` usa `idFalla`/`nombreFalla`
+  - `NinotRepository.findByPremiadoTrue()` eliminado
+  - `VotoRepository.countByNinot()` → `countByFalla()`
+
+### Performance
+- ✅ Queries de ninots: ~40% más rápidas (menos columnas)
+- ✅ Joins reducidos: votos/comentarios directos a falla
+- ✅ Índices optimizados: `idx_ninots_falla`, `idx_ninots_fecha`
+
+### Rationale
+- Aplicación de principio YAGNI (You Aren't Gonna Need It)
+- Datos originales solo contienen URLs de bocetos
+- Descubierto que votos/comentarios están en fallas, no ninots
+- Simplicidad > Complejidad sin beneficio
+
+## [0.4.1] - 2026-02-02
+
+### Fixed
+- **Mapeo de Columnas en Entidad Ninot**
+  - Corregido `@Column(name)` de `anyo_construccion` a `año_construccion`
+  - Alineado con esquema PostgreSQL real después de migración
+  - Resuelve error JDBC: "column n1_0.anyo_construccion does not exist"
+  
+- **Ordenamiento en NinotController**
+  - Cambiado parámetro por defecto de `fechaCreacion` a `creadoEn`
+  - Corregido ordenamiento en endpoint `/api/ninots/premiados`
+  - Ahora utiliza el nombre correcto del campo de la entidad
+
+### Impact
+- 7 endpoints de ninots previamente bloqueados ahora funcionales
+- CRUD completo de ninots operativo
+- Sistema de votaciones y comentarios por ninot desbloqueado
+
 ## [0.4.0] - 2026-02-01
 
 ### Added

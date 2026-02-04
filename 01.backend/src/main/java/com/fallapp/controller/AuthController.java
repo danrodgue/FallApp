@@ -42,7 +42,6 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> registrar(@Valid @RequestBody RegistroRequest request) {
         // La contraseña se encripta dentro de UsuarioService.registrar.
         // Aquí pasamos la contraseña en texto plano para evitar doble encriptado.
-
         // Crear usuario (se encargará de encriptar la contraseña)
         UsuarioDTO usuario = usuarioService.registrar(request);
         

@@ -80,7 +80,7 @@ class ComentarioServiceTest {
         // Ninot mock
         ninotMock = new Ninot();
         ninotMock.setIdNinot(1L);
-        ninotMock.setNombreNinot("Ninot Test");
+        ninotMock.setNombre("Ninot Test");
         ninotMock.setFalla(fallaMock);
 
         // Comentario mock
@@ -119,14 +119,13 @@ class ComentarioServiceTest {
         // Arrange
         ComentarioDTO dto = new ComentarioDTO();
         dto.setIdUsuario(1L);
-        dto.setIdNinot(1L);
-        dto.setContenido("Comentario de prueba en ninot");
+        dto.setIdFalla(1L);
+        dto.setContenido("Comentario de prueba en falla");
 
-        comentarioMock.setFalla(null);
-        comentarioMock.setNinot(ninotMock);
+        comentarioMock.setFalla(fallaMock);
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioMock));
-        when(ninotRepository.findById(1L)).thenReturn(Optional.of(ninotMock));
+        when(fallaRepository.findById(1L)).thenReturn(Optional.of(fallaMock));
         when(comentarioRepository.save(any(Comentario.class))).thenReturn(comentarioMock);
 
         // Act
@@ -197,20 +196,20 @@ class ComentarioServiceTest {
     @Test
     void testObtenerPorNinot_Success() {
         // Arrange
-        comentarioMock.setFalla(null);
-        comentarioMock.setNinot(ninotMock);
+        comentarioMock.setFalla(fallaMock);
+        // Ninot ya no tiene relación con comentarios
         List<Comentario> comentarios = Arrays.asList(comentarioMock);
         
-        when(ninotRepository.findById(1L)).thenReturn(Optional.of(ninotMock));
-        when(comentarioRepository.findByNinotOrderByCreadoEnDesc(ninotMock)).thenReturn(comentarios);
+        when(fallaRepository.findById(1L)).thenReturn(Optional.of(fallaMock));
+        when(comentarioRepository.findByFallaOrderByCreadoEnDesc(fallaMock)).thenReturn(comentarios);
 
         // Act
-        List<ComentarioDTO> resultado = comentarioService.obtenerPorNinot(1L);
+        List<ComentarioDTO> resultado = comentarioService.obtenerPorFalla(1L);
 
         // Assert
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        verify(comentarioRepository, times(1)).findByNinotOrderByCreadoEnDesc(ninotMock);
+        verify(comentarioRepository, times(1)).findByFallaOrderByCreadoEnDesc(fallaMock);
     }
 
     @Test

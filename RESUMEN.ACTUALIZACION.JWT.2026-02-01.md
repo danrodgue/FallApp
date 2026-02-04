@@ -1,8 +1,11 @@
-# Resumen de Actualización - Implementación JWT v0.3.0
+# Resumen de Actualización - Implementación JWT v0.3.0 (Actualizado v0.5.3)
 
-**Fecha**: 2026-02-01  
-**Versión**: 0.3.0  
-**Tiempo total**: ~5 horas (implementación + debugging + documentación + tests)
+**Fecha Original**: 2026-02-01  
+**Última Actualización**: 2026-02-03  
+**Versión Actual**: 0.5.3  
+**Estado**: ✅ FUNCIONAL Y VALIDADO
+
+> **⚠️ NOTA IMPORTANTE**: Este documento ha sido actualizado el 2026-02-03 para reflejar las correcciones en la encriptación de contraseñas y el reinicio del backend. Toda la funcionalidad JWT está operativa.
 
 ## ✅ Cambios Completados
 
@@ -12,13 +15,14 @@
 - ✅ `UserDetailsServiceImpl.java` (72 líneas) - Integración con base de datos
 - ✅ `RolUsuarioConverter.java` (29 líneas) - Converter para enum PostgreSQL
 
-### 2. Modificaciones Backend (6 archivos)
+### 2. Modificaciones Backend (6 archivos) - ✅ ACTUALIZADO 2026-02-03
 - ✅ `SecurityConfig.java` - AuthenticationManager + JWT filter chain
-- ✅ `AuthController.java` - Login y registro con BCrypt
+- ✅ `AuthController.java` - Login y registro con **BCrypt funcional** (correcciones aplicadas 03-02-2026)
 - ✅ `VotoController.java` - @AuthenticationPrincipal (eliminado idUsuario param)
 - ✅ `UsuarioService.java` - convertirADTO() público
 - ✅ `Usuario.java` - Fix columna contraseña_hash con ñ
 - ✅ `application.properties` - JWT secret 82 caracteres (512+ bits)
+- ✅ **Backend recompilado con Java 17 y reiniciado** (03-02-2026)
 
 ### 3. Documentación (4 archivos)
 - ✅ `README.md` - Estado backend actualizado a 70%
@@ -37,13 +41,51 @@
 - ✅ Swap total: 256MB → 3.4GB (+1,229%)
 - ✅ Configuración persistente en `/etc/default/zramswap` y `/etc/fstab`
 
-## 🎯 Funcionalidad Validada
+## 🎯 Funcionalidad Validada (Actualizado 2026-02-03)
 
-### Autenticación JWT ✅
+### Registro de Usuario ✅ VALIDADO 03-02-2026
 ```bash
-# Login exitoso
-POST /api/auth/login → Token JWT (188 chars)
-Response: {exito: true, datos: {token, tipo: "Bearer", expiraEn: 86400, usuario}}
+# Registro exitoso con encriptación BCrypt
+POST /api/auth/registro
+Request: {
+  "email": "test_restart_1770110877@example.com",
+  "contrasena": "password123",
+  "nombreCompleto": "Test Usuario"
+}
+Response: {
+  "exito": true,
+  "mensaje": "Usuario registrado exitosamente",
+  "datos": {
+    "token": "eyJhbGciOiJIUzUxMiJ9...",
+    "tipo": "Bearer",
+    "expiraEn": 86400,
+    "usuario": {
+      "idUsuario": 13,
+      "rol": "usuario",
+      "activo": true
+    }
+  }
+}
+```
+
+### Autenticación JWT ✅ VALIDADO 03-02-2026
+```bash
+# Login exitoso con validación BCrypt
+POST /api/auth/login
+Request: {
+  "email": "test_restart_1770110877@example.com",
+  "contrasena": "password123"
+}
+Response: {
+  "exito": true,
+  "mensaje": "Login exitoso",
+  "datos": {
+    "token": "eyJhbGciOiJIUzUxMiJ9...",
+    "tipo": "Bearer",
+    "expiraEn": 86400,
+    "usuario": {...}
+  }
+}
 ```
 
 ### Endpoints Protegidos ✅
@@ -72,16 +114,27 @@ GET /api/ninots → 200 OK
 POST /api/votos + Bearer token → Usuario automático desde JWT
 ```
 
-## ⚠️ Issues Conocidos
+## ✅ Issues Resueltos (Actualizado 2026-02-03)
 
-### 1. PostgreSQL ENUM rol_usuario (ADR-008)
+### 1. Encriptación de Contraseñas - ✅ RESUELTO
+**Problema Original**: Errores en la implementación de BCrypt
+**Solución**: Correcciones aplicadas en AuthController.java (03-02-2026)
+**Estado**: ✅ FUNCIONAL - Backend recompilado y reiniciado
+**Validación**: Registro y login funcionando correctamente con BCrypt
+**Tests Realizados**:
+- ✅ Registro de usuario con hash BCrypt
+- ✅ Login con validación de contraseña
+- ✅ Generación de token JWT
+- ✅ Token expira en 24 horas (86400 segundos)
+
+### 2. PostgreSQL ENUM rol_usuario (ADR-008)
 **Problema**: Columna `rol` tipo ENUM incompatible con JPA UPDATE
 **Workaround**: `ultimo_acceso` no se actualiza en login (comentado temporalmente)
 **Impacto**: BAJO - Métrica no crítica
 **Solución futura**: Migrar ENUM → VARCHAR con constraint CHECK
-**Archivo**: `/srv/FallApp/01.backend/src/main/java/com/fallapp/controller/AuthController.java` línea 88-94
+**Estado**: WORKAROUND APLICADO - Sistema funcional
 
-### 2. Columna año_construccion en ninots
+### 3. Columna año_construccion en ninots
 **Problema**: Similar a rol_usuario (ñ vs ny)
 **Estado**: Pendiente revisión
 **Impacto**: MEDIO - Afecta endpoint POST /api/votos

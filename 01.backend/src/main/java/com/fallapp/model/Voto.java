@@ -35,9 +35,9 @@ public class Voto {
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ninot", nullable = false)
-    @NotNull(message = "El ninot es obligatorio")
-    private Ninot ninot;
+    @JoinColumn(name = "id_falla", nullable = false)
+    @NotNull(message = "La falla es obligatoria")
+    private Falla falla;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_voto", nullable = false, length = 20, columnDefinition = "tipo_voto")

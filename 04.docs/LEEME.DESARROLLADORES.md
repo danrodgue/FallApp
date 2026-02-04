@@ -48,7 +48,7 @@ Antes de implementar **cualquier funcionalidad**, lee su especificación:
 | **Usuarios y Autenticación** | `especificaciones/01.SISTEMA-USUARIOS.md` | Registro, login, JWT, roles, permisos |
 | **Fallas/Casales** | `especificaciones/02.FALLAS.md` | Gestión de fallas, geolocalización, CRUD |
 | **Eventos** | `especificaciones/03.EVENTOS.md` | Eventos por falla, calendario |
-| **Votaciones** | `especificaciones/04.VOTACIONES.md` | Votos de ninots, restricciones |
+| **Votaciones** | `especificaciones/05.SISTEMA-VOTACION.md` | Sistema de votos a ninots individuales |
 
 ⏱️ **Tiempo**: 5-8 minutos por especificación
 

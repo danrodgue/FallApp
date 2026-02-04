@@ -1,5 +1,53 @@
 # Development Guide - FallApp
 
+## 🚀 Despliegue en Servidor
+
+### Servicio Systemd Configurado
+
+El backend está configurado como servicio systemd para máxima disponibilidad:
+
+**Ubicación del servicio:** `/etc/systemd/system/fallapp.service`
+
+**Comandos básicos:**
+```bash
+# Ver estado completo
+sudo systemctl status fallapp
+fallapp-status  # Script personalizado
+
+# Gestión del servicio
+sudo systemctl start fallapp
+sudo systemctl stop fallapp
+sudo systemctl restart fallapp
+
+# Logs
+sudo journalctl -u fallapp -f  # Tiempo real
+sudo journalctl -u fallapp -n 100  # Últimas 100 líneas
+```
+
+**Documentación completa:** [04.docs/despliegue/SERVICIO-SYSTEMD.md](04.docs/despliegue/SERVICIO-SYSTEMD.md)
+
+### Gestión de Usuarios de Base de Datos
+
+```bash
+# Ver todos los usuarios y estadísticas
+fallapp-users
+
+# Usuarios de prueba con contraseñas conocidas:
+# - admin@fallapp.es / admin123 (rol: admin)
+# - demo@fallapp.es / demo123 (rol: usuario)  
+# - casal@fallapp.es / casal123 (rol: casal)
+
+# ⚠️ IMPORTANTE: Las contraseñas están protegidas con BCrypt
+# ✅ ACTUALIZADO 2026-02-03: Encriptación BCrypt completamente funcional
+# ✅ Backend recompilado y reiniciado con correcciones
+# No se pueden "desencriptar" - es un hash unidireccional por seguridad
+# El sistema valida comparando hashes, nunca almacena contraseñas en texto plano
+```
+
+**Documentación completa:** [04.docs/despliegue/GESTION-USUARIOS-BD.md](04.docs/despliegue/GESTION-USUARIOS-BD.md)
+
+---
+
 ## Troubleshooting Guide
 
 ### Common Issues and Solutions
