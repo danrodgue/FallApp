@@ -1,5 +1,8 @@
-/* Estilos específicos para la pantalla de eventos */
-.root-vars{display:none}
+/* ================================
+   EVENTS.CSS - ESTILOS PARA EVENTS.HTML
+   Importa login.css para obtener variables y componentes globales
+   Contiene solo estilos específicos de eventos, formularios y modales
+==================================*/
 
 .events-header {
   display: grid;
@@ -25,7 +28,7 @@
   margin: 0 0 var(--spacing-sm) 0;
   color: #1a0a0a;
   font-weight: 700;
-  letter-spacing: -0.8px;
+  letter-spacing: -0.5px;
   line-height: 1.2;
   font-family: var(--font-family);
 }
@@ -34,7 +37,7 @@
 .btn-primary {
   background: var(--color-primary);
   color: #fff;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   border: none;
   font-weight: 600;
@@ -44,6 +47,11 @@
   cursor: pointer;
   transition: var(--transition);
   letter-spacing: -0.01em;
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary:hover {
@@ -56,7 +64,7 @@
   background: transparent;
   color: #fff;
   border: 1px solid rgba(255,255,255,0.2);
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-family: var(--font-family);
@@ -66,6 +74,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
+  height: fit-content;
 }
 
 .btn-back:hover {
@@ -86,7 +95,7 @@
   background: var(--color-primary);
   color: #fff;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   box-shadow: var(--shadow);
@@ -238,6 +247,7 @@
   color: #1a0a0a;
   font-family: var(--font-family);
   letter-spacing: -0.5px;
+  line-height: 1.2;
 }
 
 .modal-close {
@@ -307,13 +317,17 @@ input:focus, textarea:focus {
   background: transparent;
   border: 1px solid var(--color-border);
   color: var(--color-text);
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-family: var(--font-family);
   font-size: 14px;
   cursor: pointer;
   transition: var(--transition);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-actions .btn-secondary:hover {
@@ -411,10 +425,6 @@ body.events-page {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(198,40,40,0.1);
 }
-
-/* Layout principal: lista (sin sidebar) */
-.events-main{display:block;width:100%}
-.events-panel{background:transparent}
 
 /* Mejor apariencia de tarjetas y acciones */
 .event-card:hover {
