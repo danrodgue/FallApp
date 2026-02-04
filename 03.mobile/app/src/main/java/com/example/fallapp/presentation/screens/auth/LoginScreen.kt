@@ -1,5 +1,6 @@
 package com.example.fallapp.presentation.screens.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +16,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.fallapp.ui.theme.CreamBackground
 import com.example.fallapp.ui.theme.DarkText
-import com.example.fallapp.ui.theme.OrangeAction
 import com.example.fallapp.ui.theme.PeachSurface
 import com.example.fallapp.ui.theme.RedAccent
 
@@ -45,8 +47,8 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Surface(
-                    shape = RoundedCornerShape(24.dp),
-                    border = androidx.compose.foundation.BorderStroke(3.dp, RedAccent),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(5.dp, RedAccent),
                     color = PeachSurface,
                     modifier = Modifier
                         .height(96.dp)
@@ -61,11 +63,18 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = state.email,
                     onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-                    label = { Text("Email") },
+                    label = { Text("Email", color = DarkText) },
                     singleLine = true,
                     shape = RoundedCornerShape(28.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = PeachSurface,
+                        unfocusedContainerColor = PeachSurface,
+                        focusedIndicatorColor = RedAccent,
+                        unfocusedIndicatorColor = PeachSurface,
+                        cursorColor = DarkText
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -73,12 +82,19 @@ fun LoginScreen(
                 OutlinedTextField(
                     value = state.password,
                     onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
-                    label = { Text("Contraseña") },
+                    label = { Text("Contraseña", color = DarkText) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     shape = RoundedCornerShape(28.dp),
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = CreamBackground,
+                        unfocusedContainerColor = CreamBackground,
+                        focusedIndicatorColor = RedAccent,
+                        unfocusedIndicatorColor = CreamBackground,
+                        cursorColor = DarkText
+                    )
                 )
 
                 if (state.errorMessage != null) {
@@ -99,7 +115,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(28.dp),
                     contentPadding = PaddingValues(vertical = 14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = OrangeAction
+                        containerColor = PeachSurface
                     )
                 ) {
                     if (state.isLoading) {
@@ -109,7 +125,7 @@ fun LoginScreen(
                             modifier = Modifier.height(20.dp)
                         )
                     } else {
-                        Text(text = "Iniciar sesión")
+                        Text(text = "Continuar", color = DarkText)
                     }
                 }
 

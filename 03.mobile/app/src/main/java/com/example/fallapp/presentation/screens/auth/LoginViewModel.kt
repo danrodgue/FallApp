@@ -29,10 +29,6 @@ class LoginViewModel @Inject constructor(
             LoginAction.NavigateToRegister -> {
                 // En una versión más avanzada, navegaríamos a pantalla de registro.
             }
-
-            LoginAction.OnLoginSuccess -> {
-                // Esta acción se maneja desde el NavHost, no aquí.
-            }
         }
     }
 
@@ -50,9 +46,10 @@ class LoginViewModel @Inject constructor(
             result
                 .onSuccess {
                     // Guardado del token se realiza en el propio use case / repositorio.
-                    _uiState.value = _uiState.value.copy(isLoading = false)
-                    // Notificamos éxito mediante acción especial que observa el NavHost.
-                    onAction(LoginAction.OnLoginSuccess)
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isLoggedIn = true
+                    )
                 }
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(

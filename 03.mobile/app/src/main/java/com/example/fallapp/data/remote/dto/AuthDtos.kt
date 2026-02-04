@@ -10,6 +10,14 @@ data class LoginRequestDto(
 )
 
 @Serializable
+data class RegisterRequestDto(
+    val email: String,
+    @SerialName("contrasena") val password: String,
+    val nombreCompleto: String,
+    val idFalla: Long? = null
+)
+
+@Serializable
 data class ApiResponseDto<T>(
     val exito: Boolean,
     val mensaje: String? = null,

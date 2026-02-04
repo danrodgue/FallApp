@@ -40,10 +40,10 @@ public class AuthController {
     @PostMapping("/registro")
     @Operation(summary = "Registrar nuevo usuario")
     public ResponseEntity<ApiResponse<LoginResponse>> registrar(@Valid @RequestBody RegistroRequest request) {
-        // Encriptar contraseña
-        request.setContrasena(passwordEncoder.encode(request.getContrasena()));
-        
-        // Crear usuario
+        // La contraseña se encripta dentro de UsuarioService.registrar.
+        // Aquí pasamos la contraseña en texto plano para evitar doble encriptado.
+
+        // Crear usuario (se encargará de encriptar la contraseña)
         UsuarioDTO usuario = usuarioService.registrar(request);
         
         // Generar token JWT (usando email como username)

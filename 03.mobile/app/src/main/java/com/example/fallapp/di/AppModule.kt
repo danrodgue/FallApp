@@ -8,7 +8,9 @@ import com.example.fallapp.data.remote.FallAppApi
 import com.example.fallapp.data.remote.FallAppApi.Companion.DEFAULT_BASE_URL
 import com.example.fallapp.data.remote.createFallAppRetrofitClient
 import com.example.fallapp.data.repository.AuthRepositoryImpl
+import com.example.fallapp.data.repository.FallaRepositoryImpl
 import com.example.fallapp.domain.repository.AuthRepository
+import com.example.fallapp.domain.repository.FallaRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,5 +59,11 @@ object AppModule {
         api: FallAppApi,
         prefs: SharedPreferences
     ): AuthRepository = AuthRepositoryImpl(api, prefs)
+
+    @Provides
+    @Singleton
+    fun provideFallaRepository(
+        api: FallAppApi
+    ): FallaRepository = FallaRepositoryImpl(api)
 }
 
