@@ -3,9 +3,9 @@ package com.fallapp.features.fallas.data.repository
 import com.fallapp.core.database.dao.FallaDao
 import com.fallapp.core.network.NetworkMonitor
 import com.fallapp.core.util.Result
-import com.fallapp.features.fallas.data.api.FallasApiService
-import com.fallapp.features.fallas.data.dto.toDomain
-import com.fallapp.features.fallas.data.dto.toEntity
+import com.fallapp.features.fallas.data.mapper.toDomain
+import com.fallapp.features.fallas.data.mapper.toEntity
+import com.fallapp.features.fallas.data.remote.FallasApiService
 import com.fallapp.features.fallas.domain.model.Categoria
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.repository.FallasRepository
