@@ -1,5 +1,5 @@
 // API endpoint para obtener información del usuario
-const API_USER_URL = 'http://localhost:8080/api/usuarios';
+const API_USER_URL = 'http://35.180.21.42:8080/api/usuarios';
 
 // Variable para rastrear si estamos en modo edición
 let isEditing = false;

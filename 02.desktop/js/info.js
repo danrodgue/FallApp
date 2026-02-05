@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
    const params = new URLSearchParams(window.location.search);
    const id = params.get('id') || '95'; // Por defecto usa ID 95
    // Base del backend (Spring Boot): ajusta puerto si es necesario
-   window._recurso = window._recurso || 'http://localhost/api/fallas';
    window._apiBase = window._apiBase || 'http://35.180.21.42:8080/api';
+   window._recurso = window._recurso || (window._apiBase + '/fallas');
 
    // Cargar datos desde backend si hay id, si no, usar stub
    if (id) {
@@ -67,10 +67,12 @@ function loadFallaById(id) {
       })
       .then(json => {
          console.log('Falla cargada del backend:', json);
-         populateForm(json);
+         // El API devuelve { exito, mensaje, datos: { ... } }
+         const fallaData = json.datos || json;
+         populateForm(fallaData);
          // Si la falla tiene coordenadas, inicializar el mapa directamente
-         if (json.latitud && json.longitud) {
-            initMapa(json.latitud, json.longitud, id);
+         if (fallaData.latitud && fallaData.longitud) {
+            initMapa(fallaData.latitud, fallaData.longitud, id);
          } else {
             // Si no hay coordenadas, intentar cargar del endpoint de ubicación
             loadUbicacionMapa(id);
@@ -98,12 +100,10 @@ function loadFallaById(id) {
                   tipo: 'Caída', 
                   descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', 
                   estado: 'abierta', 
-                  reportado_por: 'Juan Pérez',
-                  latitud: 39.4699,
-                  longitud: -0.3763
+                  reportado_por: 'Juan Pérez'
                };
                populateForm(ejemplo);
-               initMapa(ejemplo.latitud, ejemplo.longitud, id);
+               loadUbicacionMapa(id);
             });
          } else {
             console.warn('API bridge no disponible, usando stub');
@@ -115,19 +115,17 @@ function loadFallaById(id) {
                tipo: 'Caída', 
                descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', 
                estado: 'abierta', 
-               reportado_por: 'Juan Pérez',
-               latitud: 39.4699,
-               longitud: -0.3763
+               reportado_por: 'Juan Pérez'
             };
             populateForm(ejemplo);
-            initMapa(ejemplo.latitud, ejemplo.longitud, id);
+            loadUbicacionMapa(id);
          }
       });
 }
 
 function loadUbicacionMapa(fallaId) {
    // Obtener las coordenadas desde el endpoint específico de ubicación
-   const ubicacionUrl = `${window._apiBase}/fallas/${fallaId}/ubicacion`;
+   const ubicacionUrl = `http://35.180.21.42:8080/api/fallas/${fallaId}/ubicacion`;
    console.log('Cargando ubicación desde:', ubicacionUrl);
    
    fetch(ubicacionUrl)
@@ -137,9 +135,9 @@ function loadUbicacionMapa(fallaId) {
       })
       .then(data => {
          console.log('Datos de ubicación recibidos:', data);
-         // Se espera que el endpoint devuelva { latitude, longitude } o { lat, lng } o { latitud, longitud }
-         const lat = data.latitude || data.lat || data.latitud;
-         const lng = data.longitude || data.lng || data.longitud;
+         // El endpoint devuelve { exito, mensaje, datos: { latitud, longitud, ... } }
+         const lat = data.datos?.latitud || data.latitude || data.lat || data.latitud;
+         const lng = data.datos?.longitud || data.longitude || data.lng || data.longitud;
          
          console.log('Coordenadas extraídas - lat:', lat, 'lng:', lng);
          
@@ -253,28 +251,34 @@ function populateForm(data) {
    if (!el('fallaId')) return; // formulario no presente
    
    // Mapear los campos que devuelve el API a los campos del formulario
-   el('fallaId').value = data.id || data.idFalla || '';
+   // Solo mostrar campos que no sean null
+   const idFalla = data.id || data.idFalla || '';
+   el('fallaId').value = idFalla;
    
-   // Fecha: soportar diferentes formatos
-   if (data.fecha) {
-      el('fallaFecha').value = formatDateForInput(data.fecha);
-   } else if (data.fechaReporte) {
-      el('fallaFecha').value = formatDateForInput(data.fechaReporte);
+   // Nombre (puede venir como nombre o nombre)
+   const nombre = data.nombre || data.ubicacion || data.direccion || '';
+   if (nombre && el('fallaUbicacion')) {
+      el('fallaUbicacion').value = nombre;
    }
    
-   // Ubicación: puede venir como ubicacion, nombre, direccion, etc.
-   el('fallaUbicacion').value = data.ubicacion || data.nombre || data.direccion || data.casal || '';
+   // Tipo: puede venir como categoria, tipo, agrupacion, etc.
+   const tipo = data.categoria || data.tipo || data.agrupacion || data.lema || '';
+   if (tipo && tipo !== 'sin_categoria' && el('fallaTipo')) {
+      el('fallaTipo').value = tipo;
+   }
    
-   // Tipo: puede venir como tipo, agrupacion, categoria, etc.
-   el('fallaTipo').value = data.tipo || data.agrupacion || data.categoria || '';
+   // Descripción: usar fallera, artista o descripcion
+   const descripcion = data.descripcion || data.fallera || data.artista || '';
+   if (descripcion && el('fallaDescripcion')) {
+      el('fallaDescripcion').value = descripcion;
+   }
    
-   // Descripción
-   el('fallaDescripcion').value = data.descripcion || data.detalles || '';
-   
-   // Actualizar side panel
+   // Actualizar side panel con descripción
    const side = document.getElementById('sideSummary');
-   const descText = data.descripcion || data.detalles || '';
-   if (side) side.textContent = descText.slice(0, 140) + (descText && descText.length > 140 ? '...' : '');
+   const descText = descripcion || '';
+   if (side && descText) {
+      side.textContent = descText.slice(0, 140) + (descText.length > 140 ? '...' : '');
+   }
    
    console.log('Formulario poblado con datos:', data);
 }

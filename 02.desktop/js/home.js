@@ -1,4 +1,4 @@
-const API_USER_URL = 'http://localhost:8080/api/usuarios';
+const API_USER_URL = 'http://35.180.21.42:8080/api/usuarios';
 let cachedUserData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
