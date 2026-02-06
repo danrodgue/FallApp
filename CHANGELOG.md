@@ -5,6 +5,60 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.9] - 2026-02-06 📖 DOCUMENTACIÓN COMPLETA API DE VOTOS
+
+### Added
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Documentación completa de todos los endpoints de votos
+    - **GET /api/votos/usuario/{idUsuario}**: Obtener votos de un usuario
+      - Ejemplos de response con múltiples votos
+      - Tabla de campos del VotoDTO (7 campos)
+      - Casos de error: 403 Forbidden, 404 Not Found
+      - Ejemplo cURL
+      - Validación: solo usuario propio o ADMIN
+    - **GET /api/votos/ninot/{idNinot}**: Obtener votos de un ninot (NUEVO)
+      - Endpoint no documentado anteriormente
+      - Ejemplos de response completos
+      - Nota sobre votos en falla asociada
+      - Casos de error documentados
+      - Ejemplo cURL
+    - **DELETE /api/votos/{idVoto}**: Eliminar un voto
+      - Validación: solo autor del voto
+      - Ejemplos de response y errores
+      - Casos de uso explicados (cambiar opinión, re-votar)
+      - Ejemplo cURL
+
+### Changed
+- **Documentación**
+  - Eliminada referencia incorrecta a `GET /api/votos/falla/{idFalla}` (endpoint no existe)
+  - Todos los endpoints de votos ahora tienen documentación nivel producción:
+    - Descripción completa
+    - Parámetros explicados
+    - Validaciones documentadas
+    - Ejemplos de success y error
+    - Casos de uso
+    - Integración cURL
+
+### Technical Details
+- **VotoDTO**: 7 campos documentados (idVoto, idUsuario, nombreUsuario, idFalla, nombreFalla, tipoVoto, fechaCreacion)
+- **Tipos de voto**: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
+- **Seguridad**: Todos los endpoints requieren autenticación JWT
+- **Permisos**: 
+  - GET usuario: solo propio usuario o ADMIN
+  - DELETE: solo autor del voto
+  - GET ninot: cualquier usuario autenticado
+
+### Developer Notes
+- **Desktop/Mobile**: Implementar lógica para mostrar/eliminar votos propios
+- **Re-votación**: Eliminar voto + crear nuevo voto (respeta constraint única)
+- **UI**: Mostrar los 3 tipos de voto con iconos distintos por categoría
+- **Cache**: Considerar cache local de votos del usuario para mejor UX
+
+### Files Modified
+- `GUIA.API.FRONTEND.md` - Documentación endpoints votos (180+ líneas añadidas)
+
+---
+
 ## [0.5.8] - 2026-02-06 🗳️ NUEVOS TIPOS DE VOTO - CATEGORÍAS DE FALLAS
 
 ### Changed

@@ -1005,18 +1005,196 @@ async function obtenerUbicacionFalla(idFalla) {
 
 ---
 
-#### GET /api/votos/usuario/{idUsuario} - Votos de un usuario
+#### GET /api/votos/usuario/{idUsuario} - Obtener votos de un usuario
 **Autenticación:** Requerida (solo el propio usuario o ADMIN)
 
+Obtiene todos los votos que ha emitido un usuario específico.
+
+**Parámetros de ruta:**
+- `idUsuario` (Long): ID del usuario
+
+**Validaciones:**
+- Solo el propio usuario o un ADMIN puede consultar los votos
+- El usuario debe existir
+
+**Response (200 OK):**
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": [
+    {
+      "idVoto": 2,
+      "idUsuario": 2,
+      "nombreUsuario": "Administrador FallApp",
+      "idFalla": 1,
+      "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
+      "tipoVoto": "EXPERIMENTAL",
+      "fechaCreacion": "2026-02-06T11:24:07.282477"
+    },
+    {
+      "idVoto": 3,
+      "idUsuario": 2,
+      "nombreUsuario": "Administrador FallApp",
+      "idFalla": 1,
+      "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
+      "tipoVoto": "INGENIO_Y_GRACIA",
+      "fechaCreacion": "2026-02-06T11:24:07.400902"
+    },
+    {
+      "idVoto": 4,
+      "idUsuario": 2,
+      "nombreUsuario": "Administrador FallApp",
+      "idFalla": 1,
+      "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
+      "tipoVoto": "MONUMENTO",
+      "fechaCreacion": "2026-02-06T11:24:07.463909"
+    }
+  ]
+}
+```
+
+**Campos del VotoDTO:**
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `idVoto` | Long | ID único del voto |
+| `idUsuario` | Long | ID del usuario que votó |
+| `nombreUsuario` | String | Nombre completo del usuario |
+| `idFalla` | Long | ID de la falla votada |
+| `nombreFalla` | String | Nombre de la falla votada |
+| `tipoVoto` | String | Tipo de voto: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO |
+| `fechaCreacion` | LocalDateTime | Fecha y hora del voto |
+
+**Error (403 Forbidden) - Sin permisos:**
+```json
+{
+  "exito": false,
+  "mensaje": "No tienes permisos para ver los votos de otro usuario",
+  "datos": null
+}
+```
+
+**Error (404 Not Found) - Usuario no existe:**
+```json
+{
+  "exito": false,
+  "mensaje": "Usuario no encontrado con id: '99'",
+  "datos": null
+}
+```
+
+**Ejemplo cURL:**
+```bash
+curl -X GET http://localhost:8080/api/votos/usuario/2 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
 ---
 
-#### GET /api/votos/falla/{idFalla} - Votos de una falla
+#### GET /api/votos/ninot/{idNinot} - Obtener votos de un ninot
 **Autenticación:** Requerida
 
+Obtiene todos los votos recibidos por una falla a través de un ninot específico.
+
+**Nota:** Los votos se almacenan en la falla asociada al ninot, no en el ninot directamente.
+
+**Parámetros de ruta:**
+- `idNinot` (Long): ID del ninot
+
+**Response (200 OK):**
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": [
+    {
+      "idVoto": 2,
+      "idUsuario": 2,
+      "nombreUsuario": "Administrador FallApp",
+      "idFalla": 1,
+      "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
+      "tipoVoto": "EXPERIMENTAL",
+      "fechaCreacion": "2026-02-06T11:24:07.282477"
+    },
+    {
+      "idVoto": 3,
+      "idUsuario": 2,
+      "nombreUsuario": "Administrador FallApp",
+      "idFalla": 1,
+      "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
+      "tipoVoto": "INGENIO_Y_GRACIA",
+      "fechaCreacion": "2026-02-06T11:24:07.400902"
+    }
+  ]
+}
+```
+
+**Error (404 Not Found) - Ninot no existe:**
+```json
+{
+  "exito": false,
+  "mensaje": "Ninot no encontrado con id: '99'",
+  "datos": null
+}
+```
+
+**Ejemplo cURL:**
+```bash
+curl -X GET http://localhost:8080/api/votos/ninot/1 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
 ---
 
-#### DELETE /api/votos/{idVoto} - Eliminar voto
-**Autenticación:** Requerida (solo autor del voto)
+#### DELETE /api/votos/{idVoto} - Eliminar un voto
+**Autenticación:** Requerida (solo el autor del voto puede eliminarlo)
+
+Elimina un voto específico. Solo el usuario que creó el voto puede eliminarlo.
+
+**Parámetros de ruta:**
+- `idVoto` (Long): ID del voto a eliminar
+
+**Validaciones:**
+- El voto debe existir
+- Solo el autor del voto puede eliminarlo
+
+**Response (200 OK):**
+```json
+{
+  "exito": true,
+  "mensaje": "Voto eliminado",
+  "datos": null
+}
+```
+
+**Error (403 Forbidden) - No es el autor:**
+```json
+{
+  "exito": false,
+  "mensaje": "No tienes permisos para eliminar este voto",
+  "datos": null
+}
+```
+
+**Error (404 Not Found) - Voto no existe:**
+```json
+{
+  "exito": false,
+  "mensaje": "Voto no encontrado con id: '99'",
+  "datos": null
+}
+```
+
+**Ejemplo cURL:**
+```bash
+curl -X DELETE http://localhost:8080/api/votos/2 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Casos de uso:**
+- Usuario cambia de opinión y quiere retirar su voto
+- Corrección de votos emitidos por error
+- Permite re-votar después de eliminar (por la constraint única)
 
 ---
 
