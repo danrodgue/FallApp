@@ -250,34 +250,82 @@ function populateForm(data) {
    const el = (id) => document.getElementById(id);
    if (!el('fallaId')) return; // formulario no presente
    
-   // Mapear los campos que devuelve el API a los campos del formulario
-   // Solo mostrar campos que no sean null
+   // ID de Falla
    const idFalla = data.id || data.idFalla || '';
-   el('fallaId').value = idFalla;
+   if (el('fallaId')) el('fallaId').value = idFalla;
    
-   // Nombre (puede venir como nombre o nombre)
+   // Nombre de la Falla
    const nombre = data.nombre || data.ubicacion || data.direccion || '';
-   if (nombre && el('fallaUbicacion')) {
-      el('fallaUbicacion').value = nombre;
+   if (el('fallaNombre')) el('fallaNombre').value = nombre;
+   
+   // Sección
+   const seccion = data.seccion || '';
+   if (el('fallaSeccion')) el('fallaSeccion').value = seccion;
+   
+   // Fallera
+   const fallera = data.fallera || '';
+   if (el('fallaFallera')) el('fallaFallera').value = fallera;
+   
+   // Presidente
+   const presidente = data.presidente || '';
+   if (el('fallaPresidente')) el('fallaPresidente').value = presidente;
+   
+   // Artista
+   const artista = data.artista || '';
+   if (el('fallaArtista')) el('fallaArtista').value = artista;
+   
+   // Lema
+   const lema = data.lema || '';
+   if (el('fallaLema')) el('fallaLema').value = lema;
+   
+   // Año de Fundación
+   const anyoFundacion = data.anyoFundacion || '';
+   if (el('fallaAnyoFundacion')) el('fallaAnyoFundacion').value = anyoFundacion;
+   
+   // Distintivo
+   const distintivo = data.distintivo || '';
+   if (el('fallaDistintivo')) el('fallaDistintivo').value = distintivo;
+   
+   // URL Boceto - Mostrar imagen
+   const uriBoceto = data.uriBoceto || data.imagenUrl || '';
+   if (uriBoceto && el('fallaBoceto')) {
+      const imgEl = el('fallaBoceto');
+      imgEl.src = uriBoceto;
+      imgEl.onerror = function() {
+         console.warn('Error cargando imagen del Boceto:', uriBoceto);
+         this.style.display = 'none';
+      };
+   } else if (el('fallaBoceto')) {
+      // Si no hay URL, ocultar la imagen
+      el('fallaBoceto').style.display = 'none';
    }
    
-   // Tipo: puede venir como categoria, tipo, agrupacion, etc.
-   const tipo = data.categoria || data.tipo || data.agrupacion || data.lema || '';
-   if (tipo && tipo !== 'sin_categoria' && el('fallaTipo')) {
-      el('fallaTipo').value = tipo;
-   }
+   // Categoría
+   const categoria = data.categoria || '';
+   if (el('fallaCategoria')) el('fallaCategoria').value = categoria;
    
-   // Descripción: usar fallera, artista o descripcion
-   const descripcion = data.descripcion || data.fallera || data.artista || '';
-   if (descripcion && el('fallaDescripcion')) {
-      el('fallaDescripcion').value = descripcion;
-   }
+   // Estadísticas
+   const totalEventos = data.totalEventos || 0;
+   if (el('fallaTotalEventos')) el('fallaTotalEventos').value = totalEventos;
    
-   // Actualizar side panel con descripción
+   const totalHintos = data.totalHintos || 0;
+   if (el('fallaTotalHintos')) el('fallaTotalHintos').value = totalHintos;
+   
+   const totalMiembros = data.totalMiembros || 0;
+   if (el('fallaTotalMiembros')) el('fallaTotalMiembros').value = totalMiembros;
+   
+   // Fechas - Formatear correctamente
+   const fechaCreacion = data.fechaCreacion || '';
+   if (el('fallaFechaCreacion')) el('fallaFechaCreacion').value = formatDateForInput(fechaCreacion);
+   
+   const fechaActualizacion = data.fechaActualizacion || '';
+   if (el('fallaFechaActualizacion')) el('fallaFechaActualizacion').value = formatDateForInput(fechaActualizacion);
+   
+   // Actualizar side panel con nombre o lema
    const side = document.getElementById('sideSummary');
-   const descText = descripcion || '';
-   if (side && descText) {
-      side.textContent = descText.slice(0, 140) + (descText.length > 140 ? '...' : '');
+   const resumen = nombre || lema || fallera || '';
+   if (side && resumen) {
+      side.textContent = resumen.slice(0, 140) + (resumen.length > 140 ? '...' : '');
    }
    
    console.log('Formulario poblado con datos:', data);
@@ -304,10 +352,19 @@ function formatDateForInput(dateStr) {
 function saveFalla() {
    const payload = {
       id: document.getElementById('fallaId').value,
-      fecha: document.getElementById('fallaFecha').value,
-      ubicacion: document.getElementById('fallaUbicacion').value,
-      tipo: document.getElementById('fallaTipo').value,
-      descripcion: document.getElementById('fallaDescripcion').value,
+      idFalla: document.getElementById('fallaId').value,
+      nombre: document.getElementById('fallaNombre').value,
+      seccion: document.getElementById('fallaSeccion').value,
+      fallera: document.getElementById('fallaFallera').value,
+      presidente: document.getElementById('fallaPresidente').value,
+      artista: document.getElementById('fallaArtista').value,
+      lema: document.getElementById('fallaLema').value,
+      anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || 0,
+      distintivo: document.getElementById('fallaDistintivo').value,
+      categoria: document.getElementById('fallaCategoria').value,
+      totalEventos: parseInt(document.getElementById('fallaTotalEventos').value) || 0,
+      totalHintos: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
+      totalMiembros: parseInt(document.getElementById('fallaTotalMiembros').value) || 0,
    };
 
    // Si tiene id => actualizar (PUT), si no => crear (POST)
@@ -318,7 +375,8 @@ function saveFalla() {
    if (window.api && window.api.saveFalla) {
       window.api.saveFalla(payload).then(json => {
          alert('Cambios guardados');
-         const side = document.getElementById('sideSummary'); if(side) side.textContent = (json.descripcion||payload.descripcion||'').slice(0,140) + ((json.descripcion||payload.descripcion) && (json.descripcion||payload.descripcion).length>140? '...':'');
+         const side = document.getElementById('sideSummary'); 
+         if(side) side.textContent = (json.nombre||payload.nombre||'').slice(0,140) + ((json.nombre||payload.nombre) && (json.nombre||payload.nombre).length>140? '...':'');
          setEditMode(false);
          if (json.id) document.getElementById('fallaId').value = json.id;
       }).catch(err => {
@@ -337,7 +395,11 @@ window._falla = { loadFallaById, populateForm, saveFalla };
 
 // ------------------ Edit mode helpers ------------------
 function setEditMode(enabled){
-   const fields = ['fallaFecha','fallaUbicacion','fallaTipo','fallaDescripcion'];
+   const fields = [
+      'fallaNombre', 'fallaSeccion', 'fallaFallera', 'fallaPresidente', 
+      'fallaArtista', 'fallaLema', 'fallaAnyoFundacion', 'fallaDistintivo', 
+      'fallaCategoria', 'fallaTotalEventos', 'fallaTotalHintos', 'fallaTotalMiembros'
+   ];
    fields.forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.disabled = !enabled; });
    const saveBtn = document.getElementById('saveBtn'); const editBtn = document.getElementById('editBtn');
    if(saveBtn) saveBtn.style.display = enabled? 'inline-block':'none';
