@@ -20,3 +20,12 @@ Thumbs.db
 *.md
 !README.md
 **/*.md
+
+# Java compiled files
+*.class
+target/
+# Gradle
+.gradle/
+build/
+*.gradle.kts.backup
+local.properties
