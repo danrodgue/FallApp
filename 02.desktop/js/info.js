@@ -278,6 +278,18 @@ function populateForm(data) {
    const lema = data.lema || '';
    if (el('fallaLema')) el('fallaLema').value = lema;
    
+   // Web Oficial
+   const webOficial = data.webOficial || data.weOficial || '';
+   if (el('fallaWebOficial')) el('fallaWebOficial').value = webOficial;
+   
+   // Teléfono Contacto
+   const telefonoContacto = data.telefonoContacto || data.telefonoContacto || '';
+   if (el('fallaTelefonoContacto')) el('fallaTelefonoContacto').value = telefonoContacto;
+   
+   // Email Contacto
+   const emailContacto = data.emailContacto || data.correoContacto || '';
+   if (el('fallaEmailContacto')) el('fallaEmailContacto').value = emailContacto;
+   
    // Año de Fundación
    const anyoFundacion = data.anyoFundacion || '';
    if (el('fallaAnyoFundacion')) el('fallaAnyoFundacion').value = anyoFundacion;
@@ -287,17 +299,48 @@ function populateForm(data) {
    if (el('fallaDistintivo')) el('fallaDistintivo').value = distintivo;
    
    // URL Boceto - Mostrar imagen
-   const uriBoceto = data.uriBoceto || data.imagenUrl || '';
-   if (uriBoceto && el('fallaBoceto')) {
-      const imgEl = el('fallaBoceto');
-      imgEl.src = uriBoceto;
-      imgEl.onerror = function() {
-         console.warn('Error cargando imagen del Boceto:', uriBoceto);
-         this.style.display = 'none';
+   // Buscar en múltiples nombres de campo posibles
+   const uriBoceto = data.uriBoceto 
+      || data.imagenUrl 
+      || data.imagen 
+      || data.boceto 
+      || data.urlBoceto 
+      || data.fotoUrl 
+      || data.foto 
+      || '';
+   
+   console.log('Búsqueda de imagen Boceto:');
+   console.log('  - uriBoceto:', data.uriBoceto);
+   console.log('  - imagenUrl:', data.imagenUrl);
+   console.log('  - imagen:', data.imagen);
+   console.log('  - boceto:', data.boceto);
+   console.log('  - urlBoceto:', data.urlBoceto);
+   console.log('  - fotoUrl:', data.fotoUrl);
+   console.log('  - foto:', data.foto);
+   console.log('  - URL final encontrada:', uriBoceto);
+   
+   const bocetoImg = el('fallaBoceto');
+   const bocetoContainer = bocetoImg ? bocetoImg.parentElement : null;
+   
+   if (uriBoceto && bocetoImg) {
+      console.log('✓ Configurando imagen Boceto con URL:', uriBoceto);
+      bocetoImg.src = uriBoceto;
+      if (bocetoContainer) {
+         bocetoContainer.style.display = 'block';
+      }
+      bocetoImg.onerror = function() {
+         console.warn('✗ Error cargando imagen del Boceto:', uriBoceto);
+         if (this.parentElement) {
+            this.parentElement.style.display = 'block'; // Mostrar contenedor
+         }
       };
-   } else if (el('fallaBoceto')) {
-      // Si no hay URL, ocultar la imagen
-      el('fallaBoceto').style.display = 'none';
+      bocetoImg.onload = function() {
+         console.log('✓ Imagen Boceto cargada correctamente');
+      };
+   } else {
+      // Si no hay URL, ocultar el contenedor pero mostrar placeholder
+      console.log('✗ No hay URL de boceto disponible - mostrando placeholder');
+      bocetoImg.src = ''; // Asegurar que src esté vacío para mostrar placeholder
    }
    
    // Categoría
@@ -328,7 +371,11 @@ function populateForm(data) {
       side.textContent = resumen.slice(0, 140) + (resumen.length > 140 ? '...' : '');
    }
    
-   console.log('Formulario poblado con datos:', data);
+   // Log de diagnóstico
+   console.log('=== DIAGNÓSTICO POPULATE FORM ===');
+   console.log('Datos completos:', data);
+   console.log('Campos disponibles en data:', Object.keys(data));
+   console.log('====================================');
 }
 
 // Helper para formatear fechas para input datetime-local
@@ -359,6 +406,9 @@ function saveFalla() {
       presidente: document.getElementById('fallaPresidente').value,
       artista: document.getElementById('fallaArtista').value,
       lema: document.getElementById('fallaLema').value,
+      webOficial: document.getElementById('fallaWebOficial').value,
+      telefonoContacto: document.getElementById('fallaTelefonoContacto').value,
+      emailContacto: document.getElementById('fallaEmailContacto').value,
       anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || 0,
       distintivo: document.getElementById('fallaDistintivo').value,
       categoria: document.getElementById('fallaCategoria').value,
@@ -397,8 +447,9 @@ window._falla = { loadFallaById, populateForm, saveFalla };
 function setEditMode(enabled){
    const fields = [
       'fallaNombre', 'fallaSeccion', 'fallaFallera', 'fallaPresidente', 
-      'fallaArtista', 'fallaLema', 'fallaAnyoFundacion', 'fallaDistintivo', 
-      'fallaCategoria', 'fallaTotalEventos', 'fallaTotalHintos', 'fallaTotalMiembros'
+      'fallaArtista', 'fallaLema', 'fallaWebOficial', 'fallaTelefonoContacto', 'fallaEmailContacto',
+      'fallaAnyoFundacion', 'fallaDistintivo', 'fallaCategoria', 
+      'fallaTotalEventos', 'fallaTotalHintos', 'fallaTotalMiembros'
    ];
    fields.forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.disabled = !enabled; });
    const saveBtn = document.getElementById('saveBtn'); const editBtn = document.getElementById('editBtn');

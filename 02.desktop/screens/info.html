@@ -49,42 +49,69 @@
                </div>
 
                <div class="falla-body">
+                    <!-- Formulario principal - Lado izquierdo -->
                     <div class="falla-main">
                          <form id="fallaForm">
                               <div class="falla-helper">Los campos están editables localmente (no persistidos a menos que guardes con backend).</div>
                               
-                              <!-- Sección de imagen (Boceto) de la falla - Primero -->
-                              <div class="falla-image-section">
-                                   <label>Boceto/Imagen de la Falla</label>
-                                   <div class="falla-image-container">
-                                        <img id="fallaBoceto" src="" alt="Boceto de la falla" />
+                              <!-- ID y Nombre en fila superior izquierda, Boceto a la derecha -->
+                              <div class="falla-top-section">
+                                   <div class="falla-fields-top">
+                                        <!-- ID de la falla -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>ID de Falla</label>
+                                                  <input id="fallaId" name="idFalla" readonly />
+                                             </div>
+                                        </div>
+
+                                        <!-- Nombre de la Falla -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Nombre de la Falla</label>
+                                                  <input id="fallaNombre" name="nombre" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Artista -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Artista</label>
+                                                  <input id="fallaArtista" name="artista" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Sección -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Sección</label>
+                                                  <input id="fallaSeccion" name="seccion" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Categoría -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Categoría</label>
+                                                  <input id="fallaCategoria" name="categoria" disabled />
+                                             </div>
+                                        </div>
+                                   </div>
+
+                                   <!-- Boceto a la derecha -->
+                                   <div class="falla-image-section falla-image-top">
+                                        <label>Boceto/Imagen de la Falla</label>
+                                        <div class="falla-image-container falla-image-responsive">
+                                             <img id="fallaBoceto" src="" alt="Boceto de la falla" />
+                                             <div class="falla-image-placeholder">No hay imagen disponible</div>
+                                        </div>
                                    </div>
                               </div>
 
-                              <!-- Sección de mapa (Ubicación) -->
+                              <!-- Mapa de Ubicación -->
                               <div class="falla-image-section">
                                    <label>Ubicación de la Falla</label>
                                    <div id="mapaUbicacion"></div>
-                              </div>
-
-                              <!-- ID de la falla -->
-                              <div class="form-row">
-                                   <div class="field">
-                                        <label>ID de Falla</label>
-                                        <input id="fallaId" name="idFalla" readonly />
-                                   </div>
-                              </div>
-
-                              <!-- Nombre y Sección -->
-                              <div class="form-row">
-                                   <div class="field">
-                                        <label>Nombre de la Falla</label>
-                                        <input id="fallaNombre" name="nombre" disabled />
-                                   </div>
-                                   <div class="field">
-                                        <label>Sección</label>
-                                        <input id="fallaSeccion" name="seccion" disabled />
-                                   </div>
                               </div>
 
                               <!-- Información de dirección -->
@@ -99,15 +126,27 @@
                                    </div>
                               </div>
 
-                              <!-- Artista y Lema -->
+                              <!-- Lema -->
                               <div class="form-row">
-                                   <div class="field">
-                                        <label>Artista</label>
-                                        <input id="fallaArtista" name="artista" disabled />
-                                   </div>
                                    <div class="field">
                                         <label>Lema</label>
                                         <input id="fallaLema" name="lema" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Web Oficial</label>
+                                        <input id="fallaWebOficial" name="webOficial" disabled />
+                                   </div>
+                              </div>
+
+                              <!-- Teléfono Contacto y Email Contacto -->
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Teléfono Contacto</label>
+                                        <input id="fallaTelefonoContacto" name="telefonoContacto" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Email Contacto</label>
+                                        <input id="fallaEmailContacto" name="emailContacto" disabled />
                                    </div>
                               </div>
 
@@ -120,14 +159,6 @@
                                    <div class="field">
                                         <label>Distintivo</label>
                                         <input id="fallaDistintivo" name="distintivo" disabled />
-                                   </div>
-                              </div>
-
-                              <!-- Categoría -->
-                              <div class="form-row">
-                                   <div class="field">
-                                        <label>Categoría</label>
-                                        <input id="fallaCategoria" name="categoria" disabled />
                                    </div>
                               </div>
 

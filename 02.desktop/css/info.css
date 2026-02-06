@@ -50,10 +50,9 @@
   font-family: var(--font-family);
 }
 .falla-body {
-  display: grid;
-  grid-template-columns: 1fr 340px;
+  display: flex;
   gap: var(--spacing-lg);
-  align-items: start;
+  align-items: flex-start;
 }
 
 .falla-main {
@@ -61,6 +60,34 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  flex: 1;
+}
+
+#fallaForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+/* Sección superior con ID, Nombre, y Boceto */
+.falla-top-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-lg);
+  align-items: start;
+  margin-bottom: var(--spacing-md);
+}
+
+.falla-fields-top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.falla-image-top {
+  margin-bottom: 0;
 }
 
 /* Sección de imagen de la falla */
@@ -91,11 +118,48 @@
   justify-content: center;
 }
 
+/* Versión responsive que se ajusta al tamaño de la imagen */
+.falla-image-container.falla-image-responsive {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 500px;
+  aspect-ratio: auto;
+}
+
+.falla-image-container.falla-image-responsive img {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 500px;
+  object-fit: contain;
+}
+
 .falla-image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+#fallaBoceto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block !important;
+}
+
+.falla-image-container.falla-image-responsive #fallaBoceto {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+#fallaBoceto:not([src]),
+#fallaBoceto[src=""] {
+  display: none !important;
 }
 
 .falla-image-placeholder {
@@ -108,13 +172,22 @@
   font-size: 14px;
   font-family: var(--font-family);
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  pointer-events: none;
 }
 
-.falla-image-container img[style*="display: none"] ~ .falla-image-placeholder {
+/* Mostrar placeholder cuando no hay imagen o está vacía */
+.falla-image-container img:not([src]),
+.falla-image-container img[src=""] {
+  display: none;
+}
+
+.falla-image-container img:not([src]) ~ .falla-image-placeholder,
+.falla-image-container img[src=""] ~ .falla-image-placeholder {
   display: flex;
 }
 
-.falla-image-container:has(img:not([style*="display: none"])) .falla-image-placeholder {
+/* Ocultar placeholder cuando la imagen está cargada */
+.falla-image-container img[src]:not([src=""]) ~ .falla-image-placeholder {
   display: none;
 }
 
@@ -127,6 +200,7 @@
   position: sticky;
   top: var(--spacing-lg);
   align-self: start;
+  display: none;
 }
 .falla-container .field {
   margin-bottom: var(--spacing-md);
@@ -145,6 +219,13 @@
 .falla-container .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.falla-container .form-row-single {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
@@ -346,19 +427,28 @@
   margin-top: 0;
 }
 
-@media (max-width: 1000px) {
-  .falla-body {
-    grid-template-columns: 1fr 300px;
+@media (max-width: 1200px) {
+  .falla-image-container.falla-image-responsive,
+  .falla-image-container.falla-image-responsive img,
+  .falla-image-container.falla-image-responsive #fallaBoceto {
+    max-width: 350px;
   }
 }
 
 @media (max-width: 800px) {
   .falla-body {
+    flex-direction: column;
+  }
+  
+  .falla-top-section {
     grid-template-columns: 1fr;
   }
   
-  .falla-side {
-    order: 2;
+  .falla-image-container.falla-image-responsive,
+  .falla-image-container.falla-image-responsive img,
+  .falla-image-container.falla-image-responsive #fallaBoceto {
+    max-width: 100%;
+    max-height: 400px;
   }
   
   .falla-container {
