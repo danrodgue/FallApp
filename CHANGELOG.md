@@ -5,6 +5,33 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.7] - 2026-02-06 📚 DOCUMENTACIÓN ENDPOINT LISTAR USUARIOS
+
+### Updated
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Endpoint GET /api/usuarios completamente documentado
+    - Descripción detallada: lista todos los usuarios activos del sistema
+    - Ejemplo de respuesta con múltiples usuarios y todos los campos
+    - Campos explicados: email, nombreCompleto, rol, falla, telefono, direccion, ciudad, codigoPostal, timestamps
+    - Ejemplos de integración: cURL, JavaScript/Electron, Kotlin/Android
+    - Notas: solo usuarios activos (activo = true), sin paginación
+
+### Technical Details
+- Endpoint: `GET /api/usuarios`
+- Autenticación: JWT Bearer token requerido
+- Controlador: `UsuarioController.listar()` → `UsuarioService.listarActivos()`
+- Filtro: Solo devuelve usuarios con campo `activo = true`
+- Respuesta: Array de UsuarioDTO con 14 campos completos
+- Sin paginación: Devuelve todos los usuarios activos en una sola llamada
+
+### Developer Notes
+- **Desktop (Electron)**: Útil para directorios de falleros o buscadores de usuarios
+- **Mobile (Android)**: Implementar cache local para evitar llamadas excesivas
+- **Seguridad**: Endpoint protegido, requiere usuario autenticado (cualquier rol)
+- **Performance**: Sin paginación actualmente, considerar limitar si > 1000 usuarios
+
+---
+
 ## [0.5.6] - 2026-02-06 📝 DOCUMENTACIÓN CAMPOS USUARIO AMPLIADA
 
 ### Updated

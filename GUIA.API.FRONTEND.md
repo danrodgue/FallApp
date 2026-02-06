@@ -1022,8 +1022,118 @@ async function obtenerUbicacionFalla(idFalla) {
 
 ### USUARIOS
 
-#### GET /api/usuarios - Listar usuarios
-**Autenticación:** Requerida
+#### GET /api/usuarios - Listar usuarios activos
+**Autenticación:** Requerida (JWT Bearer token)
+
+**Descripción:** Obtiene la lista completa de todos los usuarios activos en el sistema. Devuelve información de perfil público de cada usuario incluyendo email, nombre completo, rol, falla asociada y datos de contacto (si están disponibles).
+
+**Headers:**
+```http
+Authorization: Bearer {token}
+```
+
+**Response (200 OK):**
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": [
+    {
+      "idUsuario": 1,
+      "email": "gautier@gmsil.com",
+      "nombreCompleto": "Gautier Bastidas",
+      "rol": "usuario",
+      "idFalla": null,
+      "nombreFalla": null,
+      "activo": true,
+      "telefono": null,
+      "direccion": null,
+      "ciudad": null,
+      "codigoPostal": null,
+      "fechaCreacion": "2026-02-04T21:14:50.363445",
+      "fechaActualizacion": "2026-02-06T07:29:28.121648"
+    },
+    {
+      "idUsuario": 2,
+      "email": "admin@fallapp.com",
+      "nombreCompleto": "Administrador FallApp",
+      "rol": "usuario",
+      "idFalla": 1,
+      "nombreFalla": "Falla Convento Jerusalén",
+      "activo": true,
+      "telefono": "+34961234567",
+      "direccion": "Calle Mayor 123, 3º A",
+      "ciudad": "Valencia",
+      "codigoPostal": "46001",
+      "fechaCreacion": "2026-02-04T21:22:19.283451",
+      "fechaActualizacion": "2026-02-06T09:34:36.281842"
+    }
+  ],
+  "timestamp": "2026-02-06T10:00:00"
+}
+```
+
+**Campos devueltos por usuario:**
+- `idUsuario`: ID único del usuario
+- `email`: Correo electrónico
+- `nombreCompleto`: Nombre completo
+- `rol`: Rol del usuario (ej: "usuario", "admin")
+- `idFalla`: ID de la falla asociada (null si no tiene)
+- `nombreFalla`: Nombre de la falla asociada (null si no tiene)
+- `activo`: Indica si el usuario está activo
+- `telefono`: Teléfono de contacto (opcional, puede ser null)
+- `direccion`: Dirección postal (opcional, puede ser null)
+- `ciudad`: Ciudad de residencia (opcional, puede ser null)
+- `codigoPostal`: Código postal (opcional, puede ser null)
+- `fechaCreacion`: Fecha de registro
+- `fechaActualizacion`: Fecha de última actividad
+
+**Notas:**
+- Solo devuelve usuarios con `activo = true`
+- Usuarios desactivados no aparecen en el listado
+- No hay paginación (devuelve todos los usuarios activos)
+- Útil para directorios de falleros, búsquedas de usuarios, estadísticas
+
+**Ejemplo cURL:**
+```bash
+curl http://35.180.21.42:8080/api/usuarios \
+  -H "Authorization: Bearer TU_TOKEN_AQUI"
+```
+
+**Ejemplo JavaScript:**
+```javascript
+async function obtenerUsuarios() {
+  const token = localStorage.getItem('jwt_token');
+  
+  const response = await fetch(`${API_BASE_URL}/api/usuarios`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+  
+  const data = await response.json();
+  
+  if (data.exito) {
+    console.log(`Total usuarios activos: ${data.datos.length}`);
+    return data.datos;
+  }
+}
+```
+
+**Ejemplo Kotlin (Android):**
+```kotlin
+@GET("/api/usuarios")
+suspend fun listarUsuarios(
+    @Header("Authorization") token: String
+): ApiResponse<List<UsuarioDTO>>
+
+// Uso:
+val response = api.listarUsuarios("Bearer $token")
+if (response.exito) {
+    val usuarios = response.datos
+    println("Total usuarios: ${usuarios?.size}")
+}
+```
 
 ---
 
