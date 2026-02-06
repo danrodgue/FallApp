@@ -34,7 +34,8 @@ class MapViewModel(
      */
     fun loadFallas() {
         viewModelScope.launch {
-            getFallasUseCase(forceRefresh = false).collect { result ->
+            // Forzamos refresh para asegurar que tenemos todas las fallas (≈260)
+            getFallasUseCase(forceRefresh = true).collect { result ->
                 when (result) {
                     is Result.Loading -> {
                         _uiState.update { it.copy(isLoading = true, errorMessage = null) }

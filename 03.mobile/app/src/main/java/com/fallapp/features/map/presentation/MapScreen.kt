@@ -54,6 +54,7 @@ fun MapScreen(
     onFallaClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     hideBackButton: Boolean = false,
+    focusFallaId: Long? = null,
     viewModel: MapViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -143,7 +144,23 @@ fun MapScreen(
                         }
                         mapView.overlays.add(marker)
                     }
-                    
+
+                    // Si tenemos una falla objetivo, centrar el mapa en ella
+                    val targetFalla = focusFallaId?.let { id ->
+                        uiState.fallas.firstOrNull { it.idFalla == id }
+                    }
+                    targetFalla?.let { falla ->
+                        val lat = falla.ubicacion.latitud
+                        val lng = falla.ubicacion.longitud
+                        if (lat != null && lng != null) {
+                            val point = GeoPoint(lat, lng)
+                            mapView.controller.setZoom(17.0)
+                            mapView.controller.setCenter(point)
+                            // Marcar esta falla como seleccionada para mostrar la tarjeta inferior
+                            viewModel.onFallaSelected(falla)
+                        }
+                    }
+
                     mapView.invalidate()
                 }
             )

@@ -34,6 +34,9 @@ sealed class Screen(val route: String) {
     
     // Mapa
     data object Map : Screen("map")
+    data object MapFocus : Screen("map/{fallaId}") {
+        fun createRoute(fallaId: Long) = "map/$fallaId"
+    }
     
     // Profile
     data object Profile : Screen("profile")

@@ -1,5 +1,9 @@
 package com.fallapp.features.votos.presentation
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,18 +12,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.draw.clip
 import coil.compose.AsyncImage
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.model.TipoVoto
 import com.fallapp.features.fallas.domain.model.Voto
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -104,7 +112,7 @@ fun VotosScreen(
     ) { padding ->
         when (selectedTab) {
             0 -> VotarTab(
-                fallas = uiState.fallas,
+                fallas = uiState.fallasParaVotar,
                 isLoading = uiState.isLoading,
                 onVoteClick = { falla, tipoVoto ->
                     viewModel.votar(falla, tipoVoto)
@@ -146,45 +154,205 @@ private fun VotarTab(
     onFallaClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        if (isLoading && fallas.isEmpty()) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
-        } else if (fallas.isEmpty()) {
-            Text(
-                text = "No hay fallas disponibles",
-                modifier = Modifier.align(Alignment.Center),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        } else {
-            val pagerState = rememberPagerState(pageCount = { fallas.size })
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) { page ->
-                val falla = fallas[page]
-                SwipeFallaCard(
-                    falla = falla,
-                    onVoteClick = { tipoVoto -> onVoteClick(falla, tipoVoto) },
-                    onFallaClick = { onFallaClick(falla.idFalla) }
+    Column(modifier = modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Buscar tu falla") },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 4.dp)
+        ) {
+            if (isLoading && fallas.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
-            }
-
-            if (fallas.isNotEmpty()) {
+            } else if (fallas.isEmpty()) {
                 Text(
-                    text = "${pagerState.currentPage + 1} / ${fallas.size}",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "No hay fallas disponibles",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyLarge
                 )
+            } else {
+                val trimmedQuery = searchQuery.trim()
+                if (trimmedQuery.isEmpty()) {
+                    // Modo mazo aleatorio normal
+                    StackedCardDeck(
+                        fallas = fallas,
+                        onVoteClick = onVoteClick,
+                        onFallaClick = onFallaClick
+                    )
+                } else {
+                    // Modo búsqueda directa de falla
+                    val resultados = fallas.filter { falla ->
+                        falla.nombre.contains(trimmedQuery, ignoreCase = true) ||
+                                falla.seccion.contains(trimmedQuery, ignoreCase = true)
+                    }
+
+                    if (resultados.isEmpty()) {
+                        Text(
+                            text = "No se han encontrado fallas para \"$trimmedQuery\"",
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        // Mostramos una única carta con el mismo formato
+                        val falla = resultados.first()
+                        SwipeFallaCard(
+                            falla = falla,
+                            onVoteClick = { tipoVoto -> onVoteClick(falla, tipoVoto) },
+                            onFallaClick = { onFallaClick(falla.idFalla) }
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+/**
+ * Pila de cartas tipo "Tinder" con swipe horizontal.
+ *
+ * Implementación simplificada y fluida:
+ * - Solo hay UNA carta en el árbol de nodos.
+ * - Al hacer swipe suficiente, la carta actual sale por un lado y la siguiente entra suavemente desde el lado contrario.
+ */
+@Composable
+private fun StackedCardDeck(
+    fallas: List<Falla>,
+    onVoteClick: (Falla, TipoVoto) -> Unit,
+    onFallaClick: (Long) -> Unit
+) {
+    if (fallas.isEmpty()) return
+
+    val scope = rememberCoroutineScope()
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    val activeOffsetX = remember { Animatable(0f) }
+    val activeScale = remember { Animatable(1f) }
+
+    val swipeThreshold = 150f
+    val screenWidth = 800f // valor aproximado para animación de salida
+
+    fun computeNextIndex(direction: Float): Int =
+        if (direction >= 0f) {
+            // Swipe a la derecha → siguiente
+            (currentIndex + 1) % fallas.size
+        } else {
+            // Swipe a la izquierda → anterior
+            (currentIndex - 1 + fallas.size) % fallas.size
+        }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        val activeFalla = fallas[currentIndex]
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    translationX = activeOffsetX.value
+                    scaleX = activeScale.value
+                    scaleY = activeScale.value
+                }
+                .zIndex(10f)
+                .pointerInput(fallas, currentIndex) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                activeOffsetX.snapTo(activeOffsetX.value + dragAmount)
+                                val normalized = (activeOffsetX.value / screenWidth).coerceIn(-1f, 1f)
+                                activeScale.snapTo(1f - 0.05f * kotlin.math.abs(normalized))
+                            }
+                        },
+                        onDragEnd = {
+                            scope.launch {
+                                val shouldSwipe = kotlin.math.abs(activeOffsetX.value) > swipeThreshold
+                                val direction = if (activeOffsetX.value >= 0f) 1f else -1f
+
+                                if (shouldSwipe) {
+                                    // 1) Animar carta actual hacia afuera
+                                    activeOffsetX.animateTo(
+                                        targetValue = direction * screenWidth,
+                                        animationSpec = tween(
+                                            durationMillis = 260,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+
+                                    // 2) Cambiar índice a la siguiente carta
+                                    currentIndex = computeNextIndex(direction)
+
+                                    // 3) Preparar entrada de la nueva carta desde el lado opuesto
+                                    activeOffsetX.snapTo(-direction * screenWidth * 0.5f)
+                                    activeScale.snapTo(0.9f)
+
+                                    // 4) Animar nueva carta al centro
+                                    activeOffsetX.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(
+                                            durationMillis = 280,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                    activeScale.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(
+                                            durationMillis = 280,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                } else {
+                                    // Volver al centro sin cambiar de carta
+                                    activeOffsetX.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(
+                                            durationMillis = 220,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                    activeScale.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(
+                                            durationMillis = 220,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+        ) {
+            SwipeFallaCard(
+                falla = activeFalla,
+                onVoteClick = { tipoVoto -> onVoteClick(activeFalla, tipoVoto) },
+                onFallaClick = { onFallaClick(activeFalla.idFalla) }
+            )
+        }
+
+        // Contador de cartas (igual estilo que te gustaba: posición / total)
+        Text(
+            text = "${currentIndex + 1} / ${fallas.size}",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -249,7 +417,8 @@ private fun SwipeFallaCard(
                     contentDescription = "Imagen de ${falla.nombre}",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium),
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -335,17 +504,17 @@ private fun SwipeFallaCard(
                         ) {
                             Text(
                                 text = when (tipoVoto) {
-                                    TipoVoto.INGENIOSO -> "😄"
-                                    TipoVoto.CRITICO -> "💭"
-                                    TipoVoto.ARTISTICO -> "🎨"
+                                    TipoVoto.INGENIOSO -> "🏆"
+                                    TipoVoto.CRITICO -> "😄"
+                                    TipoVoto.ARTISTICO -> "🧪"
                                 },
                                 style = MaterialTheme.typography.titleMedium
                             )
                             Text(
                                 text = when (tipoVoto) {
-                                    TipoVoto.INGENIOSO -> "Ingenioso"
-                                    TipoVoto.CRITICO -> "Crítico"
-                                    TipoVoto.ARTISTICO -> "Artístico"
+                                    TipoVoto.INGENIOSO -> "Mejor Falla"
+                                    TipoVoto.CRITICO -> "Ingenio y Gracia"
+                                    TipoVoto.ARTISTICO -> "Mejor Experimental"
                                 },
                                 style = MaterialTheme.typography.labelSmall
                             )
@@ -465,14 +634,18 @@ private fun MiVotoCard(
                 ) {
                     Text(
                         text = when (voto.tipoVoto) {
-                            TipoVoto.INGENIOSO -> "😄"
-                            TipoVoto.CRITICO -> "💭"
-                            TipoVoto.ARTISTICO -> "🎨"
+                            TipoVoto.INGENIOSO -> "🏆"
+                            TipoVoto.CRITICO -> "😄"
+                            TipoVoto.ARTISTICO -> "🧪"
                         },
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
-                        text = voto.tipoVoto.getDisplayName().replace("😄 ", "").replace("💭 ", "").replace("🎨 ", ""),
+                        text = when (voto.tipoVoto) {
+                            TipoVoto.INGENIOSO -> "Mejor Falla"
+                            TipoVoto.CRITICO -> "Ingenio y Gracia"
+                            TipoVoto.ARTISTICO -> "Mejor Experimental"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )

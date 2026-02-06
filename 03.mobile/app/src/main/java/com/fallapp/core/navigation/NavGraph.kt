@@ -129,6 +129,20 @@ fun NavGraph(
                 }
             )
         }
+
+        // Mapa centrado en una falla concreta
+        composable(Screen.MapFocus.route) { backStackEntry ->
+            val fallaId = backStackEntry.arguments?.getString("fallaId")?.toLongOrNull()
+            MapScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                },
+                onFallaClick = { id ->
+                    navController.navigate(Screen.FallaDetail.createRoute(id))
+                },
+                focusFallaId = fallaId
+            )
+        }
     }
 }
 

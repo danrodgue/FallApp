@@ -6,6 +6,7 @@ import com.fallapp.core.util.Result
 import com.fallapp.features.fallas.data.mapper.toDomain
 import com.fallapp.features.fallas.data.mapper.toEntity
 import com.fallapp.features.fallas.data.remote.FallasApiService
+import com.fallapp.features.fallas.data.remote.dto.FallaDto
 import com.fallapp.features.fallas.domain.model.Categoria
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.repository.FallasRepository
@@ -39,8 +40,8 @@ class FallasRepositoryImpl(
             val isConnected = networkMonitor.isConnected.first()
             
             if (isConnected && (forceRefresh || shouldRefresh())) {
-                // Hay conexión, obtener desde API
-                val dtos = apiService.getAllFallas()
+                // Hay conexión, obtener TODAS las fallas desde la API (paginado)
+                val dtos = fetchAllFallasFromApi()
                 
                 // Guarda en caché local
                 val entities = dtos.map { it.toEntity() }
@@ -186,5 +187,25 @@ class FallasRepositoryImpl(
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
         return earthRadiusKm * c
+    }
+
+    /**
+     * Obtiene todas las fallas de la API recorriendo todas las páginas disponibles.
+     * Esto permite superar el límite inicial de 100 y llegar a las ~260 fallas actuales.
+     */
+    private suspend fun fetchAllFallasFromApi(): List<FallaDto> {
+        val all = mutableListOf<FallaDto>()
+        var page = 0
+        val pageSize = 100
+
+        while (true) {
+            val dtos = apiService.getAllFallas(pagina = page, tamano = pageSize)
+            if (dtos.isEmpty()) break
+            all += dtos
+            if (dtos.size < pageSize) break
+            page++
+        }
+
+        return all
     }
 }
