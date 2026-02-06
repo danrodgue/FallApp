@@ -40,11 +40,11 @@ public class Voto {
     private Falla falla;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_voto", nullable = false, length = 20, columnDefinition = "tipo_voto")
+    @Column(name = "tipo_voto", nullable = false, length = 30)
     private TipoVoto tipoVoto;
 
     @CreationTimestamp
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    @Column(name = "fecha_voto", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
 
     /**
