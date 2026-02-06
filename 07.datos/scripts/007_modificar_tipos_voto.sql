@@ -1,37 +1,50 @@
 -- ============================================================================
 -- Script: 007_modificar_tipos_voto.sql
--- Descripción: Modifica el enum tipo_voto para soportar las 3 categorías
---              de votación: EXPERIMENTAL, INGENIO_Y_GRACI, MONUMENTO
+-- Descripción: Modifica el sistema de votación para soportar 3 categorías:
+--              EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
 -- Fecha: 2026-02-06
 -- Autor: Sistema
+-- Versión: 2.0 (final - compatible con Hibernate)
 -- ============================================================================
 
--- Eliminar el enum actual (solo posible porque no hay datos en votos)
--- NOTA: DROP CASCADE elimina la columna tipo_voto y la función obtener_ranking_fallas
+-- PASO 1: Eliminar constraint única anterior y función que depende del enum
+ALTER TABLE votos DROP CONSTRAINT IF EXISTS votos_id_usuario_id_falla_tipo_voto_key;
+DROP FUNCTION IF EXISTS obtener_ranking_fallas(INTEGER, tipo_voto);
+
+-- PASO 2: Eliminar el enum tipo_voto (cascade elimina la columna)
 DROP TYPE IF EXISTS tipo_voto CASCADE;
 
--- Recrear el enum con los nuevos valores
+-- PASO 3: Recrear la columna tipo_voto como VARCHAR con CHECK constraint
+--         (Compatible con Hibernate @Enumerated(EnumType.STRING))
+ALTER TABLE votos 
+    ADD COLUMN tipo_voto VARCHAR(30) NOT NULL DEFAULT 'EXPERIMENTAL';
+
+ALTER TABLE votos 
+    ALTER COLUMN tipo_voto DROP DEFAULT;
+
+-- PASO 4: Agregar constraint de validación para los 3 tipos
+ALTER TABLE votos 
+    ADD CONSTRAINT ck_votos_tipo_voto 
+    CHECK (tipo_voto IN ('EXPERIMENTAL', 'INGENIO_Y_GRACIA', 'MONUMENTO'));
+
+-- PASO 5: Hacer columna 'valor' opcional (no todos los votos necesitan rating)
+ALTER TABLE votos ALTER COLUMN valor DROP NOT NULL;
+
+-- PASO 6: Recrear índice y constraint única
+CREATE INDEX idx_votos_tipo_voto ON votos(tipo_voto);
+ALTER TABLE votos 
+    ADD CONSTRAINT votos_id_usuario_id_falla_tipo_voto_key 
+    UNIQUE (id_usuario, id_falla, tipo_voto);
+
+-- PASO 7: Recrear tipo enum solo para la función obtener_ranking_fallas
+--         (La tabla ya no lo usa, solo la función lo necesita)
 CREATE TYPE tipo_voto AS ENUM (
     'EXPERIMENTAL',
     'INGENIO_Y_GRACIA',
     'MONUMENTO'
 );
 
--- Recrear la columna tipo_voto en la tabla votos
-ALTER TABLE votos 
-    ADD COLUMN tipo_voto tipo_voto NOT NULL DEFAULT 'EXPERIMENTAL'::tipo_voto;
-
--- Eliminar el default después de crear la columna
-ALTER TABLE votos 
-    ALTER COLUMN tipo_voto DROP DEFAULT;
-
--- Recrear índice y constraint única
-CREATE INDEX idx_votos_tipo_voto ON votos(tipo_voto);
-ALTER TABLE votos 
-    ADD CONSTRAINT votos_id_usuario_id_falla_tipo_voto_key 
-    UNIQUE (id_usuario, id_falla, tipo_voto);
-
--- Recrear la función obtener_ranking_fallas con los nuevos tipos
+-- PASO 8: Recrear función obtener_ranking_fallas
 CREATE OR REPLACE FUNCTION obtener_ranking_fallas(
     p_limite INTEGER DEFAULT 10,
     p_tipo_voto tipo_voto DEFAULT 'EXPERIMENTAL'
@@ -55,7 +68,7 @@ BEGIN
         ROUND(AVG(v.valor)::numeric, 2) as rating_promedio
     FROM fallas f
     LEFT JOIN votos v ON f.id_falla = v.id_falla 
-        AND (p_tipo_voto IS NULL OR v.tipo_voto = p_tipo_voto)
+        AND (p_tipo_voto IS NULL OR v.tipo_voto::tipo_voto = p_tipo_voto)
     WHERE f.activa = true
     GROUP BY f.id_falla, f.nombre, f.seccion
     ORDER BY COUNT(v.id_voto) DESC
@@ -63,16 +76,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Verificar que todo está correcto
+-- ============================================================================
+-- VERIFICACIONES
+-- ============================================================================
 SELECT 
-    enumlabel as tipo_voto_disponible
-FROM pg_enum
-WHERE enumtypid = 'tipo_voto'::regtype
-ORDER BY enumsortorder;
+    column_name, 
+    data_type, 
+    is_nullable,
+    column_default
+FROM information_schema.columns
+WHERE table_name = 'votos'
+ORDER BY ordinal_position;
 
--- Confirmar estructura de la tabla
 \d votos
 
 -- ============================================================================
--- FIN DEL SCRIPT
+-- RESUMEN DE CAMBIOS:
+-- - tipo_voto: Cambiado de enum PostgreSQL a VARCHAR(30) con CHECK constraint
+-- - Valores: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
+-- - Compatibilidad: Ahora compatible con Hibernate @Enumerated(EnumType.STRING)
+-- - valor: Columna opcional (NULL permitido)
+-- - Constraint única: Mantiene 1 voto por usuario por falla por tipo
 -- ============================================================================
