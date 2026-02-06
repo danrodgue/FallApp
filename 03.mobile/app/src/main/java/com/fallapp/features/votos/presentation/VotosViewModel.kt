@@ -58,6 +58,7 @@ class VotosViewModel(
                         _uiState.update {
                             it.copy(
                                 fallas = result.data,
+                                fallasParaVotar = buildDeck(result.data, it.misVotos),
                                 isLoading = false
                             )
                         }
@@ -84,13 +85,19 @@ class VotosViewModel(
      */
     private fun loadMisVotos() {
         viewModelScope.launch {
-            // TODO: Obtener idUsuario desde TokenManager
-            val idUsuario = 1L // Temporal
+            // El backend obtiene el usuario a partir del token, por lo que el idUsuario es irrelevante.
+            val idUsuarioDummy = 0L
 
-            when (val result = getVotosUsuarioUseCase(idUsuario)) {
+            when (val result = getVotosUsuarioUseCase(idUsuarioDummy)) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(misVotos = result.data)
+                    }
+                    // Recalcular mazo de fallas a partir de los votos actuales
+                    _uiState.update { state ->
+                        state.copy(
+                            fallasParaVotar = buildDeck(state.fallas, result.data)
+                        )
                     }
                 }
                 is Result.Error -> {
@@ -249,6 +256,18 @@ class VotosViewModel(
             )
         }
     }
+
+    /**
+     * Construye el mazo de fallas para votar:
+     * - Excluye las ya votadas por el usuario
+     * - Baraja el orden para mostrar una secuencia aleatoria
+     */
+    private fun buildDeck(fallas: List<Falla>, misVotos: List<Voto>): List<Falla> {
+        val votedIds = misVotos.map { it.idFalla }.toSet()
+        return fallas
+            .filter { it.idFalla !in votedIds }
+            .shuffled()
+    }
 }
 
 /**
@@ -256,6 +275,7 @@ class VotosViewModel(
  */
 data class VotosUiState(
     val fallas: List<Falla> = emptyList(),
+    val fallasParaVotar: List<Falla> = emptyList(),
     val misVotos: List<Voto> = emptyList(),
     val ranking: List<Pair<Falla, Int>> = emptyList(),
     val rankingFilter: TipoVoto? = null,
