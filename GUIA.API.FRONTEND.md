@@ -1,7 +1,7 @@
 # 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
 
-**Versión:** 0.5.0  
-**Fecha:** 2026-02-02  
+**Versión:** 0.5.5  
+**Fecha:** 2026-02-04  
 **IP Pública AWS:** http://35.180.21.42:8080  
 **Entorno:** Desarrollo
 
@@ -251,39 +251,39 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
   "datos": {
     "contenido": [
       {
-        "idFalla": 1,
-        "nombre": "Falla Convento Jerusalén",
-        "seccion": "1A",
-        "fallera": "María García López",
-        "presidente": "Juan Martínez Sánchez",
-        "artista": "Manolo Martín",
-        "lema": "La Falla del Pueblo",
-        "anyoFundacion": 1942,
-        "distintivo": "Especial",
-        "urlBoceto": "https://fallapp.es/bocetos/1.jpg",
+        "idFalla": 95,
+        "nombre": "Bailén-Xàtiva",
+        "seccion": "3B",
+        "fallera": "María López Crespo",
+        "presidente": "Leovigildo Patón Sellés",
+        "artista": "ArtdeFoc Creaciones Artísticas S.L",
+        "lema": "Libérate",
+        "anyoFundacion": 1972,
+        "distintivo": "Brillants (2012)",
+        "urlBoceto": "http://mapas.valencia.es/WebsMunicipales/layar/img/fallasvalencia/2025_088_bm.jpg",
         "experim": false,
-        "latitud": 39.4699,
-        "longitud": -0.3763,
-        "descripcion": "Falla tradicional del centro de Valencia",
-        "webOficial": "https://fallaconvento.com",
-        "telefonoContacto": "+34961234567",
-        "emailContacto": "info@fallaconvento.com",
-        "categoria": "ESPECIAL",
-        "totalEventos": 12,
-        "totalNinots": 8,
-        "totalMiembros": 245,
-        "fechaCreacion": "2025-01-15T10:00:00",
-        "fechaActualizacion": "2026-01-20T14:30:00"
+        "latitud": 39.46758519,
+        "longitud": -0.37761259,
+        "descripcion": null,
+        "webOficial": null,
+        "telefonoContacto": null,
+        "emailContacto": null,
+        "categoria": "sin_categoria",
+        "totalEventos": 0,
+        "totalNinots": 0,
+        "totalMiembros": 0,
+        "fechaCreacion": "2026-02-04T19:24:52.288945",
+        "fechaActualizacion": "2026-02-04T19:24:52.288945"
       }
     ],
     "paginaActual": 0,
-    "totalElementos": 347,
+    "totalElementos": 351,
     "totalPaginas": 18,
     "tamano": 20,
     "esUltima": false,
     "esPrimera": true
   },
-  "timestamp": "2026-02-01T18:30:00"
+  "timestamp": "2026-02-04T19:30:00"
 }
 ```
 
@@ -298,15 +298,29 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 {
   "exito": true,
   "datos": {
-    "idFalla": 1,
-    "nombre": "Falla Convento Jerusalén",
-    "seccion": "1A",
-    "presidente": "Juan Martínez Sánchez",
-    "anyoFundacion": 1942,
-    "latitud": 39.4699,
-    "longitud": -0.3763,
-    "categoria": "ESPECIAL",
-    "totalEventos": 12
+    "idFalla": 95,
+    "nombre": "Bailén-Xàtiva",
+    "seccion": "3B",
+    "fallera": "María López Crespo",
+    "presidente": "Leovigildo Patón Sellés",
+    "artista": "ArtdeFoc Creaciones Artísticas S.L",
+    "lema": "Libérate",
+    "anyoFundacion": 1972,
+    "distintivo": "Brillants (2012)",
+    "urlBoceto": "http://mapas.valencia.es/WebsMunicipales/layar/img/fallasvalencia/2025_088_bm.jpg",
+    "experim": false,
+    "latitud": 39.46758519,
+    "longitud": -0.37761259,
+    "descripcion": null,
+    "webOficial": null,
+    "telefonoContacto": null,
+    "emailContacto": null,
+    "categoria": "sin_categoria",
+    "totalEventos": 0,
+    "totalNinots": 0,
+    "totalMiembros": 0,
+    "fechaCreacion": "2026-02-04T19:24:52.288945",
+    "fechaActualizacion": "2026-02-04T19:24:52.288945"
   }
 }
 ```
@@ -1758,6 +1772,10 @@ http://35.180.21.42:8080/v3/api-docs
 
 ---
 
-**Última actualización:** 2026-02-01  
-**Versión API:** 0.4.1  
-**Estado:** Desarrollo activo
+**Última actualización:** 2026-02-04  
+**Versión API:** 0.5.5  
+**Estado:** Desarrollo activo  
+**Cambios recientes:**
+- ✅ API devuelve TODOS los campos de fallas (fallera, artista, lema, distintivo, urlBoceto, experim, descripcion, webOficial, telefonoContacto, emailContacto)
+- ✅ UsuarioDTO incluye campos de dirección (direccion, ciudad, codigoPostal)
+- ✅ Base de datos: 351 fallas con 100% cobertura GPS

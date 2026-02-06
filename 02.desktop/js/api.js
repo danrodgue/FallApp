@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8080/api/fallas';
+const API_URL = 'http://35.180.21.42:8080/api/fallas';
 
 // Obtener todas las fallas
 async function obtenerFallas() {

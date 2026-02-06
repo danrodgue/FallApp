@@ -5,8 +5,8 @@ import com.fallapp.core.database.dao.UsuarioDao
 import com.fallapp.core.database.entity.UsuarioEntity
 import com.fallapp.core.util.Result
 import com.fallapp.core.util.TokenManager
-import com.fallapp.features.auth.data.api.AuthApiService
-import com.fallapp.features.auth.data.dto.toDomain
+import com.fallapp.features.auth.data.mapper.toDomain
+import com.fallapp.features.auth.data.remote.AuthApiService
 import com.fallapp.features.auth.domain.model.AuthToken
 import com.fallapp.features.auth.domain.model.User
 import com.fallapp.features.auth.domain.model.UserRole

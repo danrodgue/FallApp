@@ -5,6 +5,93 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.5] - 2026-02-04 ✅ API ACTUALIZADA - TODOS LOS CAMPOS VISIBLES
+
+### Changed
+- **API REST - FallaDTO actualizado**
+  - ✅ GET /api/fallas ahora devuelve TODOS los campos de fallas
+  - ✅ GET /api/fallas/{id} incluye campos completos
+  - ✅ Campos añadidos a respuestas: fallera, artista, lema, distintivo, urlBoceto, experim, descripcion, webOficial, telefonoContacto, emailContacto
+  - ✅ UsuarioDTO incluye direccion, ciudad, codigoPostal
+
+### Updated
+- **Backend Service**
+  - FallaService.convertirADTO(): Mapper actualizado con 9 campos adicionales
+  - UsuarioService.convertirADTO(): Mapper actualizado con 3 campos de dirección
+  - Backend recompilado con Java 17
+  - Servicio reiniciado exitosamente
+
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Actualizado a v0.5.5 con ejemplos completos de respuestas
+  - Ejemplos de GET /api/fallas reflejan estructura real con 351 fallas
+
+### Technical Details
+- Compilación: Maven clean package con JAVA_HOME Java 17
+- JAR generado: Fallapp-0.0.1-SNAPSHOT.jar (66MB)
+- Estado: Backend activo, API operativa
+- Testing: Verificado endpoint /api/fallas/95 con todos los campos
+
+### Developer Notes
+**Para equipos Mobile y Desktop:**
+Actualizar parsers JSON para incluir los nuevos campos de FallaDTO:
+- `fallera` (String, nullable)
+- `artista` (String, nullable)
+- `lema` (String)
+- `distintivo` (String)
+- `urlBoceto` (String, URL a imagen)
+- `experim` (Boolean)
+- `descripcion` (String, nullable)
+- `webOficial` (String, nullable)
+- `telefonoContacto` (String, nullable)
+- `emailContacto` (String, nullable)
+
+Ver `GUIA.API.FRONTEND.md` sección "Endpoints Públicos > FALLAS" para ejemplos completos.
+
+---
+
+## [0.5.4] - 2026-02-04 ✅ REESTRUCTURACIÓN COMPLETA BASE DE DATOS
+
+### Changed
+- **FALLAS - Reestructuración completa de datos**
+  - ✅ Eliminados 347 registros antiguos con campos incompletos
+  - ✅ Insertados 351 registros completos desde JSON original
+  - ✅ Cobertura GPS: 99.71% → 100% (351/351 fallas)
+  - ✅ +4 fallas adicionales del dataset completo
+  - ✅ Datos de fallera, artista, lema, distintivo completados
+  - ✅ Respeto de valores NULL intencionales ("NO HAY" en fallera)
+
+### Added
+- **USUARIOS - Nuevos campos de dirección**
+  - Campo `direccion` VARCHAR(255)
+  - Campo `ciudad` VARCHAR(100)
+  - Campo `codigo_postal` VARCHAR(10)
+  - Índice `idx_usuarios_ciudad` para búsquedas
+
+- **Scripts de migración**
+  - `07.datos/scripts/generar_insert_fallas.py`: Generador automático de SQL desde JSONL
+  - `07.datos/scripts/03.insertar_351_fallas_completo.sql`: SQL con 351 INSERT statements
+  - `07.datos/scripts/02.reestructurar_fallas_completo.sql`: Documentación del proceso
+
+### Updated
+- **Documentación**
+  - `04.docs/DB.SCHEMA.md`: Actualizado a versión 1.1 con estadísticas actuales
+  - Diagramas ERD y ASCII actualizados (347 → 351 registros)
+  - `MIGRACION.DB.2026-02-04.md`: Documento completo de migración con rollback
+  
+### Technical Details
+- Proceso: TRUNCATE CASCADE + INSERT (5 segundos)
+- Impacto: Eliminación temporal de usuarios y ninots (restauración pendiente)
+- Verificado: 351 fallas, 100% con GPS, integridad referencial OK
+- Backend: Requiere recompilación para reconocer nuevos campos de Usuario
+
+### Breaking Changes
+⚠️ **IMPORTANTE**: Esta migración ejecutó TRUNCATE CASCADE, eliminando:
+- 13 registros de USUARIOS (restaurar manualmente)
+- 346 registros de NINOTS (restaurar desde backup)
+- Ver `MIGRACION.DB.2026-02-04.md` para detalles de rollback
+
+---
+
 ## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL + BACKEND ACTUALIZADO
 
 ### Added

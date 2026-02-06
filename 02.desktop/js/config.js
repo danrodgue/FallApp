@@ -10,7 +10,7 @@
     cfg = null;
   }
 
-  const defaultBase = 'http://127.0.0.1:8080';
+  const defaultBase = 'http://35.180.21.42:8080';
   const apiBase = (cfg && cfg.apiBase) ? cfg.apiBase : defaultBase;
 
   window._API_BASE = window._API_BASE || apiBase;

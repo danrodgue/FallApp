@@ -1,9 +1,9 @@
 package com.fallapp.features.fallas.data.repository
 
 import com.fallapp.core.util.Result
-import com.fallapp.features.fallas.data.api.VotosApiService
-import com.fallapp.features.fallas.data.dto.toDomain
-import com.fallapp.features.fallas.data.dto.toDto
+import com.fallapp.features.fallas.data.mapper.toDomain
+import com.fallapp.features.fallas.data.mapper.toDto
+import com.fallapp.features.fallas.data.remote.VotosApiService
 import com.fallapp.features.fallas.domain.model.Voto
 import com.fallapp.features.fallas.domain.model.VotoRequest
 import com.fallapp.features.fallas.domain.repository.VotosRepository

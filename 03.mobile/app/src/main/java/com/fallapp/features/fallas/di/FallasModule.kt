@@ -1,7 +1,7 @@
 package com.fallapp.features.fallas.di
 
-import com.fallapp.features.fallas.data.api.FallasApiService
-import com.fallapp.features.fallas.data.api.VotosApiService
+import com.fallapp.features.fallas.data.remote.FallasApiService
+import com.fallapp.features.fallas.data.remote.VotosApiService
 import com.fallapp.features.fallas.data.repository.FallasRepositoryImpl
 import com.fallapp.features.fallas.data.repository.VotosRepositoryImpl
 import com.fallapp.features.fallas.domain.repository.FallasRepository

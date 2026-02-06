@@ -1,6 +1,6 @@
 package com.fallapp.features.auth.di
 
-import com.fallapp.features.auth.data.api.AuthApiService
+import com.fallapp.features.auth.data.remote.AuthApiService
 import com.fallapp.features.auth.data.repository.AuthRepositoryImpl
 import com.fallapp.features.auth.domain.repository.AuthRepository
 import com.fallapp.features.auth.domain.usecase.LoginUseCase
@@ -25,7 +25,7 @@ import org.koin.dsl.module
  */
 val authModule = module {
     
-    // API Service
+    // Data / Remote - API Service
     single<AuthApiService> {
         AuthApiService(httpClient = get())
     }
