@@ -5,6 +5,60 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.8] - 2026-02-06 🗳️ NUEVOS TIPOS DE VOTO - CATEGORÍAS DE FALLAS
+
+### Changed
+- **Base de Datos**
+  - Enum `tipo_voto` redefinido con 3 nuevas categorías:
+    - `EXPERIMENTAL` - Voto para categoría Experimental
+    - `INGENIO_Y_GRACIA` - Voto para categoría Ingenio y Gracia
+    - `MONUMENTO` - Voto para categoría Monumento
+  - Función `obtener_ranking_fallas()` actualizada con default 'EXPERIMENTAL'
+  - Constraint única mantiene: 1 voto por usuario por falla por tipo
+  - Script de migración: `007_modificar_tipos_voto.sql`
+
+- **Backend (Spring Boot)**
+  - `Voto.java`: Enum `TipoVoto` actualizado (EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO)
+  - `CrearVotoRequest.java`: Pattern de validación actualizado
+  - `VotoService.java`: Lógica de votación adaptada a nuevos tipos
+  - Backend recompilado y reiniciado con Java 17
+
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: POST /api/votos actualizado con nuevos tipos
+    - Ejemplos de request/response con categorías actualizadas
+    - Documentación de JavaScript/Electron actualizada
+    - Documentación de Kotlin/Android actualizada
+    - Ejemplos de cURL actualizados
+
+### Technical Details
+- **Migración SQL**: DROP CASCADE del enum anterior (tabla votos estaba vacía)
+- **Tipos anteriores eliminados**: favorito, ingenioso, critico, artistico, rating
+- **Tipos nuevos**: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
+- **Formato**: Enum PostgreSQL con validación a nivel de BD
+- **Validación Backend**: Pattern regexp en @Valid de CrearVotoRequest
+- **Compatibilidad**: Breaking change - clientes deben actualizar tipos de voto
+
+### Impact
+- ⚠️ **Breaking Change**: Aplicaciones móviles/desktop deben actualizar valores de tipoVoto
+- ✅ Sin pérdida de datos: tabla votos estaba vacía antes de migración
+- ✅ Función de ranking actualizada y funcional
+- ✅ Backend compilado y en producción con systemd
+
+### Migration Notes
+- **Desktop App**: Actualizar UI de votación con 3 botones: "Experimental", "Ingenio y Gracia", "Monumento"
+- **Mobile App**: Actualizar strings de tipos de voto en código Kotlin
+- **Frontend**: Cambiar valores de tipoVoto en formularios de voto
+- **Testing**: Verificar constraint única (1 voto/usuario/falla/tipo)
+
+### Files Modified
+- `07.datos/scripts/007_modificar_tipos_voto.sql` - Nuevo
+- `07.datos/scripts/30.vistas.consultas.sql` - Actualizado
+- `01.backend/src/main/java/com/fallapp/model/Voto.java` - Enum actualizado
+- `01.backend/src/main/java/com/fallapp/dto/CrearVotoRequest.java` - Validación actualizada
+- `GUIA.API.FRONTEND.md` - Documentación actualizada (6 secciones)
+
+---
+
 ## [0.5.7] - 2026-02-06 📚 DOCUMENTACIÓN ENDPOINT LISTAR USUARIOS
 
 ### Updated

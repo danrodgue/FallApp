@@ -963,14 +963,14 @@ async function obtenerUbicacionFalla(idFalla) {
 ```json
 {
   "idNinot": 15,
-  "tipoVoto": "ARTISTICO"
+  "tipoVoto": "EXPERIMENTAL"
 }
 ```
 
 **Tipos de voto válidos:**
-- `"INGENIOSO"`
-- `"CRITICO"`
-- `"ARTISTICO"`
+- `"EXPERIMENTAL"` - Voto para la categoría Experimental
+- `"INGENIO_Y_GRACIA"` - Voto para la categoría Ingenio y Gracia
+- `"MONUMENTO"` - Voto para la categoría Monumento
 
 **Validaciones:**
 - Usuario solo puede votar 1 vez por falla por tipo
@@ -988,7 +988,7 @@ async function obtenerUbicacionFalla(idFalla) {
     "nombreUsuario": "María García",
     "idFalla": 23,
     "nombreFalla": "Falla Convento Jerusalén",
-    "tipoVoto": "ARTISTICO",
+    "tipoVoto": "EXPERIMENTAL",
     "fechaCreacion": "2026-02-01T19:05:00"
   }
 }
@@ -998,7 +998,7 @@ async function obtenerUbicacionFalla(idFalla) {
 ```json
 {
   "exito": false,
-  "mensaje": "Ya has votado por esta falla con tipo ARTISTICO",
+  "mensaje": "Ya has votado esta falla con el tipo: EXPERIMENTAL",
   "datos": null
 }
 ```
@@ -1451,7 +1451,7 @@ async function votarNinot(idNinot, tipoVoto) {
       },
       body: JSON.stringify({
         idNinot,
-        tipoVoto  // "INGENIOSO", "CRITICO", "ARTISTICO"
+        tipoVoto  // "EXPERIMENTAL", "INGENIO_Y_GRACIA", "MONUMENTO"
       })
     });
 
@@ -1579,7 +1579,7 @@ data class FallaDTO(
 
 data class VotoRequest(
     val idNinot: Long,
-    val tipoVoto: String  // "INGENIOSO", "CRITICO", "ARTISTICO"
+    val tipoVoto: String  // "EXPERIMENTAL", "INGENIO_Y_GRACIA", "MONUMENTO"
 )
 
 // =================================
@@ -1879,7 +1879,7 @@ curl -X POST http://35.180.21.42:8080/api/votos \
   -H "Content-Type: application/json" \
   -d '{
     "idNinot": 1,
-    "tipoVoto": "ARTISTICO"
+    "tipoVoto": "EXPERIMENTAL"
   }'
 
 # =================================

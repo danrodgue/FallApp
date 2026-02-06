@@ -51,10 +51,8 @@ public class Voto {
      * Enum para tipos de voto
      */
     public enum TipoVoto {
-        favorito,
-        ingenioso,
-        critico,
-        artistico,
-        rating
+        EXPERIMENTAL,
+        INGENIO_Y_GRACIA,
+        MONUMENTO
     }
 }
