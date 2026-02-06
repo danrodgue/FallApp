@@ -213,7 +213,7 @@ class FallaDetailViewModel(
     fun resetVoteSuccess() {
         _uiState.update { it.copy(voteSuccess = false) }
     }
-    
+        
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
     }
