@@ -131,7 +131,7 @@ erDiagram
         int id_voto PK
         int id_usuario FK "NOT NULL"
         int id_falla FK "NOT NULL"
-        enum tipo_voto "NOT NULL"
+        enum tipo_voto "NOT NULL: EXPERIMENTAL | INGENIO_Y_GRACIA | MONUMENTO"
         int valor "1-5"
         timestamptz fecha_voto
     }
@@ -240,7 +240,7 @@ TIPOS ENUM:
 ├─► categoria_falla: {brillants, fulles, argent, especial, sin_categoria}
 ├─► rol_usuario: {admin, casal, usuario}
 ├─► tipo_evento: {plantà, cremà, ofrenda, encuentro, concierto, teatro, otro}
-└─► tipo_voto: {me_gusta, mejor_ninot, mejor_tema, rating}
+└─► tipo_voto: {EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO}
 ```
 
 ---
@@ -654,7 +654,7 @@ Sistema de votación múltiple por tipo de voto.
 | **id_voto** | INTEGER | PK, NOT NULL, AUTO | Identificador único |
 | **id_usuario** | INTEGER | FK, NOT NULL | Usuario votante |
 | **id_falla** | INTEGER | FK, NOT NULL | Falla votada |
-| **tipo_voto** | tipo_voto | NOT NULL | Tipo: me_gusta, mejor_ninot, mejor_tema, rating |
+| **tipo_voto** | tipo_voto | NOT NULL | Categoría: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO |
 | **valor** | INTEGER | NOT NULL, CHECK(1-5) | Valor del voto (1-5) |
 | **comentario** | TEXT | NULL | Comentario opcional |
 | **ip_origen** | VARCHAR(45) | NULL | IP del votante (IPv4/IPv6) |
@@ -706,11 +706,14 @@ Tipos de eventos organizados:
 - `otro` - Otro tipo de evento
 
 ### tipo_voto
-Tipos de votación disponibles:
-- `me_gusta` - Me gusta general
-- `mejor_ninot` - Voto al mejor ninot
-- `mejor_tema` - Voto al mejor tema
-- `rating` - Valoración general (1-5)
+**Última actualización:** 2026-02-06 (v0.5.8)
+
+Categorías de votación para fallas:
+- `EXPERIMENTAL` - Categoría Experimental
+- `INGENIO_Y_GRACIA` - Categoría Ingenio y Gracia
+- `MONUMENTO` - Categoría Monumento
+
+**Nota:** Los tipos anteriores (me_gusta, mejor_ninot, mejor_tema, rating) fueron reemplazados en la versión 0.5.8.
 
 ---
 
