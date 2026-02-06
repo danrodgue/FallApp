@@ -21,7 +21,7 @@ val fallasModule = module {
     
     // Data Layer - API
     single { FallasApiService(httpClient = get()) }
-    single { VotosApiService(client = get()) }
+    single { VotosApiService(client = get(), tokenManager = get()) }
     
     // Data Layer - Repository
     single<FallasRepository> {

@@ -31,7 +31,7 @@ fun FallaDto.toDomain(): Falla {
         ),
         descripcion = descripcion,
         historia = null,
-        imagenes = emptyList(),
+        imagenes = listOfNotNull(urlBoceto),
         contacto = if (hasContactInfo()) {
             Contacto(
                 telefono = telefonoContacto,
@@ -102,7 +102,7 @@ fun FallaEntity.toDomain(): Falla {
         ),
         descripcion = descripcion,
         historia = null,
-        imagenes = emptyList(),
+        imagenes = listOfNotNull(urlBoceto),
         contacto = if (telefonoContacto != null || emailContacto != null || webOficial != null) {
             Contacto(
                 telefono = telefonoContacto,

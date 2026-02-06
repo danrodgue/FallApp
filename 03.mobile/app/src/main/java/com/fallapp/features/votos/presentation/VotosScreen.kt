@@ -10,9 +10,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import coil.compose.AsyncImage
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.model.TipoVoto
 import com.fallapp.features.fallas.domain.model.Voto
@@ -154,29 +158,41 @@ private fun VotarTab(
                 style = MaterialTheme.typography.bodyLarge
             )
         } else {
-            LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(fallas) { falla ->
-                    FallaVotarCard(
-                        falla = falla,
-                        onVoteClick = { tipoVoto ->
-                            onVoteClick(falla, tipoVoto)
-                        },
-                        onFallaClick = { onFallaClick(falla.idFalla) }
-                    )
-                }
+            val pagerState = rememberPagerState(pageCount = { fallas.size })
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) { page ->
+                val falla = fallas[page]
+                SwipeFallaCard(
+                    falla = falla,
+                    onVoteClick = { tipoVoto -> onVoteClick(falla, tipoVoto) },
+                    onFallaClick = { onFallaClick(falla.idFalla) }
+                )
+            }
+
+            if (fallas.isNotEmpty()) {
+                Text(
+                    text = "${pagerState.currentPage + 1} / ${fallas.size}",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
 }
 
 /**
- * Card de falla para votar.
+ * Carta tipo "Tinder" para votar una falla.
  */
 @Composable
-private fun FallaVotarCard(
+private fun SwipeFallaCard(
     falla: Falla,
     onVoteClick: (TipoVoto) -> Unit,
     onFallaClick: () -> Unit
@@ -210,9 +226,13 @@ private fun FallaVotarCard(
     }
 
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxSize(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
         elevation = CardDefaults.elevatedCardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 8.dp
         )
     ) {
         Column(
@@ -220,24 +240,77 @@ private fun FallaVotarCard(
                 .clickable(onClick = onFallaClick)
                 .padding(16.dp)
         ) {
+            // Imagen principal de la falla
+            val imageUrl = falla.imagenes.firstOrNull()
+
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Imagen de ${falla.nombre}",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sin imagen disponible",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Información de la falla
             Text(
                 text = falla.nombre,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = falla.seccion,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+            falla.descripcion?.let {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Enlace al mapa
+            TextButton(
+                onClick = onFallaClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Ver en el mapa")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botones de votación
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

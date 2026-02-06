@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
@@ -22,10 +24,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
 import com.fallapp.features.fallas.presentation.list.FallasListScreen
 import com.fallapp.features.map.presentation.MapScreen
@@ -45,6 +50,8 @@ fun MainScreen(
     navController: NavHostController
 ) {
     var selectedItem by rememberSaveable { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState(initialPage = 0) { 4 }
+    val scope = rememberCoroutineScope()
     
     val items = listOf(
         BottomNavItem("Mapa", Icons.Default.LocationOn),
@@ -61,43 +68,57 @@ fun MainScreen(
                         icon = { Icon(item.icon, contentDescription = item.label) },
                         label = { Text(item.label) },
                         selected = selectedItem == index,
-                        onClick = { selectedItem = index }
+                        onClick = {
+                            selectedItem = index
+                            scope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        }
                     )
                 }
             }
         }
     ) { padding ->
-        when (selectedItem) {
-            0 -> MapScreen(
-                onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
-                onFallaClick = { fallaId ->
-                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
-                },
-                modifier = Modifier.padding(padding),
-                hideBackButton = true
-            )
-            1 -> FallasListScreen(
-                onFallaClick = { fallaId ->
-                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
-                },
-                onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
-                modifier = Modifier.padding(padding),
-                hideBackButton = true
-            )
-            2 -> VotosScreen(
-                onFallaClick = { fallaId ->
-                    navController.navigate(Screen.FallaDetail.createRoute(fallaId))
-                },
-                modifier = Modifier.padding(padding)
-            )
-            3 -> ProfileTab(
-                onLogout = {
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                modifier = Modifier.padding(padding)
-            )
+        LaunchedEffect(pagerState.currentPage) {
+            selectedItem = pagerState.currentPage
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.padding(padding)
+        ) { page ->
+            when (page) {
+                0 -> MapScreen(
+                    onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
+                    onFallaClick = { fallaId ->
+                        navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    hideBackButton = true
+                )
+                1 -> FallasListScreen(
+                    onFallaClick = { fallaId ->
+                        navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                    },
+                    onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
+                    modifier = Modifier.fillMaxSize(),
+                    hideBackButton = true
+                )
+                2 -> VotosScreen(
+                    onFallaClick = { fallaId ->
+                        navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+                3 -> ProfileTab(
+                    onLogout = {
+                        navController.navigate(Screen.Login.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
