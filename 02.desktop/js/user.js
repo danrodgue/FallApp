@@ -36,16 +36,10 @@ async function loadUserData() {
     currentUserId = idUsuario;
 
     // Obtener los datos del usuario específico desde la API
-    const response = await fetch(`${API_USER_URL}/${idUsuario}`);
-    
-    if (!response.ok) {
-      throw new Error(`Error al obtener datos: ${response.status}`);
-    }
-
-    const result = await response.json();
+    const response = await obtenerUsuario(idUsuario);
     
     // Manejo de diferentes formatos de respuesta
-    const userData = result.datos || result.data || result;
+    const userData = response.datos || response.data || response;
     
     if (!userData) {
       throw new Error('Usuario no encontrado');
@@ -54,7 +48,7 @@ async function loadUserData() {
     populateUserForm(userData);
   } catch (error) {
     console.error('Error loading user data:', error);
-    showErrorMessage('No se pudieron cargar los datos del usuario. Intenta de nuevo.');
+    showErrorMessage(`Error al cargar datos: ${error.message}`);
   }
 }
 
@@ -143,6 +137,32 @@ function toggleEditMode() {
   }
 }
 
+// Validar datos del usuario
+function validateUserData(formData) {
+  const errors = [];
+  
+  // Validar email
+  if (formData.email && !formData.email.includes('@')) {
+    errors.push('El email no es válido');
+  }
+  
+  // Validar teléfono (opcional pero si se proporciona debe tener formato)
+  if (formData.telefono && formData.telefono.length > 0) {
+    if (formData.telefono.replace(/\D/g, '').length < 9) {
+      errors.push('El teléfono debe tener al menos 9 dígitos');
+    }
+  }
+  
+  // Validar código postal (opcional pero si se proporciona)
+  if (formData.codigoPostal && formData.codigoPostal.length > 0) {
+    if (!/^\d{5}$/.test(formData.codigoPostal)) {
+      errors.push('El código postal debe tener 5 dígitos');
+    }
+  }
+  
+  return errors;
+}
+
 // Guardar cambios del usuario
 async function saveUserData() {
   try {
@@ -152,27 +172,29 @@ async function saveUserData() {
     }
 
     const formData = {
-      nombreCompleto: document.getElementById('userNombreCompleto').value,
-      email: document.getElementById('userEmail').value,
-      telefono: document.getElementById('userTelefono').value,
-      direccion: document.getElementById('userDireccion').value,
-      ciudad: document.getElementById('userCiudad').value,
-      codigoPostal: document.getElementById('userCodigoPostal').value,
+      nombreCompleto: document.getElementById('userNombreCompleto').value.trim(),
+      email: document.getElementById('userEmail').value.trim(),
+      telefono: document.getElementById('userTelefono').value.trim(),
+      direccion: document.getElementById('userDireccion').value.trim(),
+      ciudad: document.getElementById('userCiudad').value.trim(),
+      codigoPostal: document.getElementById('userCodigoPostal').value.trim(),
     };
 
-    // Enviar actualización al backend
-    const response = await fetch(`${API_USER_URL}/${currentUserId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!response.ok) {
-      const errorResult = await response.json();
-      throw new Error(errorResult.message || `Error al guardar: ${response.status}`);
+    // Validar datos
+    const validationErrors = validateUserData(formData);
+    if (validationErrors.length > 0) {
+      showErrorMessage(validationErrors.join('\n'));
+      return;
     }
+
+    // Mostrar indicador de carga
+    const saveBtn = document.getElementById('saveBtn');
+    const originalText = saveBtn.textContent;
+    saveBtn.textContent = 'Guardando...';
+    saveBtn.disabled = true;
+
+    // Enviar actualización utilizando la función mejorada de api.js
+    const result = await actualizarUsuario(currentUserId, formData);
 
     // Deshabilitar modo edición
     isEditing = true;
@@ -181,7 +203,14 @@ async function saveUserData() {
     showSuccessMessage('Perfil actualizado correctamente.');
   } catch (error) {
     console.error('Error saving user data:', error);
-    showErrorMessage(error.message || 'No se pudieron guardar los cambios. Intenta de nuevo.');
+    showErrorMessage(`Error al guardar: ${error.message}`);
+  } finally {
+    // Restaurar botón de guardar
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+      saveBtn.textContent = 'Guardar';
+      saveBtn.disabled = false;
+    }
   }
 }
 
@@ -196,7 +225,7 @@ function showSuccessMessage(message) {
 function showErrorMessage(message) {
   const messageDiv = createMessageElement(message, 'error');
   document.body.appendChild(messageDiv);
-  setTimeout(() => messageDiv.remove(), 4000);
+  setTimeout(() => messageDiv.remove(), 5000);
 }
 
 // Crear elemento de mensaje
@@ -212,6 +241,9 @@ function createMessageElement(message, type) {
     font-size: 14px;
     z-index: 9999;
     animation: slideIn 0.3s ease-out;
+    max-width: 400px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
     ${type === 'success' 
       ? 'background: #10b981; color: white;' 
       : 'background: #ef4444; color: white;'}

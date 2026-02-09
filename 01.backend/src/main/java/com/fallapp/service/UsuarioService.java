@@ -84,8 +84,29 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
 
-        if (dto.getNombreCompleto() != null) {
+        // Actualizar campos editables
+        if (dto.getNombreCompleto() != null && !dto.getNombreCompleto().isBlank()) {
             usuario.setNombreCompleto(dto.getNombreCompleto());
+        }
+        
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            usuario.setEmail(dto.getEmail());
+        }
+        
+        if (dto.getTelefono() != null) {
+            usuario.setTelefono(dto.getTelefono());
+        }
+        
+        if (dto.getDireccion() != null) {
+            usuario.setDireccion(dto.getDireccion());
+        }
+        
+        if (dto.getCiudad() != null) {
+            usuario.setCiudad(dto.getCiudad());
+        }
+        
+        if (dto.getCodigoPostal() != null) {
+            usuario.setCodigoPostal(dto.getCodigoPostal());
         }
 
         Usuario actualizado = usuarioRepository.save(usuario);

@@ -415,48 +415,188 @@ function formatDateForInput(dateStr) {
    return dateStr || '';
 }
 
+// Validar datos de falla
+function validateFallaData(data) {
+   const errors = [];
+   
+   if (!data.nombre || data.nombre.trim().length === 0) {
+      errors.push('El nombre de la falla es obligatorio');
+   }
+   
+   if (!data.seccion || data.seccion.trim().length === 0) {
+      errors.push('La sección es obligatoria');
+   }
+   
+   if (!data.presidente || data.presidente.trim().length === 0) {
+      errors.push('El nombre del presidente es obligatorio');
+   }
+   
+   if (data.anyoFundacion) {
+      const year = parseInt(data.anyoFundacion);
+      if (isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+         errors.push('El año de fundación debe estar entre 1900 y ' + new Date().getFullYear());
+      }
+   }
+   
+   if (data.emailContacto) {
+      if (!data.emailContacto.includes('@') || !data.emailContacto.includes('.')) {
+         errors.push('El email contacto no es válido');
+      }
+   }
+   
+   return errors;
+}
+
+// Mostrar notificación mejorada
+function showNotificationFalla(message, type = 'info') {
+   const notification = document.createElement('div');
+   notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+      max-width: 400px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      ${type === 'success' ? 'background: #10b981; color: white;' : 
+        type === 'error' ? 'background: #ef4444; color: white;' :
+        type === 'warning' ? 'background: #f59e0b; color: white;' :
+        'background: #3b82f6; color: white;'}
+   `;
+   notification.textContent = message;
+   document.body.appendChild(notification);
+   
+   const timeout = type === 'error' ? 5000 : 3000;
+   setTimeout(() => notification.remove(), timeout);
+}
+
 function saveFalla() {
-   const payload = {
-      id: document.getElementById('fallaId').value,
-      idFalla: document.getElementById('fallaId').value,
-      nombre: document.getElementById('fallaNombre').value,
-      seccion: document.getElementById('fallaSeccion').value,
-      fallera: document.getElementById('fallaFallera').value,
-      presidente: document.getElementById('fallaPresidente').value,
-      artista: document.getElementById('fallaArtista').value,
-      lema: document.getElementById('fallaLema').value,
-      webOficial: document.getElementById('fallaWebOficial').value,
-      telefonoContacto: document.getElementById('fallaTelefonoContacto').value,
-      emailContacto: document.getElementById('fallaEmailContacto').value,
-      anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || 0,
-      distintivo: document.getElementById('fallaDistintivo').value,
-      categoria: document.getElementById('fallaCategoria').value,
+   const formData = {
+      nombre: document.getElementById('fallaNombre').value.trim(),
+      seccion: document.getElementById('fallaSeccion').value.trim(),
+      fallera: document.getElementById('fallaFallera').value.trim(),
+      presidente: document.getElementById('fallaPresidente').value.trim(),
+      artista: document.getElementById('fallaArtista').value.trim(),
+      lema: document.getElementById('fallaLema').value.trim(),
+      webOficial: document.getElementById('fallaWebOficial').value.trim(),
+      telefonoContacto: document.getElementById('fallaTelefonoContacto').value.trim(),
+      emailContacto: document.getElementById('fallaEmailContacto').value.trim(),
+      anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || null,
+      distintivo: document.getElementById('fallaDistintivo').value.trim(),
+      categoria: document.getElementById('fallaCategoria').value.trim(),
       totalEventos: parseInt(document.getElementById('fallaTotalEventos').value) || 0,
       totalHintos: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
       totalMiembros: parseInt(document.getElementById('fallaTotalMiembros').value) || 0,
    };
 
-   // Si tiene id => actualizar (PUT), si no => crear (POST)
-   const id = payload.id;
-   const url = id ? (window._recurso + '/' + id) : window._recurso;
-   const method = id ? 'put' : 'post';
-
-   if (window.api && window.api.saveFalla) {
-      window.api.saveFalla(payload).then(json => {
-         alert('Cambios guardados');
-         const side = document.getElementById('sideSummary'); 
-         if(side) side.textContent = (json.nombre||payload.nombre||'').slice(0,140) + ((json.nombre||payload.nombre) && (json.nombre||payload.nombre).length>140? '...':'');
-         setEditMode(false);
-         if (json.id) document.getElementById('fallaId').value = json.id;
-      }).catch(err => {
-         console.error('Error guardando:', err);
-         alert('Error al guardar. Ver consola para más detalles.');
-      });
-   } else {
-      console.warn('API bridge no disponible - cambios no persistidos');
-      alert('Cambios guardados localmente (simulado).');
-      setEditMode(false);
+   // Validar datos
+   const validationErrors = validateFallaData(formData);
+   if (validationErrors.length > 0) {
+      showNotificationFalla(validationErrors.join('\n'), 'error');
+      return;
    }
+
+   const id = document.getElementById('fallaId').value;
+   
+   // Mostrar indicador de carga
+   const saveBtn = document.getElementById('saveBtn');
+   const originalText = saveBtn.textContent;
+   if (saveBtn) {
+      saveBtn.textContent = 'Guardando...';
+      saveBtn.disabled = true;
+   }
+
+   // Si tiene id => actualizar (PUT), si no => crear (POST)
+   if (id) {
+      if (window.api && window.api.saveFalla) {
+         window.api.saveFalla(formData).then(json => {
+            showNotificationFalla('Falla actualizada correctamente', 'success');
+            const side = document.getElementById('sideSummary'); 
+            if(side) side.textContent = (json.nombre||formData.nombre||'').slice(0,140) + ((json.nombre||formData.nombre) && (json.nombre||formData.nombre).length>140? '...':'');
+            setEditMode(false);
+            if (json.id) document.getElementById('fallaId').value = json.id;
+         }).catch(err => {
+            console.error('Error guardando:', err);
+            showNotificationFalla(`Error al guardar: ${err.message || err}`, 'error');
+         }).finally(() => {
+            if (saveBtn) {
+               saveBtn.textContent = originalText;
+               saveBtn.disabled = false;
+            }
+         });
+      } else {
+         // Intentar con fetch directo
+         actualizar_falla_directo(id, formData, originalText, saveBtn);
+      }
+   } else {
+      // Crear nueva
+      if (window.api && window.api.saveFalla) {
+         window.api.saveFalla(formData).then(json => {
+            showNotificationFalla('Falla creada correctamente', 'success');
+            const side = document.getElementById('sideSummary'); 
+            if(side) side.textContent = (json.nombre||formData.nombre||'').slice(0,140) + ((json.nombre||formData.nombre) && (json.nombre||formData.nombre).length>140? '...':'');
+            if (json.id) document.getElementById('fallaId').value = json.id;
+            setEditMode(false);
+         }).catch(err => {
+            console.error('Error creando:', err);
+            showNotificationFalla(`Error al crear: ${err.message || err}`, 'error');
+         }).finally(() => {
+            if (saveBtn) {
+               saveBtn.textContent = originalText;
+               saveBtn.disabled = false;
+            }
+         });
+      } else {
+         showNotificationFalla('API bridge no disponible - cambios no persistidos', 'warning');
+         setEditMode(false);
+         if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+         }
+      }
+   }
+}
+
+// Actualizar falla directamente llamando a la API
+function actualizar_falla_directo(id, formData, originalText, saveBtn) {
+   const url = `${window._apiBase}/fallas/${id}`;
+   fetch(url, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(formData)
+   })
+   .then(response => {
+      if (!response.ok) {
+         return response.json().then(data => {
+            throw new Error(data.message || `Error HTTP ${response.status}`);
+         }).catch(parseErr => {
+            throw new Error(`Error HTTP ${response.status}: ${parseErr.message}`);
+         });
+      }
+      return response.json();
+   })
+   .then(json => {
+      const result = json.datos || json;
+      showNotificationFalla('Falla actualizada correctamente', 'success');
+      const side = document.getElementById('sideSummary');
+      if(side) side.textContent = (result.nombre||formData.nombre||'').slice(0,140) + ((result.nombre||formData.nombre) && (result.nombre||formData.nombre).length>140? '...':'');
+      setEditMode(false);
+   })
+   .catch(err => {
+      console.error('Error actualizando falla:', err);
+      showNotificationFalla(`Error al guardar: ${err.message}`, 'error');
+   })
+   .finally(() => {
+      if (saveBtn) {
+         saveBtn.textContent = originalText;
+         saveBtn.disabled = false;
+      }
+   });
 }
 
 // Exportar para pruebas (opcional)
@@ -480,5 +620,23 @@ function toggleEditMode(){
    const saveBtn = document.getElementById('saveBtn');
    const enabled = !(saveBtn && saveBtn.style.display === 'inline-block');
    setEditMode(enabled);
+}
+
+// Agregar animación de deslizamiento si no existe
+if (!document.querySelector('style:contains(slideIn)')) {
+   const style = document.createElement('style');
+   style.textContent = `
+      @keyframes slideIn {
+         from {
+            transform: translateX(400px);
+            opacity: 0;
+         }
+         to {
+            transform: translateX(0);
+            opacity: 1;
+         }
+      }
+   `;
+   document.head.appendChild(style);
 }
 

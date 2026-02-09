@@ -9,6 +9,59 @@ function escapeHtml(s){ return String(s||'').replace(/[&<>\"]/g, c=>({ '&':'&amp
 function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); }catch(e){} }
 function loadLocal(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): [] }catch(e){ return [] } }
 
+// ============================================
+// UTILIDADES DE MENSAJES
+// ============================================
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+    max-width: 400px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    ${type === 'success' ? 'background: #10b981; color: white;' : 
+      type === 'error' ? 'background: #ef4444; color: white;' :
+      type === 'warning' ? 'background: #f59e0b; color: white;' :
+      'background: #3b82f6; color: white;'}
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  const timeout = type === 'error' ? 5000 : 3000;
+  setTimeout(() => notification.remove(), timeout);
+}
+
+// ============================================
+// VALIDACIONES
+// ============================================
+
+function validateEventData(data) {
+  const errors = [];
+  
+  if (!data.name || data.name.trim().length === 0) {
+    errors.push('El nombre del evento es obligatorio');
+  }
+  
+  if (!data.date || data.date.trim().length === 0) {
+    errors.push('La fecha del evento es obligatoria');
+  }
+  
+  if (!data.place || data.place.trim().length === 0) {
+    errors.push('El lugar del evento es obligatorio');
+  }
+  
+  return errors;
+}
+
 // Render list
 function renderList(filter=''){
   if(!eventsEl) return;
@@ -119,22 +172,45 @@ function openNew(){
 }
 
 function openEdit(id){
-  const ev = events.find(x=>x.id===id); if(!ev) return alert('Evento no encontrado');
+  const ev = events.find(x=>x.id===id); if(!ev) return showNotification('Evento no encontrado', 'error');
   openModal(); const title = document.getElementById('modal-title'); if(title) title.textContent='Editar evento';
   if(inputs.id) inputs.id.value = ev.id; if(inputs.name) inputs.name.value=ev.name||''; if(inputs.date) inputs.date.value=ev.date||''; if(inputs.time) inputs.time.value=ev.time||''; if(inputs.place) inputs.place.value=ev.place||''; if(inputs.description) inputs.description.value=ev.description||'';
   if(inputs.creator) inputs.creator.value = ev.creator || localStorage.getItem('fallapp_user') || '';
 }
 
 function openView(id){
-  const ev = events.find(x=>x.id===id); if(!ev) return alert('Evento no encontrado');
+  const ev = events.find(x=>x.id===id); if(!ev) return showNotification('Evento no encontrado', 'error');
   const text = `Nombre: ${ev.name}\nCreador: ${ev.creator}\nFecha: ${ev.date} ${ev.time||''}\nLugar: ${ev.place}\n\nDescripción:\n${ev.description||''}`;
   alert(text);
 }
 
 async function saveFromForm(){
   const id = inputs.id.value;
+  const eventData = {
+    name: inputs.name.value.trim(),
+    date: inputs.date.value,
+    time: inputs.time.value,
+    place: inputs.place.value.trim(),
+    description: inputs.description.value.trim()
+  };
   const currentUser = localStorage.getItem('fallapp_user') || inputs.creator.value.trim();
-  const payload = { id: id || generateId(), name: inputs.name.value.trim(), creator: currentUser, date: inputs.date.value, time: inputs.time.value, place: inputs.place.value.trim(), description: inputs.description.value.trim() };
+  
+  // Validar datos
+  const validationErrors = validateEventData(eventData);
+  if (validationErrors.length > 0) {
+    showNotification(validationErrors.join('\n'), 'error');
+    return;
+  }
+
+  const payload = { 
+    id: id || generateId(), 
+    name: eventData.name, 
+    creator: currentUser, 
+    date: eventData.date, 
+    time: eventData.time, 
+    place: eventData.place, 
+    description: eventData.description 
+  };
 
   if(id){
     // Update: try backend then local
@@ -143,10 +219,19 @@ async function saveFromForm(){
       const idx = events.findIndex(x=>x.id===id);
       if(idx>=0) events[idx]=payload;
       saveLocal(); renderList(currentSearchValue() || '');
+      showNotification('Evento actualizado correctamente', 'success');
     }catch(e){
+      console.error('Error updating event:', e);
       // fallback local
       const idx = events.findIndex(x=>x.id===id);
-          if(idx>=0){ events[idx]=payload; saveLocal(); renderList(currentSearchValue() || ''); }
+      if(idx>=0){ 
+        events[idx]=payload; 
+        saveLocal(); 
+        renderList(currentSearchValue() || ''); 
+        showNotification(`Evento actualizado localmente (sin conexión): ${e.message}`, 'warning');
+      } else {
+        showNotification(`Error al actualizar evento: ${e.message}`, 'error');
+      }
     }
   } else {
     // Create
@@ -154,9 +239,16 @@ async function saveFromForm(){
       const created = await apiCreateEvent(payload);
       // use created if backend returned an id
       if(created && created.id) payload.id = created.id;
-      events.push(payload); saveLocal(); renderList(currentSearchValue() || '');
+      events.push(payload); 
+      saveLocal(); 
+      renderList(currentSearchValue() || '');
+      showNotification('Evento creado correctamente', 'success');
     }catch(e){
-      events.push(payload); saveLocal(); renderList(currentSearchValue() || '');
+      console.error('Error creating event:', e);
+      events.push(payload); 
+      saveLocal(); 
+      renderList(currentSearchValue() || '');
+      showNotification(`Evento creado localmente (sin conexión): ${e.message}`, 'warning');
     }
   }
   closeModal();
@@ -166,10 +258,22 @@ async function deleteEvent(id){
   if(!confirm('¿Eliminar este evento?')) return;
   try{
     await apiDeleteEvent(id);
-    events = events.filter(x=>x.id!==id); saveLocal(); renderList(currentSearchValue() || '');
+    events = events.filter(x=>x.id!==id); 
+    saveLocal(); 
+    renderList(currentSearchValue() || '');
+    showNotification('Evento eliminado correctamente', 'success');
   }catch(e){
+    console.error('Error deleting event:', e);
     // fallback local
-    events = events.filter(x=>x.id!==id); saveLocal(); renderList(currentSearchValue() || '');
+    const beforeLen = events.length;
+    events = events.filter(x=>x.id!==id); 
+    if (events.length < beforeLen) {
+      saveLocal(); 
+      renderList(currentSearchValue() || '');
+      showNotification(`Evento eliminado localmente (sin conexión): ${e.message}`, 'warning');
+    } else {
+      showNotification(`Error al eliminar evento: ${e.message}`, 'error');
+    }
   }
 }
 
@@ -204,6 +308,7 @@ async function init(){
     const list = await apiFetchEvents();
     if(Array.isArray(list) && list.length>=0){ events = list; saveLocal(); }
   }catch(e){
+    console.warn('Could not fetch events from backend, loading from cache:', e);
     events = loadLocal();
   }
 
@@ -224,5 +329,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// Agregar animación de deslizamiento
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+`;
+document.head.appendChild(style);
 
 init();
