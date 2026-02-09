@@ -3,6 +3,7 @@ package com.fallapp.features.fallas.data.repository
 import com.fallapp.core.util.Result
 import com.fallapp.features.fallas.data.mapper.toDomain
 import com.fallapp.features.fallas.data.mapper.toDto
+import com.fallapp.features.fallas.data.remote.NinotsApiService
 import com.fallapp.features.fallas.data.remote.VotosApiService
 import com.fallapp.features.fallas.domain.model.Voto
 import com.fallapp.features.fallas.domain.model.VotoRequest
@@ -19,13 +20,24 @@ import com.fallapp.features.fallas.domain.repository.VotosRepository
  * @since 1.0.0
  */
 class VotosRepositoryImpl(
-    private val apiService: VotosApiService
+    private val apiService: VotosApiService,
+    private val ninotsApiService: NinotsApiService
 ) : VotosRepository {
     
     override suspend fun crearVoto(request: VotoRequest): Result<Voto> {
         return try {
-            val response = apiService.crearVoto(request.toDto())
-            
+            // El dominio usa idNinot como id de la falla. Aquí resolvemos el
+            // idNinot real consultando los ninots de esa falla.
+            val ninots = ninotsApiService.getNinotsByFalla(request.idNinot)
+            val realIdNinot = ninots.firstOrNull()?.idNinot
+                ?: return Result.Error(
+                    exception = Exception("No se encontraron ninots para esta falla"),
+                    message = "No se encontraron ninots para esta falla"
+                )
+
+            val dtoRequest = request.copy(idNinot = realIdNinot).toDto()
+            val response = apiService.crearVoto(dtoRequest)
+
             if (response.exito && response.datos != null) {
                 Result.Success(response.datos.toDomain())
             } else {
@@ -47,9 +59,10 @@ class VotosRepositoryImpl(
             // El backend obtiene el usuario a partir del token,
             // por lo que el idUsuario se ignora y se usa /votos/mis-votos
             val response = apiService.getMisVotos()
-            
+
             if (response.exito && response.datos != null) {
-                 Result.Success(response.datos.map { it.toDomain() })
+                val votosDto = response.datos.content
+                Result.Success(votosDto.map { it.toDomain() })
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos"),
@@ -67,7 +80,7 @@ class VotosRepositoryImpl(
     override suspend fun eliminarVoto(idVoto: Long): Result<Unit> {
         return try {
             val response = apiService.eliminarVoto(idVoto)
-            
+
             if (response.exito) {
                 Result.Success(Unit)
             } else {
@@ -86,10 +99,16 @@ class VotosRepositoryImpl(
     
     override suspend fun getVotosFalla(idFalla: Long): Result<List<Voto>> {
         return try {
-            val response = apiService.getVotosFalla(idFalla)
-            
+            // Resolver el idNinot real asociado a esta falla
+            val ninots = ninotsApiService.getNinotsByFalla(idFalla)
+            val realIdNinot = ninots.firstOrNull()?.idNinot
+                ?: return Result.Success(emptyList())
+
+            val response = apiService.getVotosFalla(realIdNinot)
+
             if (response.exito && response.datos != null) {
-                Result.Success(response.datos.map { it.toDomain() })
+                val votosDto = response.datos.content
+                Result.Success(votosDto.map { it.toDomain() })
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos de la falla"),

@@ -1,6 +1,7 @@
 package com.fallapp.features.fallas.di
 
 import com.fallapp.features.fallas.data.remote.FallasApiService
+import com.fallapp.features.fallas.data.remote.NinotsApiService
 import com.fallapp.features.fallas.data.remote.VotosApiService
 import com.fallapp.features.fallas.data.repository.FallasRepositoryImpl
 import com.fallapp.features.fallas.data.repository.VotosRepositoryImpl
@@ -22,6 +23,7 @@ val fallasModule = module {
     // Data Layer - API
     single { FallasApiService(httpClient = get()) }
     single { VotosApiService(client = get(), tokenManager = get()) }
+    single { NinotsApiService(client = get()) }
     
     // Data Layer - Repository
     single<FallasRepository> {
@@ -34,7 +36,8 @@ val fallasModule = module {
     
     single<VotosRepository> {
         VotosRepositoryImpl(
-            apiService = get()
+            apiService = get(),
+            ninotsApiService = get()
         )
     }
     

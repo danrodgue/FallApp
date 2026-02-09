@@ -135,7 +135,12 @@ fun VotoDto.toDomain(): Voto {
         nombreUsuario = nombreUsuario,
         idFalla = idFalla,
         nombreFalla = nombreFalla,
-        tipoVoto = TipoVoto.valueOf(tipoVoto),
+        tipoVoto = when (tipoVoto.uppercase()) {
+            "MONUMENTO" -> TipoVoto.INGENIOSO          // Mejor Falla
+            "INGENIO_Y_GRACIA" -> TipoVoto.CRITICO     // Ingenio y Gracia
+            "EXPERIMENTAL" -> TipoVoto.ARTISTICO       // Mejor Experimental
+            else -> TipoVoto.INGENIOSO
+        },
         fechaCreacion = parseDateTime(fechaCreacion)
     )
 }
@@ -144,7 +149,12 @@ fun VotoDto.toDomain(): Voto {
 fun VotoRequest.toDto(): VotoRequestDto {
     return VotoRequestDto(
         idNinot = idNinot,
-        tipoVoto = tipoVoto.name
+        tipoVoto = when (tipoVoto) {
+            // Mapear nombres de dominio a constantes de la API
+            TipoVoto.INGENIOSO -> "MONUMENTO"
+            TipoVoto.CRITICO -> "INGENIO_Y_GRACIA"
+            TipoVoto.ARTISTICO -> "EXPERIMENTAL"
+        }
     )
 }
 

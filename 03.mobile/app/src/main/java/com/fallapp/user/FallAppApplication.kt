@@ -7,6 +7,7 @@ import com.fallapp.core.di.networkModule
 import com.fallapp.features.auth.di.authModule
 import com.fallapp.features.fallas.di.fallasModule
 import com.fallapp.features.map.di.mapModule
+import com.fallapp.features.eventos.di.eventosModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -44,6 +45,7 @@ class FallAppApplication : Application() {
                 appModule,
                 authModule,    // ← Auth feature module
                 fallasModule,  // ← Fallas feature module
+                eventosModule, // ← Eventos feature module
                 mapModule      // ← Map feature module
             )
         }

@@ -1,18 +1,26 @@
 package com.fallapp.core.navigation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -28,13 +36,18 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import androidx.navigation.NavHostController
 import com.fallapp.features.fallas.presentation.list.FallasListScreen
 import com.fallapp.features.map.presentation.MapScreen
 import com.fallapp.features.votos.presentation.VotosScreen
+import com.fallapp.features.eventos.presentation.EventosScreen
 
 /**
  * Pantalla principal con Bottom Navigation Bar.
@@ -55,7 +68,7 @@ fun MainScreen(
     
     val items = listOf(
         BottomNavItem("Mapa", Icons.Default.LocationOn),
-        BottomNavItem("Fallas", Icons.Default.List),
+        BottomNavItem("Eventos", Icons.Default.Search),
         BottomNavItem("Votos", Icons.Default.Star),
         BottomNavItem("Perfil", Icons.Default.Person)
     )
@@ -96,13 +109,11 @@ fun MainScreen(
                     modifier = Modifier.fillMaxSize(),
                     hideBackButton = true
                 )
-                1 -> FallasListScreen(
+                1 -> EventosScreen(
                     onFallaClick = { fallaId ->
                         navController.navigate(Screen.FallaDetail.createRoute(fallaId))
                     },
-                    onBackClick = { /* No hacer nada, estamos en pantalla principal */ },
-                    modifier = Modifier.fillMaxSize(),
-                    hideBackButton = true
+                    modifier = Modifier.fillMaxSize()
                 )
                 2 -> VotosScreen(
                     onFallaClick = { fallaId ->
@@ -142,22 +153,69 @@ private fun ProfileTab(
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        Card(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxSize(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Text(
-                text = "Perfil de Usuario",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "Información del usuario aparecerá aquí",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Button(onClick = onLogout) {
-                Text("Cerrar Sesión")
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Avatar circular
+                Box(
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Placeholder de imagen de perfil
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Avatar",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+
+                Text(
+                    text = "Perfil de usuario",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                // Datos básicos (placeholders por ahora)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Nombre: (pendiente de perfil API)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "Email: (pendiente de perfil API)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cerrar sesión")
+                }
             }
         }
     }

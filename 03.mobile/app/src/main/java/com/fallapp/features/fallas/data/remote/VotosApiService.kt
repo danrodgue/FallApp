@@ -3,6 +3,7 @@ package com.fallapp.features.fallas.data.remote
 import com.fallapp.core.config.ApiConfig
 import com.fallapp.core.network.ApiException
 import com.fallapp.core.network.ApiResponse
+import com.fallapp.core.network.PageResponse
 import com.fallapp.core.util.TokenManager
 import com.fallapp.features.fallas.data.remote.dto.VotoDto
 import com.fallapp.features.fallas.data.remote.dto.VotoRequestDto
@@ -30,34 +31,36 @@ class VotosApiService(
         header(ApiConfig.AUTH_HEADER, "${ApiConfig.TOKEN_PREFIX}$token")
     }
 
-    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<VotoDto> {
-        return client.post(ApiConfig.Endpoints.VOTOS) {
+    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<VotoDto> =
+        client.post(ApiConfig.Endpoints.VOTOS) {
             contentType(ContentType.Application.Json)
             attachAuthHeader()
             setBody(request)
         }.body()
-    }
 
     /**
      * Obtiene los votos del usuario actual a partir del token JWT.
      * No necesita idUsuario porque el backend lo infiere del token.
+     *
+     * En producción, el backend está devolviendo `datos` como un objeto
+     * paginado estilo Spring (`content`, `empty`, ...), no como array plano.
      */
-    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> {
-        return client.get(ApiConfig.Endpoints.MIS_VOTOS) {
+    suspend fun getMisVotos(): ApiResponse<PageResponse<VotoDto>> =
+        client.get(ApiConfig.Endpoints.MIS_VOTOS) {
             attachAuthHeader()
         }.body()
-    }
 
-    suspend fun eliminarVoto(idVoto: Long): ApiResponse<Unit> {
-        return client.delete("${ApiConfig.Endpoints.VOTOS}/$idVoto") {
+    suspend fun eliminarVoto(idVoto: Long): ApiResponse<Unit> =
+        client.delete("${ApiConfig.Endpoints.VOTOS}/$idVoto") {
             attachAuthHeader()
         }.body()
-    }
 
-    suspend fun getVotosFalla(idFalla: Long): ApiResponse<List<VotoDto>> {
-        return client.get("${ApiConfig.Endpoints.VOTOS}/falla/$idFalla") {
+    /**
+     * Obtiene los votos asociados a un ninot/falla concreto.
+     */
+    suspend fun getVotosFalla(idNinot: Long): ApiResponse<PageResponse<VotoDto>> =
+        client.get("${ApiConfig.API_PATH}/votos/ninot/$idNinot") {
             attachAuthHeader()
         }.body()
-    }
 }
 
