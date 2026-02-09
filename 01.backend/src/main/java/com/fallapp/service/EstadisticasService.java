@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import com.fallapp.model.Voto;
 
 /**
  * Servicio de Analytics y Estadísticas para FallApp
@@ -134,11 +135,62 @@ public class EstadisticasService {
     /**
      * Obtener estadísticas de votos
      */
-    public Map<String, Object> obtenerEstadisticasVotos() {
+    public Map<String, Object> obtenerEstadisticasVotos(Integer limite, String tipoVotoStr) {
         Map<String, Object> estadisticas = new HashMap<>();
-        
+
         estadisticas.put("totalVotos", votoRepository.count());
-        
+
+        int top = (limite == null || limite <= 0) ? 10 : limite;
+
+        // Parse tipoVoto if provided
+        Voto.TipoVoto tipo = null;
+        if (tipoVotoStr != null && !tipoVotoStr.isBlank()) {
+            try {
+                tipo = Voto.TipoVoto.valueOf(tipoVotoStr);
+            } catch (IllegalArgumentException ex) {
+                tipo = null;
+            }
+        }
+
+        final Voto.TipoVoto filtroTipo = tipo;
+
+        // Top fallas (by votes)
+        List<Map<String, Object>> topFallas = fallaRepository.findAll().stream()
+                .map(f -> {
+                    long cnt = (filtroTipo == null) ? votoRepository.countByFalla(f) : votoRepository.countByFallaAndTipoVoto(f, filtroTipo);
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("idFalla", f.getIdFalla());
+                    m.put("nombre", f.getNombre());
+                    m.put("seccion", f.getSeccion());
+                    m.put("votos", cnt);
+                    return m;
+                })
+                .sorted((a, b) -> Long.compare(((Number) b.get("votos")).longValue(), ((Number) a.get("votos")).longValue()))
+                .limit(top)
+                .toList();
+
+        estadisticas.put("topFallas", topFallas);
+
+        // Top ninots: attribute votes of their falla to the ninot (since votes are stored per falla)
+        List<Map<String, Object>> topNinots = ninotRepository.findAll().stream()
+                .map(n -> {
+                    long cnt = (filtroTipo == null) ? votoRepository.countByFalla(n.getFalla()) : votoRepository.countByFallaAndTipoVoto(n.getFalla(), filtroTipo);
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("idNinot", n.getIdNinot());
+                    m.put("urlImagen", n.getUrlImagen());
+                    m.put("idFalla", n.getFalla().getIdFalla());
+                    m.put("nombreFalla", n.getFalla().getNombre());
+                    m.put("votos", cnt);
+                    return m;
+                })
+                .sorted((a, b) -> Long.compare(((Number) b.get("votos")).longValue(), ((Number) a.get("votos")).longValue()))
+                .limit(top)
+                .toList();
+
+        estadisticas.put("topNinots", topNinots);
+
+        estadisticas.put("filtroTipoVoto", tipo == null ? "ALL" : tipo.name());
+
         return estadisticas;
     }
     

@@ -123,8 +123,11 @@ public class EstadisticasController {
      */
     @GetMapping("/votos")
     @Operation(summary = "Obtener estadísticas de votos y ninots más votados")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> obtenerEstadisticasVotos() {
-        Map<String, Object> estadisticas = estadisticasService.obtenerEstadisticasVotos();
+    public ResponseEntity<ApiResponse<Map<String, Object>>> obtenerEstadisticasVotos(
+            @RequestParam(required = false) Integer limite,
+            @RequestParam(required = false) String tipoVoto
+    ) {
+        Map<String, Object> estadisticas = estadisticasService.obtenerEstadisticasVotos(limite, tipoVoto);
         return ResponseEntity.ok(ApiResponse.success(estadisticas));
     }
     

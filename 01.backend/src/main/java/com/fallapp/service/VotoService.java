@@ -58,6 +58,8 @@ public class VotoService {
         voto.setUsuario(usuario);
         voto.setFalla(falla);
         voto.setTipoVoto(tipo);
+        // Normalizar valor a 1 para indicar presencia de voto
+        voto.setValor(1);
 
         Voto guardado = votoRepository.save(voto);
         return convertirADTO(guardado);

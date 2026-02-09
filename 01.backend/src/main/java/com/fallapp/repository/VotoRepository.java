@@ -60,6 +60,11 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
      */
     long countByTipoVoto(Voto.TipoVoto tipoVoto);
 
+        /**
+         * Contar votos por falla y tipo (uso para rankings por categoría)
+         */
+        long countByFallaAndTipoVoto(Falla falla, Voto.TipoVoto tipoVoto);
+
     /**
      * Contar usuarios únicos que han votado
      */

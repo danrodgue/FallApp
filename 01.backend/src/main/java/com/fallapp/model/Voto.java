@@ -48,6 +48,13 @@ public class Voto {
     private LocalDateTime creadoEn;
 
     /**
+     * Campo `valor` en la tabla `votos`.
+     * Se utiliza como indicador de presencia de voto y siempre deberá valer 1 cuando exista el voto.
+     */
+    @Column(name = "valor", nullable = false)
+    private Integer valor = 1;
+
+    /**
      * Enum para tipos de voto
      */
     public enum TipoVoto {
