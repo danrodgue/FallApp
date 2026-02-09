@@ -106,7 +106,8 @@ fun MainScreen(
                 )
                 2 -> VotosScreen(
                     onFallaClick = { fallaId ->
-                        navController.navigate(Screen.FallaDetail.createRoute(fallaId))
+                        // Navegar al mapa centrado en esta falla
+                        navController.navigate(Screen.MapFocus.createRoute(fallaId))
                     },
                     modifier = Modifier.fillMaxSize()
                 )

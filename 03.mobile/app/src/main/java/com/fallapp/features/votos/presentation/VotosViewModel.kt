@@ -52,7 +52,8 @@ class VotosViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            getFallasUseCase().collect { result ->
+            // Forzamos refresh para asegurarnos de tener todas las fallas (≈260)
+            getFallasUseCase(forceRefresh = true).collect { result ->
                 when (result) {
                     is Result.Success -> {
                         _uiState.update {
@@ -117,7 +118,8 @@ class VotosViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            getFallasUseCase().collect { fallasResult ->
+            // Para el ranking también queremos todas las fallas actualizadas
+            getFallasUseCase(forceRefresh = true).collect { fallasResult ->
                 when (fallasResult) {
                     is Result.Success -> {
                         // Obtener votos para cada falla

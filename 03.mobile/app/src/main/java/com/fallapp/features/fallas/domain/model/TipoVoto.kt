@@ -20,17 +20,17 @@ enum class TipoVoto {
      * Obtiene el nombre para mostrar en UI.
      */
     fun getDisplayName(): String = when (this) {
-        INGENIOSO -> "😄 Ingenioso"
-        CRITICO -> "💭 Crítico"
-        ARTISTICO -> "🎨 Artístico"
+        INGENIOSO -> "🏆 Mejor Falla"
+        CRITICO -> "😄 Ingenio y Gracia"
+        ARTISTICO -> "🧪 Mejor Experimental"
     }
     
     /**
      * Obtiene la descripción del tipo de voto.
      */
     fun getDescription(): String = when (this) {
-        INGENIOSO -> "Mensaje ingenioso y creativo"
-        CRITICO -> "Crítica social relevante"
-        ARTISTICO -> "Gran valor artístico"
+        INGENIOSO -> "Reconoce a la mejor falla en conjunto"
+        CRITICO -> "Premia el ingenio y la gracia"
+        ARTISTICO -> "Destaca las propuestas más experimentales"
     }
 }
