@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
       logoutBtn.addEventListener('click', function() {
          try {
             localStorage.removeItem('fallapp_user');
+            localStorage.removeItem('fallapp_token');
+            localStorage.removeItem('fallapp_user_email');
+            localStorage.removeItem('fallapp_user_nombre');
+            localStorage.removeItem('fallapp_user_rol');
+            localStorage.removeItem('fallapp_user_idFalla');
+            localStorage.removeItem('fallapp_user_id');
          } catch (e) {
             console.error('Error removing user:', e);
          }
@@ -18,7 +24,20 @@ document.addEventListener('DOMContentLoaded', function () {
    }
 
    const params = new URLSearchParams(window.location.search);
-   const id = params.get('id') || '95'; // Por defecto usa ID 95
+   let id = params.get('id');
+   
+   // Si no hay id en URL, obtener el idFalla del usuario autenticado
+   if (!id) {
+      const idFallaStored = localStorage.getItem('fallapp_user_idFalla');
+      if (idFallaStored) {
+         id = idFallaStored;
+         console.log('Usando idFalla del usuario autenticado:', id);
+      } else {
+         console.warn('No hay id en URL ni idFalla en localStorage, usando ID por defecto: 95');
+         id = '95'; // Por defecto usa ID 95
+      }
+   }
+   
    // Base del backend (Spring Boot): ajusta puerto si es necesario
    window._apiBase = window._apiBase || 'http://35.180.21.42:8080/api';
    window._recurso = window._recurso || (window._apiBase + '/fallas');

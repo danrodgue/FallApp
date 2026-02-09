@@ -15,8 +15,10 @@
 
   window._API_BASE = window._API_BASE || apiBase;
   // Endpoints usados por los scripts
+  window._API_URL = window._API_URL || (window._API_BASE + '/api');
   window._recurso = window._recurso || (window._API_BASE + '/api/fallas');
   window._eventsResource = window._eventsResource || (window._API_BASE + '/api/events');
+  window._authEndpoint = window._authEndpoint || (window._API_BASE + '/api/auth/login');
 
   // Credenciales (si están en config.json). Evita imprimirlas en consola.
   if (cfg && cfg.apiUser) {
