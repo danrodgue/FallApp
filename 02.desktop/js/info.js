@@ -370,7 +370,7 @@ function populateForm(data) {
    const totalEventos = data.totalEventos || 0;
    if (el('fallaTotalEventos')) el('fallaTotalEventos').value = totalEventos;
    
-   const totalHintos = data.totalHintos || 0;
+   const totalHintos = data.totalNinots || data.totalHintos || 0;
    if (el('fallaTotalHintos')) el('fallaTotalHintos').value = totalHintos;
    
    const totalMiembros = data.totalMiembros || 0;
@@ -490,7 +490,7 @@ function saveFalla() {
       distintivo: document.getElementById('fallaDistintivo').value.trim(),
       categoria: document.getElementById('fallaCategoria').value.trim(),
       totalEventos: parseInt(document.getElementById('fallaTotalEventos').value) || 0,
-      totalHintos: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
+      totalNinots: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
       totalMiembros: parseInt(document.getElementById('fallaTotalMiembros').value) || 0,
    };
 
@@ -513,13 +513,20 @@ function saveFalla() {
 
    // Si tiene id => actualizar (PUT), si no => crear (POST)
    if (id) {
+      formData.id = id; // Agregar el ID al payload
+      // Obtener token para autenticación
+      const token = localStorage.getItem('fallapp_token');
+      if (token) {
+         formData.token = token;
+      }
+      
       if (window.api && window.api.saveFalla) {
          window.api.saveFalla(formData).then(json => {
             showNotificationFalla('Falla actualizada correctamente', 'success');
             const side = document.getElementById('sideSummary'); 
-            if(side) side.textContent = (json.nombre||formData.nombre||'').slice(0,140) + ((json.nombre||formData.nombre) && (json.nombre||formData.nombre).length>140? '...':'');
+            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
             setEditMode(false);
-            if (json.id) document.getElementById('fallaId').value = json.id;
+            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
          }).catch(err => {
             console.error('Error guardando:', err);
             showNotificationFalla(`Error al guardar: ${err.message || err}`, 'error');
@@ -535,12 +542,17 @@ function saveFalla() {
       }
    } else {
       // Crear nueva
+      const token = localStorage.getItem('fallapp_token');
+      if (token) {
+         formData.token = token;
+      }
+      
       if (window.api && window.api.saveFalla) {
          window.api.saveFalla(formData).then(json => {
             showNotificationFalla('Falla creada correctamente', 'success');
             const side = document.getElementById('sideSummary'); 
-            if(side) side.textContent = (json.nombre||formData.nombre||'').slice(0,140) + ((json.nombre||formData.nombre) && (json.nombre||formData.nombre).length>140? '...':'');
-            if (json.id) document.getElementById('fallaId').value = json.id;
+            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
+            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
             setEditMode(false);
          }).catch(err => {
             console.error('Error creando:', err);

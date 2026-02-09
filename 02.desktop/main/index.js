@@ -58,11 +58,42 @@ ipcMain.handle('get-falla', async (evt, id) => {
   return await res.json();
 });
 ipcMain.handle('save-falla', async (evt, payload) => {
-  const id = payload.id;
-  const url = id ? `${API_BASE}/api/fallas/${id}` : `${API_BASE}/api/fallas`;
-  const method = id ? 'PUT' : 'POST';
-  const res = await fetch(url, { method: method, body: JSON.stringify(payload), headers: {'Content-Type':'application/json'} });
-  return await res.json();
+  try {
+    // Extraer token e id del payload
+    const token = payload.token;
+    const id = payload.id;
+    
+    // Crear copia del payload sin id y token para enviar al backend
+    const bodyPayload = { ...payload };
+    delete bodyPayload.id;
+    delete bodyPayload.token;
+    
+    const url = id ? `${API_BASE}/api/fallas/${id}` : `${API_BASE}/api/fallas`;
+    const method = id ? 'PUT' : 'POST';
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Si hay token, agregarlo a los headers
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const res = await fetch(url, { 
+      method: method, 
+      body: JSON.stringify(bodyPayload), 
+      headers: headers 
+    });
+    
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: `Error HTTP ${res.status}` }));
+      throw new Error(error.message || error.error || `Error HTTP ${res.status}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error('Error en save-falla:', error);
+    throw error;
+  }
 });
 ipcMain.handle('delete-falla', async (evt, id) => {
   const res = await fetch(`${API_BASE}/api/fallas/${id}`, { method: 'DELETE' });

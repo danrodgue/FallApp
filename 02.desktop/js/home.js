@@ -1,4 +1,3 @@
-const API_USER_URL = 'http://35.180.21.42:8080/api/usuarios';
 let cachedUserData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -19,10 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const profileModalOverlay = document.querySelector('.profile-modal-overlay');
 
   if (profileBtn) {
-    profileBtn.addEventListener('click', () => {
-      if (cachedUserData) {
-        populateProfileModal(cachedUserData);
-      }
+    profileBtn.addEventListener('click', async () => {
+      // Recargar datos frescos cuando se abre el modal
+      await loadUserDataForModal();
       profileModal.classList.add('active');
       document.body.style.overflow = 'hidden';
     });
@@ -46,30 +44,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Cargar datos del usuario para el modal (cachear resultado)
+// Cargar datos del usuario para el modal directamente desde la API
 async function loadUserDataForModal() {
   try {
-    const loggedUser = localStorage.getItem('fallapp_user');
+    const idUsuario = localStorage.getItem('fallapp_user_id');
     
-    if (!loggedUser) {
-      console.warn('No user logged in');
+    if (!idUsuario) {
+      console.warn('No user ID in localStorage');
       return;
     }
 
-    const response = await fetch(API_USER_URL);
+    // Usar obtenerUsuario de api.js que incluye el token
+    const response = await obtenerUsuario(idUsuario);
     
-    if (!response.ok) {
-      console.error('Error fetching users');
-      return;
-    }
-
-    const result = await response.json();
-    const usersData = result.data || [];
-    
-    // Buscar el usuario logueado por email
-    const userData = Array.isArray(usersData) 
-      ? usersData.find(u => u.email === loggedUser)
-      : usersData;
+    // Manejar diferentes formatos de respuesta
+    const userData = response.datos || response.data || response;
     
     if (userData) {
       cachedUserData = userData;
