@@ -71,6 +71,24 @@ public class Usuario {
     private String codigoPostal;
 
     /**
+     * Foto de perfil del usuario almacenada como binario en la base de datos.
+     * Campo opcional para no obligar a todos los usuarios a tener foto.
+     *
+     * Tipo en BD recomendado: BYTEA
+     */
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "foto_perfil")
+    private byte[] fotoPerfil;
+
+    /**
+     * Content-Type original de la imagen subida (image/jpeg, image/png, etc.)
+     * Se almacena en texto para poder devolver la cabecera HTTP correcta.
+     */
+    @Column(name = "foto_perfil_content_type", length = 100)
+    private String fotoPerfilContentType;
+
+    /**
      * Enum para roles de usuario
      */
     public enum RolUsuario {

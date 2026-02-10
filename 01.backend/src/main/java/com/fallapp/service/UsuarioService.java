@@ -6,9 +6,11 @@ import com.fallapp.exception.BadRequestException;
 import com.fallapp.exception.ResourceNotFoundException;
 import com.fallapp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +53,7 @@ public class UsuarioService {
      */
     @Transactional(readOnly = true)
     public UsuarioDTO obtenerPorId(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+        Usuario usuario = obtenerEntidadPorId(id);
         return convertirADTO(usuario);
     }
 
@@ -117,9 +118,58 @@ public class UsuarioService {
      * Desactivar usuario
      */
     public void desactivar(Long id) {
+        Usuario usuario = obtenerEntidadPorId(id);
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Devuelve la entidad Usuario completa (incluyendo campos perezosos como la foto de perfil).
+     * Uso interno de la capa de servicio y controladores que necesiten acceso a la entidad.
+     */
+    @Transactional(readOnly = true)
+    public Usuario obtenerEntidadPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+    }
+
+    /**
+     * Actualiza la foto de perfil del usuario almacenando la imagen como binario en BD.
+     *
+     * Responsabilidades:
+     * - Validar tamaño máximo razonable de la imagen
+     * - Guardar bytes en campo BYTEA
+     * - Guardar el Content-Type para poder servir la imagen correctamente
+     *
+     * La conversión a binario se hace en backend a partir del MultipartFile recibido.
+     */
+    public void actualizarFotoPerfil(Long id, MultipartFile foto) {
+        if (foto == null || foto.isEmpty()) {
+            throw new BadRequestException("La imagen de perfil no puede estar vacía");
+        }
+
+        // Límite defensivo: 2 MB por foto de perfil
+        long maxBytes = 2 * 1024 * 1024;
+        if (foto.getSize() > maxBytes) {
+            throw new BadRequestException("La imagen de perfil supera el tamaño máximo permitido (2 MB)");
+        }
+
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-        usuario.setActivo(false);
+
+        try {
+            usuario.setFotoPerfil(foto.getBytes());
+        } catch (java.io.IOException e) {
+            throw new BadRequestException("No se ha podido leer la imagen de perfil");
+        }
+
+        String contentType = foto.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            // Por defecto, asumimos PNG si no viene content-type
+            contentType = MediaType.IMAGE_PNG_VALUE;
+        }
+        usuario.setFotoPerfilContentType(contentType);
+
         usuarioRepository.save(usuario);
     }
 

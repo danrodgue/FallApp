@@ -9,8 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -165,6 +167,50 @@ public class EventoService {
         eventoRepository.delete(evento);
     }
 
+    /**
+     * Devuelve la entidad Evento completa (incluyendo campos perezosos como la imagen).
+     */
+    @Transactional(readOnly = true)
+    public Evento obtenerEntidadPorId(Long id) {
+        return eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+    }
+
+    /**
+     * Actualiza la imagen principal de un evento almacenando la imagen como binario en BD.
+     *
+     * - Valida un tamaño máximo razonable (por defecto 5 MB)
+     * - Guarda los bytes en campo BYTEA
+     * - Guarda el Content-Type para devolver la cabecera adecuada
+     */
+    @Transactional
+    public void actualizarImagen(Long idEvento, MultipartFile imagen) {
+        if (imagen == null || imagen.isEmpty()) {
+            throw new RuntimeException("La imagen del evento no puede estar vacía");
+        }
+
+        long maxBytes = 5 * 1024 * 1024; // 5 MB
+        if (imagen.getSize() > maxBytes) {
+            throw new RuntimeException("La imagen del evento supera el tamaño máximo permitido (5 MB)");
+        }
+
+        Evento evento = eventoRepository.findById(idEvento)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + idEvento));
+
+        try {
+            evento.setImagen(imagen.getBytes());
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("No se ha podido leer la imagen del evento");
+        }
+
+        String contentType = imagen.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            contentType = MediaType.IMAGE_JPEG_VALUE;
+        }
+        evento.setImagenContentType(contentType);
+
+        eventoRepository.save(evento);
+    }
     /**
      * Mapear DTO a entidad
      */

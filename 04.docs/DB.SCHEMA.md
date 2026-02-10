@@ -513,6 +513,8 @@ Gestiona usuarios del sistema con autenticación JWT y roles.
 | **direccion** | VARCHAR(255) | NULL | Dirección postal completa |
 | **ciudad** | VARCHAR(100) | NULL | Ciudad de residencia |
 | **codigo_postal** | VARCHAR(10) | NULL | Código postal |
+| **foto_perfil** | BYTEA | NULL | Foto de perfil almacenada en binario |
+| **foto_perfil_content_type** | VARCHAR(100) | NULL | MIME type de la imagen (image/jpeg, image/png, etc.) |
 | **fecha_registro** | TIMESTAMPTZ | NOT NULL, DEFAULT=NOW() | Fecha de registro |
 | **ultimo_acceso** | TIMESTAMPTZ | NULL | Última sesión iniciada |
 | **actualizado_en** | TIMESTAMPTZ | NOT NULL, DEFAULT=NOW() | Última actualización |
@@ -555,7 +557,9 @@ Gestiona eventos y actividades relacionadas con cada falla.
 | **ubicacion** | VARCHAR(255) | NULL | Lugar del evento |
 | **direccion** | VARCHAR(255) | NULL | Dirección exacta |
 | **participantes_estimado** | INTEGER | NULL | Asistencia estimada |
-| **url_imagen** | VARCHAR(500) | NULL | Imagen del evento |
+| **url_imagen** | VARCHAR(500) | NULL | Imagen del evento (URL externa opcional) |
+| **imagen** | BYTEA | NULL | Imagen principal del evento almacenada en binario |
+| **imagen_content_type** | VARCHAR(100) | NULL | MIME type de la imagen (image/jpeg, image/png, etc.) |
 | **creado_por** | INTEGER | FK, NULL | Usuario creador |
 | **actualizado_por** | INTEGER | FK, NULL | Usuario que modificó |
 | **fecha_creacion** | TIMESTAMPTZ | NOT NULL, DEFAULT=NOW() | Fecha de creación |

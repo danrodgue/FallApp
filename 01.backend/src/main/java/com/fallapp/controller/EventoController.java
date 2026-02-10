@@ -8,8 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -101,4 +105,46 @@ public class EventoController {
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         eventoService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.success("Evento eliminado exitosamente", null));
-    }}
+    }
+
+    /**
+     * PUT /api/eventos/{id}/imagen - Actualizar imagen principal del evento.
+     *
+     * Formato: multipart/form-data con un campo "imagen" que contiene la imagen.
+     * La imagen se almacena como binario (BYTEA) en la base de datos.
+     */
+    @PutMapping(path = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Void>> actualizarImagen(
+            @PathVariable Long id,
+            @RequestPart("imagen") MultipartFile imagen) {
+
+        eventoService.actualizarImagen(id, imagen);
+        return ResponseEntity.ok(ApiResponse.success("Imagen del evento actualizada correctamente", null));
+    }
+
+    /**
+     * GET /api/eventos/{id}/imagen - Obtener imagen principal del evento.
+     *
+     * Devuelve directamente los bytes de la imagen con el Content-Type original.
+     * Si el evento no tiene imagen, devuelve 404.
+     */
+    @GetMapping("/{id}/imagen")
+    public ResponseEntity<byte[]> obtenerImagen(@PathVariable Long id) {
+        var evento = eventoService.obtenerEntidadPorId(id);
+
+        byte[] imagen = evento.getImagen();
+        if (imagen == null || imagen.length == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        String contentType = evento.getImagenContentType();
+        if (contentType == null || contentType.isBlank()) {
+            contentType = MediaType.IMAGE_JPEG_VALUE;
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(contentType));
+
+        return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
+    }
+}
