@@ -137,7 +137,7 @@ public class FallaService {
                 .emailContacto(falla.getEmailContacto())
                 .categoria(falla.getCategoria() != null ? falla.getCategoria().name() : null)
                 .totalEventos(falla.getEventos() != null ? falla.getEventos().size() : 0)
-                .totalNinots(falla.getNinots() != null ? falla.getNinots().size() : 0)
+                .totalNinots(0)
                 .totalMiembros(falla.getUsuarios() != null ? falla.getUsuarios().size() : 0)
                 .fechaCreacion(falla.getCreadoEn())
                 .fechaActualizacion(falla.getActualizadoEn())

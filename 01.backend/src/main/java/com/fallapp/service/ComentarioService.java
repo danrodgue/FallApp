@@ -6,7 +6,6 @@ import com.fallapp.model.Falla;
 import com.fallapp.model.Usuario;
 import com.fallapp.repository.ComentarioRepository;
 import com.fallapp.repository.FallaRepository;
-import com.fallapp.repository.NinotRepository;
 import com.fallapp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
