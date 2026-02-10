@@ -173,12 +173,8 @@ class VotosViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // Usar el ID de la falla como idNinot temporal
-            // TODO: Obtener el ID del ninot real cuando esté disponible
-            val idNinot = falla.idFalla
-
             val request = VotoRequest(
-                idNinot = idNinot,
+                idFalla = falla.idFalla,
                 tipoVoto = tipoVoto
             )
 

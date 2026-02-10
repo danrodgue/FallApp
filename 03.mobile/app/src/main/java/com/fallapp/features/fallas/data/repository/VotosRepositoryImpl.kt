@@ -26,16 +26,9 @@ class VotosRepositoryImpl(
     
     override suspend fun crearVoto(request: VotoRequest): Result<Voto> {
         return try {
-            // El dominio usa idNinot como id de la falla. Aquí resolvemos el
-            // idNinot real consultando los ninots de esa falla.
-            val ninots = ninotsApiService.getNinotsByFalla(request.idNinot)
-            val realIdNinot = ninots.firstOrNull()?.idNinot
-                ?: return Result.Error(
-                    exception = Exception("No se encontraron ninots para esta falla"),
-                    message = "No se encontraron ninots para esta falla"
-                )
-
-            val dtoRequest = request.copy(idNinot = realIdNinot).toDto()
+            // Ahora el dominio usa idFalla y la API acepta directamente idFalla,
+            // por lo que no necesitamos resolver ninots.
+            val dtoRequest = request.toDto()
             val response = apiService.crearVoto(dtoRequest)
 
             if (response.exito && response.datos != null) {
