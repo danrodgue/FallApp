@@ -105,7 +105,7 @@ public class Falla {
     private List<Evento> eventos;
 
     @OneToMany(mappedBy = "falla", cascade = CascadeType.ALL, orphanRemoval = false)
-    private List<Ninot> ninots;
+    // Ninots removed from the model: images/media now handled via `urlBoceto` or external media service
 
     @OneToMany(mappedBy = "falla", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Usuario> usuarios;

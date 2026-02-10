@@ -3,7 +3,6 @@ package com.fallapp.service;
 import com.fallapp.dto.ComentarioDTO;
 import com.fallapp.model.Comentario;
 import com.fallapp.model.Falla;
-import com.fallapp.model.Ninot;
 import com.fallapp.model.Usuario;
 import com.fallapp.repository.ComentarioRepository;
 import com.fallapp.repository.FallaRepository;
@@ -57,7 +56,6 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final FallaRepository fallaRepository;
-    
     /**
      * Obtener todos los comentarios del sistema
      * 

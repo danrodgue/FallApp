@@ -55,7 +55,6 @@ public class EstadisticasService {
     
     private final FallaRepository fallaRepository;
     private final EventoRepository eventoRepository;
-    private final NinotRepository ninotRepository;
     private final UsuarioRepository usuarioRepository;
     private final VotoRepository votoRepository;
     private final ComentarioRepository comentarioRepository;
@@ -92,7 +91,8 @@ public class EstadisticasService {
         
         resumen.put("totalFallas", fallaRepository.count());
         resumen.put("totalEventos", eventoRepository.count());
-        resumen.put("totalNinots", ninotRepository.count());
+        // Table `ninots` removed; report 0 or derive from media if available
+        resumen.put("totalNinots", 0);
         resumen.put("totalUsuarios", usuarioRepository.count());
         resumen.put("totalVotos", votoRepository.count());
         resumen.put("totalComentarios", comentarioRepository.count());
@@ -171,23 +171,8 @@ public class EstadisticasService {
 
         estadisticas.put("topFallas", topFallas);
 
-        // Top ninots: attribute votes of their falla to the ninot (since votes are stored per falla)
-        List<Map<String, Object>> topNinots = ninotRepository.findAll().stream()
-                .map(n -> {
-                    long cnt = (filtroTipo == null) ? votoRepository.countByFalla(n.getFalla()) : votoRepository.countByFallaAndTipoVoto(n.getFalla(), filtroTipo);
-                    Map<String, Object> m = new HashMap<>();
-                    m.put("idNinot", n.getIdNinot());
-                    m.put("urlImagen", n.getUrlImagen());
-                    m.put("idFalla", n.getFalla().getIdFalla());
-                    m.put("nombreFalla", n.getFalla().getNombre());
-                    m.put("votos", cnt);
-                    return m;
-                })
-                .sorted((a, b) -> Long.compare(((Number) b.get("votos")).longValue(), ((Number) a.get("votos")).longValue()))
-                .limit(top)
-                .toList();
-
-        estadisticas.put("topNinots", topNinots);
+        // Ninots removed: no per-ninot ranking available. Return empty list.
+        estadisticas.put("topNinots", Collections.emptyList());
 
         estadisticas.put("filtroTipoVoto", tipo == null ? "ALL" : tipo.name());
 

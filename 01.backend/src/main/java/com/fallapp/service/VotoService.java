@@ -8,7 +8,6 @@ import com.fallapp.model.Usuario;
 import com.fallapp.model.Voto;
 import com.fallapp.exception.BadRequestException;
 import com.fallapp.exception.ResourceNotFoundException;
-import com.fallapp.repository.NinotRepository;
 import com.fallapp.repository.UsuarioRepository;
 import com.fallapp.repository.VotoRepository;
 import lombok.RequiredArgsConstructor;
