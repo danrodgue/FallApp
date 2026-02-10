@@ -1,7 +1,8 @@
 # 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
 
-**Versión:** 0.5.5  
-**Fecha:** 2026-02-04  
+**Versión:** 0.5.6  
+**Fecha:** 2026-02-10  
+**Cambios:** Eliminación de tabla NINOTS - Votos ahora directos a FALLAS  
 **IP Pública AWS:** http://35.180.21.42:8080  
 **Entorno:** Desarrollo
 
@@ -30,11 +31,8 @@ Esta guía describe todos los endpoints disponibles en la API REST de FallApp pa
 | Nivel | Descripción | Endpoints |
 |-------|-------------|-----------|
 | **🌐 PÚBLICO** | Sin autenticación | Todos los GET (browse), login, registro |
-| **🔐 AUTENTICADO** | Requiere JWT token | POST/PUT fallas, eventos, ninots, comentarios, votos |
-| **👑 ADMIN** | Solo administradores | DELETE fallas, eventos, ninots, comentarios |
-
----
-
+| **🔐 AUTENTICADO** | Requiere JWT token | POST/PUT fallas, eventos, comentarios, votos |
+| **👑 ADMIN** | Solo administradores | DELETE fallas, eventos, comentarios |
 ## 🌍 URL Base
 
 ### Desarrollo (AWS)
@@ -293,7 +291,6 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
         "emailContacto": null,
         "categoria": "sin_categoria",
         "totalEventos": 0,
-        "totalNinots": 0,
         "totalMiembros": 0,
         "fechaCreacion": "2026-02-04T19:24:52.288945",
         "fechaActualizacion": "2026-02-04T19:24:52.288945"
@@ -340,7 +337,6 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
     "emailContacto": null,
     "categoria": "sin_categoria",
     "totalEventos": 0,
-    "totalNinots": 0,
     "totalMiembros": 0,
     "fechaCreacion": "2026-02-04T19:24:52.288945",
     "fechaActualizacion": "2026-02-04T19:24:52.288945"
@@ -533,72 +529,12 @@ async function obtenerUbicacionFalla(idFalla) {
 
 ---
 
-### NINOTS
-
-#### GET /api/ninots - Listar ninots con paginación
-**Autenticación:** No requerida  
-**Query Params:**
-- `page` (int, default: 0)
-- `size` (int, default: 20)
-
-**Response:**
-```json
-{
-  "exito": true,
-  "datos": {
-    "content": [
-      {
-        "idNinot": 1,
-        "idFalla": 1,
-        "nombreFalla": "Falla Convento Jerusalén",
-        "nombreNinot": "El Político Corrupto",
-        "tituloObra": "La Trampa del Poder",
-        "altura": 3.5,
-        "ancho": 2.0,
-        "imagenes": [
-          "https://fallapp.es/ninots/1_1.jpg",
-          "https://fallapp.es/ninots/1_2.jpg"
-        ],
-        "premiado": true,
-        "totalVotos": 245,
-        "votosIngenioso": 80,
-        "votosCritico": 95,
-        "votosArtistico": 70,
-        "fechaCreacion": "2026-01-10T12:00:00"
-      }
-    ],
-    "totalElements": 128
-  }
-}
-```
-
----
-
-#### GET /api/ninots/{id} - Ninot por ID
-**Autenticación:** No requerida
-
----
-
-#### GET /api/ninots/falla/{idFalla} - Ninots de una falla
-**Autenticación:** No requerida
-
----
-
-#### GET /api/ninots/premiados - Ninots premiados
-**Autenticación:** No requerida  
-**Query Params:**
-- `page` (int, default: 0)
-- `size` (int, default: 20)
-
----
-
 ### COMENTARIOS
 
 #### GET /api/comentarios - Comentarios filtrados
 **Autenticación:** No requerida  
 **Query Params:**
-- `idFalla` (Long, opcional)
-- `idNinot` (Long, opcional)
+- `idFalla` (Long) - Filtrar por falla
 
 **Ejemplo:** `GET /api/comentarios?idFalla=1`
 
@@ -613,8 +549,6 @@ async function obtenerUbicacionFalla(idFalla) {
       "nombreUsuario": "María García",
       "idFalla": 1,
       "nombreFalla": "Falla Convento Jerusalén",
-      "idNinot": null,
-      "nombreNinot": null,
       "contenido": "¡Espectacular la plantà de este año! Enhorabuena al casal",
       "fechaCreacion": "2026-03-16T10:30:00",
       "fechaActualizacion": "2026-03-16T10:30:00"
@@ -642,7 +576,6 @@ async function obtenerUbicacionFalla(idFalla) {
   "datos": {
     "totalFallas": 347,
     "totalEventos": 1245,
-    "totalNinots": 982,
     "totalUsuarios": 4567,
     "totalVotos": 12890,
     "totalComentarios": 3456
@@ -682,10 +615,10 @@ async function obtenerUbicacionFalla(idFalla) {
 #### GET /api/estadisticas/votos - Estadísticas de votos
 **Autenticación:** No requerida
 
-Descripción: Devuelve rankings y estadísticas de votaciones. Soporta filtros por tipo de voto y límite de resultados. El backend almacena los votos por FALLA (no por ninot) y por cada ninot se registran votos en 3 categorías; internamente el campo `valor` se normaliza a `1` para indicar la presencia del voto (no es una puntuación 1-5).
+Descripción: Devuelve rankings y estadísticas de votaciones. Los votos se almacenan **directamente por FALLA** (no por ninot). Soporta filtros por tipo de voto y límite de resultados.
 
 Query Params opcionales:
-- `limite` (int, default: 10): número máximo de elementos devueltos en los rankings (`topFallas` y `topNinots`).
+- `limite` (int, default: 10): número máximo de elementos devueltos en el ranking `topFallas`.
 - `tipoVoto` (String, opcional): filtra por tipo de voto. Valores permitidos: `EXPERIMENTAL`, `INGENIO_Y_GRACIA`, `MONUMENTO`. Si se omite, se consideran todos los tipos.
 
 Ejemplo: `/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTAL`
@@ -698,22 +631,18 @@ Response (200 OK) - Estructura principal:
     "totalVotos": 12890,
     "topFallas": [
       {"idFalla": 23, "nombre": "Falla Convento Jerusalén", "seccion": "1A", "votos": 340},
-      ...
-    ],
-    "topNinots": [
-      {"idNinot": 15, "urlImagen": "https://...", "idFalla": 23, "nombreFalla": "Falla Convento Jerusalén", "votos": 120},
+      {"idFalla": 15, "nombre": "Falla Plaza del Pilar", "seccion": "2B", "votos": 290},
       ...
     ],
     "filtroTipoVoto": "EXPERIMENTAL"
   },
-  "timestamp": "2026-02-09T12:00:00"
+  "timestamp": "2026-02-10T12:00:00"
 }
 ```
 
 Notas de implementación:
-- Los votos se almacenan en la tabla `votos` con `tipo_voto` (VARCHAR) y `valor` normalizado a `1` cuando existe el voto.
+- Los votos se almacenan en la tabla `votos` con `tipo_voto` (ENUM) y `valor` normalizado a `1` cuando existe el voto.
 - Un usuario solo puede votar una vez por combinación (`id_usuario`, `id_falla`, `tipo_voto`) (constraint única).
-- `topNinots` asigna a cada ninot los votos recibidos por su `falla` (diseño actual: los votos se vinculan a la falla).
 
 Ejemplo cURL (ranking experimental top 5):
 ```bash
@@ -991,15 +920,15 @@ curl "http://localhost:8080/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTA
 
 ### VOTOS
 
-#### POST /api/votos - Votar por una falla (a través de ninot)
+#### POST /api/votos - Votar por una falla
 **Autenticación:** Requerida
 
-**Nota importante v0.5.0:** Los votos se registran en la **falla** asociada al ninot, no en el ninot directamente. Esto es por diseño del esquema de base de datos.
+Los votos se registran **directamente en la falla**, sin ninguna relación intermedia.
 
 **Request:**
 ```json
 {
-  "idNinot": 15,
+  "idFalla": 23,
   "tipoVoto": "EXPERIMENTAL"
 }
 ```
@@ -1011,10 +940,10 @@ curl "http://localhost:8080/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTA
 
 **Validaciones:**
 - Usuario solo puede votar 1 vez por falla por tipo
-- `idNinot` debe existir (internamente se vota su falla)
+- `idFalla` debe existir
 - `tipoVoto` debe ser uno de los 3 valores permitidos
 
-**Nota de implementación (2026-02-09):** En la base de datos el campo `valor` de la tabla `votos` se utiliza como indicador de presencia de voto y se normaliza a `1` cuando se crea un voto. El backend establece `valor = 1` al registrar el voto; no es una puntuación de 1-5.
+**Nota de implementación:** En la base de datos el campo `valor` de la tabla `votos` se utiliza como indicador de presencia de voto y se normaliza a `1` cuando se crea un voto. El backend establece `valor = 1` al registrar el voto; no es una puntuación de 1-5.
 
 **Response (201 Created):**
 ```json
@@ -1028,7 +957,7 @@ curl "http://localhost:8080/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTA
     "idFalla": 23,
     "nombreFalla": "Falla Convento Jerusalén",
     "tipoVoto": "EXPERIMENTAL",
-    "fechaCreacion": "2026-02-01T19:05:00"
+    "fechaCreacion": "2026-02-10T19:05:00"
   }
 }
 ```
@@ -1130,15 +1059,13 @@ curl -X GET http://localhost:8080/api/votos/usuario/2 \
 
 ---
 
-#### GET /api/votos/ninot/{idNinot} - Obtener votos de un ninot
-**Autenticación:** Requerida
+#### GET /api/votos/falla/{idFalla} - Obtener votos de una falla
+**Autenticación:** No requerida
 
-Obtiene todos los votos recibidos por una falla a través de un ninot específico.
-
-**Nota:** Los votos se almacenan en la falla asociada al ninot, no en el ninot directamente.
+Obtiene todos los votos recibidos por una falla específica.
 
 **Parámetros de ruta:**
-- `idNinot` (Long): ID del ninot
+- `idFalla` (Long): ID de la falla
 
 **Response (200 OK):**
 ```json
@@ -1153,7 +1080,7 @@ Obtiene todos los votos recibidos por una falla a través de un ninot específic
       "idFalla": 1,
       "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
       "tipoVoto": "EXPERIMENTAL",
-      "fechaCreacion": "2026-02-06T11:24:07.282477"
+      "fechaCreacion": "2026-02-10T11:24:07.282477"
     },
     {
       "idVoto": 3,
@@ -1162,25 +1089,24 @@ Obtiene todos los votos recibidos por una falla a través de un ninot específic
       "idFalla": 1,
       "nombreFalla": "Isabel la Catòlica-Ciril Amorós",
       "tipoVoto": "INGENIO_Y_GRACIA",
-      "fechaCreacion": "2026-02-06T11:24:07.400902"
+      "fechaCreacion": "2026-02-10T11:24:07.400902"
     }
   ]
 }
 ```
 
-**Error (404 Not Found) - Ninot no existe:**
+**Error (404 Not Found) - Falla no existe:**
 ```json
 {
   "exito": false,
-  "mensaje": "Ninot no encontrado con id: '99'",
+  "mensaje": "Falla no encontrada con id: '99'",
   "datos": null
 }
 ```
 
 **Ejemplo cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/votos/ninot/1 \
-  -H "Authorization: Bearer $TOKEN"
+curl http://localhost:8080/api/votos/falla/1
 ```
 
 ---

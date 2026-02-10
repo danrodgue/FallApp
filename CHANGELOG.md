@@ -5,6 +5,80 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.10] - 2026-02-10 🗑️ ELIMINACIÓN DE TABLA NINOTS - VOTOS DIRECTOS A FALLAS
+
+### BREAKING CHANGES ⚠️
+- **Base de Datos**
+  - ❌ **Tabla `ninots` eliminada completamente**
+  - ✅ Votos ahora se relacionan **directamente con fallas** mediante `id_falla`
+  - ⚠️ Clientes mobile/desktop DEBEN actualizarse (API v0.5.9- NO compatible)
+
+### Removed
+- **Endpoints eliminados:**
+  - `GET /api/ninots` - Listar ninots
+  - `GET /api/ninots/{id}` - Ninot por ID
+  - `GET /api/ninots/falla/{idFalla}` - Ninots de una falla
+  - `GET /api/ninots/premiados` - Ninots premiados
+  - `GET /api/votos/ninot/{idNinot}` - Votos de un ninot
+
+- **Modelo de datos:**
+  - Entidad `Ninot` eliminada
+  - `NinotRepository` eliminado
+  - Relación `Falla.ninots` eliminada
+  - Campos `Evento.imagen` y `Evento.imagenContentType` eliminados (no soportados por BD)
+
+### Changed
+- **POST /api/votos - Votar por una falla**
+  - **ANTES:** `{ "idNinot": 15, "tipoVoto": "EXPERIMENTAL" }`
+  - **AHORA:** `{ "idFalla": 23, "tipoVoto": "EXPERIMENTAL" }`
+  - Validación actualizada: un voto por usuario por falla por tipo
+
+- **GET /api/votos/falla/{idFalla}**
+  - Mantiene misma funcionalidad, ahora más directa (sin JOIN a ninots)
+
+- **Modelo Voto:**
+  - Columna `id_ninot` reemplazada por `id_falla`
+  - Constraint única: `(id_usuario, id_falla, tipo_voto)`
+
+- **FallaDTO:**
+  - Campo `totalNinots` eliminado de responses
+
+- **Estadísticas:**
+  - `GET /api/estadisticas/resumen`: campo `totalNinots` eliminado
+  - `GET /api/estadisticas/votos`: lista `topNinots` eliminada, solo devuelve `topFallas`
+
+- **Mobile (Android/Kotlin):**
+  - `VotoRequestDto`: campo `idNinot` → `idFalla`
+  - `VotosApiService`: endpoint `votos/ninot/{id}` → `votos/falla/{id}`
+  - `FallasMappers`: mapeo actualizado a `idFalla`
+
+### Fixed
+- Errores de compilación Lombok en backend (getters/setters faltantes)
+- `@OneToMany` duplicado en `Falla.java`
+- Import obsoleto `NinotRepository` en servicios
+- Error SQL "relation 'ninots' does not exist" corregido
+
+### Migration
+- **Script:** `07.datos/migracion/2026-02-10_remove_ninots.sql`
+  - Backup creado: tabla `ninots_backup_20260210`
+  - `DROP TABLE ninots CASCADE` ejecutado
+  - ✅ Migración completada exitosamente
+
+### Documentation
+- **Actualizado:**
+  - `GUIA.API.FRONTEND.md` v0.5.6 - Sección NINOTS eliminada, sección VOTOS actualizada
+  - `ACTUALIZACION.ELIMINACION.NINOTS.2026-02-10.md` - Documento completo de cambios
+  - `04.docs/DB.SCHEMA.md` - Diagrama ERD actualizado (VOTOS → FALLAS)
+
+### Technical Details
+- **Backend compilado:** `mvn clean package` ✅ SUCCESS
+- **Servicio reiniciado:** `systemctl restart fallapp.service` ✅ RUNNING
+- **API funcional:** `GET /api/fallas` ✅ `{"exito": true}`
+- **Commits locales:** Cambios en backend, mobile y docs committeados
+- **Push remoto:** ⏳ Pendiente (usuario solicitó esperar)
+
+---
+
 ## [0.5.9] - 2026-02-06 📖 DOCUMENTACIÓN COMPLETA API DE VOTOS
 
 ### Added
