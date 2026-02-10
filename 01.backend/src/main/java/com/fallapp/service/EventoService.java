@@ -179,10 +179,14 @@ public class EventoService {
     /**
      * Actualiza la imagen principal de un evento almacenando la imagen como binario en BD.
      *
+     * NOTA: Funcionalidad deshabilitada - la BD no tiene columnas imagen/imagen_content_type.
+     * Usar url_imagen en su lugar.
+     *
      * - Valida un tamaño máximo razonable (por defecto 5 MB)
      * - Guarda los bytes en campo BYTEA
      * - Guarda el Content-Type para devolver la cabecera adecuada
      */
+    /*
     @Transactional
     public void actualizarImagen(Long idEvento, MultipartFile imagen) {
         if (imagen == null || imagen.isEmpty()) {
@@ -211,6 +215,7 @@ public class EventoService {
 
         eventoRepository.save(evento);
     }
+    */
     /**
      * Mapear DTO a entidad
      */

@@ -56,23 +56,6 @@ public class Evento {
     @Column(name = "url_imagen", length = 500)
     private String urlImagen;
 
-    /**
-     * Imagen principal del evento almacenada como binario en la base de datos.
-     * Se mantiene el campo urlImagen para compatibilidad con clientes que usen URLs.
-     *
-     * Tipo en BD recomendado: BYTEA
-     */
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "imagen")
-    private byte[] imagen;
-
-    /**
-     * Content-Type original de la imagen del evento (image/jpeg, image/png, etc.)
-     */
-    @Column(name = "imagen_content_type", length = 100)
-    private String imagenContentType;
-
     @Column(name = "participantes_estimado")
     private Integer participantesEstimado;
 

@@ -110,9 +110,13 @@ public class EventoController {
     /**
      * PUT /api/eventos/{id}/imagen - Actualizar imagen principal del evento.
      *
+     * NOTA: Endpoint deshabilitado - la BD no tiene columnas imagen/imagen_content_type.
+     * Usar url_imagen en su lugar.
+     *
      * Formato: multipart/form-data con un campo "imagen" que contiene la imagen.
      * La imagen se almacena como binario (BYTEA) en la base de datos.
      */
+    /*
     @PutMapping(path = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<Void>> actualizarImagen(
             @PathVariable Long id,
@@ -121,13 +125,17 @@ public class EventoController {
         eventoService.actualizarImagen(id, imagen);
         return ResponseEntity.ok(ApiResponse.success("Imagen del evento actualizada correctamente", null));
     }
+    */
 
     /**
      * GET /api/eventos/{id}/imagen - Obtener imagen principal del evento.
      *
      * Devuelve directamente los bytes de la imagen con el Content-Type original.
      * Si el evento no tiene imagen, devuelve 404.
+     * NOTA: Endpoint deshabilitado - la BD no tiene columnas imagen/imagen_content_type.
+     * Usar url_imagen en su lugar.
      */
+    /*
     @GetMapping("/{id}/imagen")
     public ResponseEntity<byte[]> obtenerImagen(@PathVariable Long id) {
         var evento = eventoService.obtenerEntidadPorId(id);
@@ -147,4 +155,5 @@ public class EventoController {
 
         return new ResponseEntity<>(imagen, headers, HttpStatus.OK);
     }
+    */
 }

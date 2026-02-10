@@ -61,31 +61,20 @@ public class Usuario {
     @Column(name = "telefono", length = 20)
     private String telefono;
 
-    @Column(name = "direccion", length = 255)
+    // Campos NO persistidos (no existen en BD - marcados como @Transient)
+    @Transient
     private String direccion;
 
-    @Column(name = "ciudad", length = 100)
+    @Transient
     private String ciudad;
 
-    @Column(name = "codigo_postal", length = 10)
+    @Transient
     private String codigoPostal;
 
-    /**
-     * Foto de perfil del usuario almacenada como binario en la base de datos.
-     * Campo opcional para no obligar a todos los usuarios a tener foto.
-     *
-     * Tipo en BD recomendado: BYTEA
-     */
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "foto_perfil")
+    @Transient
     private byte[] fotoPerfil;
 
-    /**
-     * Content-Type original de la imagen subida (image/jpeg, image/png, etc.)
-     * Se almacena en texto para poder devolver la cabecera HTTP correcta.
-     */
-    @Column(name = "foto_perfil_content_type", length = 100)
+    @Transient
     private String fotoPerfilContentType;
 
     /**

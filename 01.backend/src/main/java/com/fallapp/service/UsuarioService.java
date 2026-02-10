@@ -136,6 +136,8 @@ public class UsuarioService {
     /**
      * Actualiza la foto de perfil del usuario almacenando la imagen como binario en BD.
      *
+     * NOTA: Funcionalidad deshabilitada - la BD no tiene columnas foto_perfil/foto_perfil_content_type.
+     *
      * Responsabilidades:
      * - Validar tamaño máximo razonable de la imagen
      * - Guardar bytes en campo BYTEA
@@ -143,6 +145,7 @@ public class UsuarioService {
      *
      * La conversión a binario se hace en backend a partir del MultipartFile recibido.
      */
+    /*
     public void actualizarFotoPerfil(Long id, MultipartFile foto) {
         if (foto == null || foto.isEmpty()) {
             throw new BadRequestException("La imagen de perfil no puede estar vacía");
@@ -172,6 +175,7 @@ public class UsuarioService {
 
         usuarioRepository.save(usuario);
     }
+    */
 
     /**
      * Convertir entidad a DTO (público para uso en controllers)

@@ -59,9 +59,12 @@ public class UsuarioController {
     /**
      * PUT /api/usuarios/{id}/foto - Actualizar foto de perfil del usuario.
      *
+     * NOTA: Endpoint deshabilitado - la BD no tiene columnas foto_perfil/foto_perfil_content_type.
+     *
      * Formato: multipart/form-data con un campo "foto" que contiene la imagen.
      * La imagen se almacena como binario (BYTEA) en la base de datos.
      */
+    /*
     @PutMapping(path = "/{id}/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Actualizar foto de perfil del usuario")
     public ResponseEntity<ApiResponse<Void>> actualizarFotoPerfil(
@@ -71,13 +74,17 @@ public class UsuarioController {
         usuarioService.actualizarFotoPerfil(id, foto);
         return ResponseEntity.ok(ApiResponse.success("Foto de perfil actualizada", null));
     }
+    */
 
     /**
      * GET /api/usuarios/{id}/foto - Obtener la foto de perfil del usuario.
      *
+     * NOTA: Endpoint deshabilitado - la BD no tiene columnas foto_perfil/foto_perfil_content_type.
+     *
      * Devuelve directamente los bytes de la imagen con el Content-Type original.
      * Si el usuario no tiene foto, devuelve 404.
      */
+    /*
     @GetMapping("/{id}/foto")
     @Operation(summary = "Obtener foto de perfil del usuario")
     public ResponseEntity<byte[]> obtenerFotoPerfil(@PathVariable Long id) {
@@ -98,4 +105,5 @@ public class UsuarioController {
 
         return new ResponseEntity<>(foto, headers, HttpStatus.OK);
     }
+    */
 }
