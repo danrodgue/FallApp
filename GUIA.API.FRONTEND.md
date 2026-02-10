@@ -682,6 +682,43 @@ async function obtenerUbicacionFalla(idFalla) {
 #### GET /api/estadisticas/votos - Estadísticas de votos
 **Autenticación:** No requerida
 
+Descripción: Devuelve rankings y estadísticas de votaciones. Soporta filtros por tipo de voto y límite de resultados. El backend almacena los votos por FALLA (no por ninot) y por cada ninot se registran votos en 3 categorías; internamente el campo `valor` se normaliza a `1` para indicar la presencia del voto (no es una puntuación 1-5).
+
+Query Params opcionales:
+- `limite` (int, default: 10): número máximo de elementos devueltos en los rankings (`topFallas` y `topNinots`).
+- `tipoVoto` (String, opcional): filtra por tipo de voto. Valores permitidos: `EXPERIMENTAL`, `INGENIO_Y_GRACIA`, `MONUMENTO`. Si se omite, se consideran todos los tipos.
+
+Ejemplo: `/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTAL`
+
+Response (200 OK) - Estructura principal:
+```json
+{
+  "exito": true,
+  "datos": {
+    "totalVotos": 12890,
+    "topFallas": [
+      {"idFalla": 23, "nombre": "Falla Convento Jerusalén", "seccion": "1A", "votos": 340},
+      ...
+    ],
+    "topNinots": [
+      {"idNinot": 15, "urlImagen": "https://...", "idFalla": 23, "nombreFalla": "Falla Convento Jerusalén", "votos": 120},
+      ...
+    ],
+    "filtroTipoVoto": "EXPERIMENTAL"
+  },
+  "timestamp": "2026-02-09T12:00:00"
+}
+```
+
+Notas de implementación:
+- Los votos se almacenan en la tabla `votos` con `tipo_voto` (VARCHAR) y `valor` normalizado a `1` cuando existe el voto.
+- Un usuario solo puede votar una vez por combinación (`id_usuario`, `id_falla`, `tipo_voto`) (constraint única).
+- `topNinots` asigna a cada ninot los votos recibidos por su `falla` (diseño actual: los votos se vinculan a la falla).
+
+Ejemplo cURL (ranking experimental top 5):
+```bash
+curl "http://localhost:8080/api/estadisticas/votos?limite=5&tipoVoto=EXPERIMENTAL" | jq
+```
 ---
 
 #### GET /api/estadisticas/usuarios - Estadísticas de usuarios
@@ -976,6 +1013,8 @@ async function obtenerUbicacionFalla(idFalla) {
 - Usuario solo puede votar 1 vez por falla por tipo
 - `idNinot` debe existir (internamente se vota su falla)
 - `tipoVoto` debe ser uno de los 3 valores permitidos
+
+**Nota de implementación (2026-02-09):** En la base de datos el campo `valor` de la tabla `votos` se utiliza como indicador de presencia de voto y se normaliza a `1` cuando se crea un voto. El backend establece `valor = 1` al registrar el voto; no es una puntuación de 1-5.
 
 **Response (201 Created):**
 ```json
@@ -2058,7 +2097,7 @@ curl -X POST http://35.180.21.42:8080/api/votos \
   -d '{
     "idNinot": 1,
     "tipoVoto": "EXPERIMENTAL"
-  }'
+cd  }'
 
 # =================================
 # 8. CREAR COMENTARIO (autenticado)

@@ -3,7 +3,7 @@ package com.fallapp.service;
 import com.fallapp.dto.VotoDTO;
 import com.fallapp.dto.CrearVotoRequest;
 import com.fallapp.model.Falla;
-import com.fallapp.model.Ninot;
+import com.fallapp.model.Falla;
 import com.fallapp.model.Usuario;
 import com.fallapp.model.Voto;
 import com.fallapp.exception.BadRequestException;
@@ -27,9 +27,9 @@ import java.util.stream.Collectors;
 @Transactional
 public class VotoService {
 
-    private final VotoRepository votoRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final NinotRepository ninotRepository;
+        private final VotoRepository votoRepository;
+        private final UsuarioRepository usuarioRepository;
+        private final com.fallapp.repository.FallaRepository fallaRepository;
 
     /**
      * Crear un nuevo voto
@@ -39,15 +39,10 @@ public class VotoService {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", idUsuario));
 
-        // Verificar que el ninot existe
-        Ninot ninot = ninotRepository.findById(request.getIdNinot())
-                .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", request.getIdNinot()));
-
-        // Verificar que el usuario no haya votado ya esta falla con este tipo
+        // Verificar que la falla existe y obtenerla
         Voto.TipoVoto tipo = Voto.TipoVoto.valueOf(request.getTipoVoto());
-        Falla falla = ninotRepository.findById(request.getIdNinot())
-                .map(Ninot::getFalla)
-                .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", request.getIdNinot()));
+        Falla falla = fallaRepository.findById(request.getIdFalla())
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", request.getIdFalla()));
         
         if (votoRepository.existsByUsuarioAndFallaAndTipoVoto(usuario, falla, tipo)) {
             throw new BadRequestException("Ya has votado esta falla con el tipo: " + request.getTipoVoto());
@@ -80,14 +75,13 @@ public class VotoService {
     }
 
     /**
-     * Obtener votos de un ninot
+     * Obtener votos de una falla
      */
     @Transactional(readOnly = true)
-    public List<VotoDTO> obtenerVotosNinot(Long idNinot) {
-        Ninot ninot = ninotRepository.findById(idNinot)
-                .orElseThrow(() -> new ResourceNotFoundException("Ninot", "id", idNinot));
-        Falla falla = ninot.getFalla();
-        
+    public List<VotoDTO> obtenerVotosFalla(Long idFalla) {
+        Falla falla = fallaRepository.findById(idFalla)
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", idFalla));
+
         return votoRepository.findByFalla(falla, Pageable.unpaged())
                 .stream()
                 .map(this::convertirADTO)

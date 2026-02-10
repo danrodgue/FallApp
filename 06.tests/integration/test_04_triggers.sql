@@ -87,30 +87,8 @@ BEGIN;
         'Trigger eventos actualiza timestamp' as test_name;
 ROLLBACK;
 
--- Test 4.4: Trigger en ninots
-\echo ''
-\echo 'Test 4.4: Trigger ninots'
-BEGIN;
-    SELECT id_falla FROM fallas LIMIT 1 \gset
-    
-    INSERT INTO ninots (id_falla, nombre_ninot, titulo_obra, anyo_construccion)
-    VALUES (:id_falla, 'TEST_NINOT', 'Test Obra', 2024)
-    RETURNING id_ninot \gset
-    
-    SELECT actualizado_en FROM ninots WHERE id_ninot = :id_ninot \gset tn1_
-    SELECT pg_sleep(1);
-    
-    UPDATE ninots SET nombre_ninot = 'UPDATED' WHERE id_ninot = :id_ninot;
-    
-    SELECT actualizado_en FROM ninots WHERE id_ninot = :id_ninot \gset tn2_
-    
-    SELECT 
-        CASE 
-            WHEN :'tn2_actualizado_en' > :'tn1_actualizado_en' THEN 'PASS'
-            ELSE 'FAIL'
-        END as result,
-        'Trigger ninots actualiza timestamp' as test_name;
-ROLLBACK;
+-- Test 4.4: Trigger en ninots (omitted)
+-- La tabla `ninots` fue eliminada; pruebas relacionadas a triggers de ninots se omiten.
 
 -- Test 4.5: Trigger en comentarios
 \echo ''

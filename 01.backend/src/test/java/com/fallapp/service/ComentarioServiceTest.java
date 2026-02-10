@@ -3,11 +3,10 @@ package com.fallapp.service;
 import com.fallapp.dto.ComentarioDTO;
 import com.fallapp.model.Comentario;
 import com.fallapp.model.Falla;
-import com.fallapp.model.Ninot;
 import com.fallapp.model.Usuario;
 import com.fallapp.repository.ComentarioRepository;
 import com.fallapp.repository.FallaRepository;
-import com.fallapp.repository.NinotRepository;
+// Ninots eliminados: tests adaptados a comentarios por falla
 import com.fallapp.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,15 +51,13 @@ class ComentarioServiceTest {
     @Mock
     private FallaRepository fallaRepository;
 
-    @Mock
-    private NinotRepository ninotRepository;
 
     @InjectMocks
     private ComentarioService comentarioService;
 
     private Usuario usuarioMock;
     private Falla fallaMock;
-    private Ninot ninotMock;
+    // ninotMock removed (tabla ninots eliminada)
     private Comentario comentarioMock;
 
     @BeforeEach
@@ -77,11 +74,7 @@ class ComentarioServiceTest {
         fallaMock.setNombre("Falla Plaza del Ayuntamiento");
         fallaMock.setSeccion("Especial");
 
-        // Ninot mock
-        ninotMock = new Ninot();
-        ninotMock.setIdNinot(1L);
-        ninotMock.setNombre("Ninot Test");
-        ninotMock.setFalla(fallaMock);
+        // Ninots removed — no se crea mock de ninot
 
         // Comentario mock
         comentarioMock = new Comentario();
@@ -115,7 +108,7 @@ class ComentarioServiceTest {
     }
 
     @Test
-    void testCrearComentarioEnNinot_Success() {
+    void testCrearComentarioEnFalla_Alternate_Success() {
         // Arrange
         ComentarioDTO dto = new ComentarioDTO();
         dto.setIdUsuario(1L);
@@ -194,7 +187,7 @@ class ComentarioServiceTest {
     }
 
     @Test
-    void testObtenerPorNinot_Success() {
+    void testObtenerPorFalla_AsNinotScenario_Success() {
         // Arrange
         comentarioMock.setFalla(fallaMock);
         // Ninot ya no tiene relación con comentarios

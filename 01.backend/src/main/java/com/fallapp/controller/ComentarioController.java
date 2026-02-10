@@ -18,7 +18,6 @@ import java.util.List;
  * 
  * Funcionalidad:
  * - GET /api/comentarios?idFalla={id} - Listar comentarios de una falla (público)
- * - GET /api/comentarios?idNinot={id} - Listar comentarios de un ninot (público)
  * - GET /api/comentarios/{id} - Obtener comentario por ID (público)
  * - POST /api/comentarios - Crear comentario (requiere autenticación JWT)
  * - PUT /api/comentarios/{id} - Actualizar comentario (requiere ser autor o admin)
@@ -65,24 +64,19 @@ public class ComentarioController {
      * 
      * Ordenamiento: Descendente por fecha de creación (más recientes primero)
      * 
-     * @param idFalla ID de la falla (opcional, mutuamente exclusivo con idNinot)
-     * @param idNinot ID del ninot (opcional, mutuamente exclusivo con idFalla)
+    * @param idFalla ID de la falla (opcional)
      * @return ApiResponse con lista de ComentarioDTO ordenados por fecha
      * @throws ResourceNotFoundException Si idFalla o idNinot no existen
      */
     @GetMapping
-    @Operation(summary = "Obtener comentarios", description = "Obtener comentarios filtrados por falla o ninot")
+    @Operation(summary = "Obtener comentarios", description = "Obtener comentarios filtrados por falla")
     public ResponseEntity<ApiResponse<List<ComentarioDTO>>> obtener(
-            @RequestParam(required = false) Long idFalla,
-            @RequestParam(required = false) Long idNinot) {
+            @RequestParam(required = false) Long idFalla) {
         
         List<ComentarioDTO> comentarios;
         
-        // Filtrado condicional: idFalla tiene prioridad sobre idNinot
         if (idFalla != null) {
             comentarios = comentarioService.obtenerPorFalla(idFalla);
-        } else if (idNinot != null) {
-            comentarios = comentarioService.obtenerPorNinot(idNinot);
         } else {
             comentarios = comentarioService.obtenerTodos();
         }
@@ -105,7 +99,7 @@ public class ComentarioController {
      * Requiere autenticación
      */
     @PostMapping
-    @Operation(summary = "Crear nuevo comentario", description = "Requiere autenticación. Debe especificar idFalla o idNinot.")
+    @Operation(summary = "Crear nuevo comentario", description = "Requiere autenticación. Debe especificar idFalla.")
     public ResponseEntity<ApiResponse<ComentarioDTO>> crear(
             @RequestBody @jakarta.validation.Valid ComentarioDTO comentarioDTO) {
         ComentarioDTO comentarioCreado = comentarioService.crear(comentarioDTO);

@@ -27,8 +27,29 @@ ALTER TABLE votos
     ADD CONSTRAINT ck_votos_tipo_voto 
     CHECK (tipo_voto IN ('EXPERIMENTAL', 'INGENIO_Y_GRACIA', 'MONUMENTO'));
 
--- PASO 5: Hacer columna 'valor' opcional (no todos los votos necesitan rating)
-ALTER TABLE votos ALTER COLUMN valor DROP NOT NULL;
+-- PASO 5: Normalizar columna 'valor' a INTEGER con valor 1 cuando exista voto.
+-- 1) Eliminar cualquier CHECK previo que imponga rango 1-5
+ALTER TABLE votos DROP CONSTRAINT IF EXISTS ck_votos_valor;
+
+-- 2) Si la columna `valor` viene como BOOLEAN (migración previa), convertir a INTEGER
+--    TRUE -> 1, FALSE -> 0. Si ya es INTEGER, se mantiene el valor.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name='votos' AND column_name='valor' AND data_type='boolean'
+    ) THEN
+        ALTER TABLE votos ALTER COLUMN valor TYPE INTEGER USING (CASE WHEN valor IS TRUE THEN 1 WHEN valor IS FALSE THEN 0 ELSE NULL END);
+    END IF;
+END$$;
+
+-- 3) Normalizar: cualquier valor no nulo lo convertimos a 1 (el sistema solo usa 1 para indicar voto)
+UPDATE votos SET valor = 1 WHERE valor IS NOT NULL;
+
+-- 4) Asegurar esquema: entero NOT NULL por defecto 1 y constraint que deje claro la semántica
+ALTER TABLE votos ALTER COLUMN valor SET DEFAULT 1;
+ALTER TABLE votos ALTER COLUMN valor SET NOT NULL;
+ALTER TABLE votos ADD CONSTRAINT ck_votos_valor CHECK (valor = 1);
 
 -- PASO 6: Recrear índice y constraint única
 CREATE INDEX idx_votos_tipo_voto ON votos(tipo_voto);

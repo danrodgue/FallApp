@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
  * Tabla: votos
  */
 @Entity
-@Table(name = "votos", 
+@Table(name = "votos",
        uniqueConstraints = @UniqueConstraint(
-           name = "uk_usuario_ninot_tipo",
-           columnNames = {"id_usuario", "id_ninot", "tipo_voto"}
+           name = "uk_usuario_falla_tipo",
+           columnNames = {"id_usuario", "id_falla", "tipo_voto"}
        ))
 @Data
 @NoArgsConstructor

@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/votos")
 @RequiredArgsConstructor
-@Tag(name = "Votos", description = "Gestión de votos a ninots")
+@Tag(name = "Votos", description = "Gestión de votos a fallas")
 public class VotoController {
 
     private final VotoService votoService;
@@ -66,10 +66,10 @@ public class VotoController {
         return ResponseEntity.ok(ApiResponse.success(votos));
     }
 
-    @GetMapping("/ninot/{idNinot}")
-    @Operation(summary = "Obtener votos de un ninot")
-    public ResponseEntity<ApiResponse<List<VotoDTO>>> obtenerVotosNinot(@PathVariable Long idNinot) {
-        List<VotoDTO> votos = votoService.obtenerVotosNinot(idNinot);
+    @GetMapping("/falla/{idFalla}")
+    @Operation(summary = "Obtener votos de una falla")
+    public ResponseEntity<ApiResponse<List<VotoDTO>>> obtenerVotosFalla(@PathVariable Long idFalla) {
+        List<VotoDTO> votos = votoService.obtenerVotosFalla(idFalla);
         return ResponseEntity.ok(ApiResponse.success(votos));
     }
 

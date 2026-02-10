@@ -76,7 +76,6 @@ public class SecurityConfig {
                 // Endpoints de solo lectura públicos (exploración sin login)
                 .requestMatchers(HttpMethod.GET, "/api/fallas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/eventos/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/ninots/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/comentarios/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/estadisticas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
@@ -84,20 +83,17 @@ public class SecurityConfig {
                 // Endpoints de creación (requieren autenticación, cualquier usuario)
                 .requestMatchers(HttpMethod.POST, "/api/fallas").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/eventos").authenticated()
-                .requestMatchers(HttpMethod.POST, "/api/ninots").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/comentarios").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/votos").authenticated()
                 
                 // Endpoints de actualización (requieren autenticación)
                 .requestMatchers(HttpMethod.PUT, "/api/fallas/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/eventos/**").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/ninots/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/comentarios/**").authenticated()
                 
                 // Endpoints de eliminación (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/api/fallas/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/ninots/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
                 
                 // Gestión de usuarios (requiere autenticación)

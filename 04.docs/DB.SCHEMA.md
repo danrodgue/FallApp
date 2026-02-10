@@ -2,7 +2,7 @@
 
 **Base de Datos:** PostgreSQL 13  
 **Fecha de Actualización:** 2026-02-04  
-**Total de Tablas:** 7  
+**Total de Tablas:** 6
 **Versión del Esquema:** 1.1  
 **Última Migración:** Reestructuración completa de FALLAS + nuevos campos USUARIOS
 
@@ -31,7 +31,6 @@
 |-------|-----------|-----------------|-----------------|
 | FALLAS | 351 | 100% (351/351) | 98.5% promedio |
 | USUARIOS | 13 | N/A | 100% (campos obligatorios) |
-| NINOTS | 346 | N/A | 100% |
 | EVENTOS | 0 | N/A | - |
 | VOTOS | 0 | N/A | - |
 | COMENTARIOS | 0 | N/A | - |
@@ -60,7 +59,7 @@ Este esquema incluye múltiples formas de visualizar la estructura de la base de
 erDiagram
     FALLAS ||--o{ USUARIOS : "pertenece"
     FALLAS ||--o{ EVENTOS : "organiza"
-    FALLAS ||--o{ NINOTS : "tiene"
+    
     FALLAS ||--o{ COMENTARIOS : "sobre"
     FALLAS ||--o{ VOTOS : "recibe"
     
@@ -108,13 +107,7 @@ erDiagram
         timestamptz fecha_creacion
     }
     
-    NINOTS {
-        int id_ninot PK
-        int id_falla FK "NOT NULL"
-        varchar nombre
-        varchar url_imagen "NOT NULL"
-        timestamp fecha_creacion
-    }
+    
     
     COMENTARIOS {
         int id_comentario PK
@@ -132,9 +125,11 @@ erDiagram
         int id_usuario FK "NOT NULL"
         int id_falla FK "NOT NULL"
         enum tipo_voto "NOT NULL: EXPERIMENTAL | INGENIO_Y_GRACIA | MONUMENTO"
-        int valor "1-5"
+        int valor "1 (presencia de voto)"
         timestamptz fecha_voto
     }
+
+> Nota de implementación (2026-02-09): El backend establece `valor = 1` al registrar un voto. El campo `valor` se usa únicamente como indicador de presencia de voto, no como una puntuación.
 ```
 
 ---
@@ -144,21 +139,21 @@ erDiagram
 ```
 ╔═══════════════════════════════════════════════════════════════════════════╗
 ║                    BASE DE DATOS: fallapp (PostgreSQL 13)                 ║
-║                              7 Tablas - 710 Registros                     ║
+║                              6 Tablas - 710 Registros                     ║
 ║                        ✅ Actualizado: 2026-02-04                         ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
                                  ┏━━━━━━━━━━━┓
                         ┌────────┨  FALLAS   ┠────────┐
                         │        ┃ [351 reg] ┃        │
-                        │        ┗━━━━━┯━━━━━┛        │
-                        │              │              │
-         ┌──────────────┴───┐      ┌──┴───┐     ┌────┴─────┐
-         │                  │      │      │     │          │
-    ┌────▼────┐       ┌─────▼───┐ │ ┌────▼───┐ │   ┌──────▼──────┐
-    │USUARIOS │       │ EVENTOS │ │ │ NINOTS │ │   │   VOTOS     │
-    │ [13]    │       │  [0]    │ │ │ [346]  │ │   │   [0]       │
-    └────┬────┘       └────┬────┘ │ └────────┘ │   └─────────────┘
+                            │        ┗━━━━━┯━━━━━┛        │
+                                            │              │
+                                ┌──────────────┴───┐      ┌──┴───┐     
+                                │                  │      │      │     
+                            ┌────▼────┐       ┌─────▼───┐     ┌──────▼──────┐
+                            │USUARIOS │       │ EVENTOS │     │   VOTOS     │
+                            │ [13]    │       │  [0]    │     │   [0]       │
+                            └────┬────┘       └────┬────┘     └─────────────┘
          │                 │      │            │
          │                 │      └────────────┘
          │                 │
@@ -190,13 +185,13 @@ graph TB
     F[🎭 FALLAS<br/>351 registros<br/>Tabla Central<br/>✅ 100% GPS]
     U[👥 USUARIOS<br/>13 registros<br/>+ Nuevos campos dirección]
     E[📅 EVENTOS<br/>0 registros]
-    N[🎨 NINOTS<br/>346 registros]
+    
     C[💬 COMENTARIOS<br/>0 registros]
     V[⭐ VOTOS<br/>0 registros]
     
     F -->|1:N pertenece| U
     F -->|1:N organiza| E
-    F -->|1:N tiene| N
+    
     F -->|1:N recibe| C
     F -->|1:N recibe| V
     
@@ -229,7 +224,7 @@ FALLAS (id_falla) [TABLA PRINCIPAL]
 ├─► EVENTOS (id_falla → fallas)
 │   └─► Metadata: creado_por, actualizado_por
 │
-├─► NINOTS (id_falla → fallas)
+    
 │
 ├─► COMENTARIOS (id_falla → fallas)
 │   └─► COMENTARIOS (id_respuesta_a → comentarios) [RECURSIVO]
@@ -339,13 +334,7 @@ Table eventos {
   actualizado_en timestamptz [not null, default: `now()`]
 }
 
-Table ninots {
-  id_ninot integer [pk, increment]
-  id_falla integer [not null]
-  nombre varchar(255)
-  url_imagen varchar(500) [not null]
-  fecha_creacion timestamp [default: `now()`]
-}
+// Tabla `ninots` eliminada: las imágenes/figuras ahora se gestionan desde `fallas` o un recurso de media asociado.
 
 Table comentarios {
   id_comentario integer [pk, increment]
@@ -364,7 +353,7 @@ Table votos {
   id_usuario integer [not null]
   id_falla integer [not null]
   tipo_voto tipo_voto [not null]
-  valor integer [not null, note: 'CHECK: 1-5']
+    valor integer [not null, note: 'CHECK: valor = 1 (presencia de voto)']
   comentario text
   ip_origen varchar(45)
   fecha_voto timestamptz [not null, default: `now()`]
@@ -380,7 +369,7 @@ Ref: usuarios.id_falla > fallas.id_falla [delete: set null]
 Ref: eventos.id_falla > fallas.id_falla [delete: cascade]
 Ref: eventos.creado_por > usuarios.id_usuario [delete: set null]
 Ref: eventos.actualizado_por > usuarios.id_usuario [delete: set null]
-Ref: ninots.id_falla > fallas.id_falla [delete: cascade]
+// Ref: ninots.id_falla > fallas.id_falla removed (tabla ninots eliminada)
 Ref: comentarios.id_usuario > usuarios.id_usuario [delete: cascade]
 Ref: comentarios.id_falla > fallas.id_falla [delete: cascade]
 Ref: comentarios.id_respuesta_a > comentarios.id_comentario [delete: set null]
@@ -588,24 +577,9 @@ Gestiona eventos y actividades relacionadas con cada falla.
 
 ---
 
-### 4. 🎨 NINOTS (Figuras de las Fallas)
+### 4. 🎨 NINOTS (Eliminada)
 
-Catálogo de ninots pertenecientes a cada falla.
-
-| Columna | Tipo | Restricciones | Descripción |
-|---------|------|---------------|-------------|
-| **id_ninot** | INTEGER | PK, NOT NULL, AUTO | Identificador único |
-| **id_falla** | INTEGER | FK, NOT NULL | Falla propietaria |
-| **nombre** | VARCHAR(255) | NULL | Nombre/título del ninot |
-| **url_imagen** | VARCHAR(500) | NOT NULL | URL de la imagen |
-| **fecha_creacion** | TIMESTAMP | DEFAULT=NOW() | Fecha de registro |
-
-**Índices:**
-- `idx_ninots_falla` (btree)
-- `idx_ninots_fecha` (btree DESC)
-
-**Foreign Keys:**
-- `id_falla` → fallas(id_falla) ON DELETE CASCADE
+La tabla `ninots` fue eliminada: las imágenes/figuras se gestionan ahora directamente desde la entidad `fallas` (campo o relación de media). Cualquier referencia previa a `ninots` ha sido removida del esquema y del backend.
 
 ---
 
@@ -655,7 +629,7 @@ Sistema de votación múltiple por tipo de voto.
 | **id_usuario** | INTEGER | FK, NOT NULL | Usuario votante |
 | **id_falla** | INTEGER | FK, NOT NULL | Falla votada |
 | **tipo_voto** | tipo_voto | NOT NULL | Categoría: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO |
-| **valor** | INTEGER | NOT NULL, CHECK(1-5) | Valor del voto (1-5) |
+| **valor** | INTEGER | NOT NULL, CHECK(valor = 1) | Presencia de voto (1 = votado) |
 | **comentario** | TEXT | NULL | Comentario opcional |
 | **ip_origen** | VARCHAR(45) | NULL | IP del votante (IPv4/IPv6) |
 | **fecha_voto** | TIMESTAMPTZ | NOT NULL, DEFAULT=NOW() | Fecha del voto |
@@ -722,7 +696,6 @@ Categorías de votación para fallas:
 ### Fallas (Centro del Modelo)
 - **1:N con Usuarios** → Una falla tiene múltiples miembros
 - **1:N con Eventos** → Una falla organiza múltiples eventos
-- **1:N con Ninots** → Una falla tiene múltiples ninots
 - **1:N con Comentarios** → Una falla recibe múltiples comentarios
 - **1:N con Votos** → Una falla recibe múltiples votos
 

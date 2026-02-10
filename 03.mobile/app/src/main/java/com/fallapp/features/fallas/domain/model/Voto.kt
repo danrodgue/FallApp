@@ -36,7 +36,7 @@ data class Voto(
  * @property tipoVoto Tipo de voto
  */
 data class VotoRequest(
-    val idNinot: Long,
+    val idFalla: Long,
     val tipoVoto: TipoVoto
 )
 

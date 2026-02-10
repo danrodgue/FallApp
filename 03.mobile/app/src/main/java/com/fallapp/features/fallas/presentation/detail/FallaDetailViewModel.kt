@@ -126,7 +126,7 @@ class FallaDetailViewModel(
      * Para simplificar, usaremos el idFalla como idNinot temporalmente
      * (en producción deberías obtener el primer ninot de la falla).
      */
-    fun vote(tipoVoto: TipoVoto, idNinot: Long) {
+    fun vote(tipoVoto: TipoVoto, idFalla: Long) {
         val currentState = _uiState.value
         
         // Verificar si ya votó con este tipo
@@ -141,7 +141,7 @@ class FallaDetailViewModel(
             _uiState.update { it.copy(isVoting = true, voteError = null) }
             
             val request = VotoRequest(
-                idNinot = idNinot,
+                idFalla = idFalla,
                 tipoVoto = tipoVoto
             )
             

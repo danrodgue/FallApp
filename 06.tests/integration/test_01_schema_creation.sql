@@ -20,12 +20,12 @@ SELECT
 FROM pg_extension
 WHERE extname IN ('uuid-ossp', 'unaccent');
 
--- Test 1.2: Verificar que existen las 6 tablas principales
+-- Test 1.2: Verificar que existen las 5 tablas principales
 \echo ''
 \echo 'Test 1.2: Tablas principales creadas'
 SELECT 
     CASE 
-        WHEN COUNT(*) = 6 THEN 'PASS'
+        WHEN COUNT(*) = 5 THEN 'PASS'
         ELSE 'FAIL'
     END as result,
     'Tablas principales' as test_name,
@@ -34,7 +34,7 @@ SELECT
 FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_type = 'BASE TABLE'
-  AND table_name IN ('usuarios', 'fallas', 'eventos', 'ninots', 'votos', 'comentarios');
+    AND table_name IN ('usuarios', 'fallas', 'eventos', 'votos', 'comentarios');
 
 -- Test 1.3: Verificar que existen los 4 tipos ENUM
 \echo ''
@@ -56,7 +56,7 @@ WHERE typtype = 'e'
 \echo 'Test 1.4: Primary Keys definidas'
 SELECT 
     CASE 
-        WHEN COUNT(*) = 6 THEN 'PASS'
+        WHEN COUNT(*) = 5 THEN 'PASS'
         ELSE 'FAIL'
     END as result,
     'Primary Keys' as test_name,
@@ -64,7 +64,7 @@ SELECT
 FROM information_schema.table_constraints
 WHERE constraint_type = 'PRIMARY KEY'
   AND table_schema = 'public'
-  AND table_name IN ('usuarios', 'fallas', 'eventos', 'ninots', 'votos', 'comentarios');
+    AND table_name IN ('usuarios', 'fallas', 'eventos', 'votos', 'comentarios');
 
 -- Test 1.5: Verificar FOREIGN KEYS
 \echo ''

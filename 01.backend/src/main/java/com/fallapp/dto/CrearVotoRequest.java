@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrearVotoRequest {
-    @NotNull(message = "El ID del ninot es obligatorio")
-    private Long idNinot;
+    @NotNull(message = "El ID de la falla es obligatorio")
+    private Long idFalla;
 
     @NotBlank(message = "El tipo de voto es obligatorio")
     @Pattern(regexp = "EXPERIMENTAL|INGENIO_Y_GRACIA|MONUMENTO", 

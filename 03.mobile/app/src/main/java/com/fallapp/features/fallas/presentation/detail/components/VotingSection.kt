@@ -69,8 +69,7 @@ fun VotingSection(
                     isLoading = uiState.isVoting,
                     onVoteClick = {
                         uiState.falla?.let { falla ->
-                            // Temporalmente usamos idFalla como idNinot
-                            // En producción, deberías obtener el primer ninot de la falla
+                            // Envío de voto por falla: se utiliza `idFalla` directamente
                             onVoteClick(tipoVoto, falla.idFalla)
                         }
                     },

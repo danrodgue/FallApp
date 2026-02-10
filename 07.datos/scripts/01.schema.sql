@@ -273,7 +273,9 @@ CREATE TABLE votos (
     
     -- Voto
     tipo_voto tipo_voto NOT NULL,
-    valor INTEGER NOT NULL,  -- 1-5 estrellas o peso de ranking
+    -- `valor` indica la presencia del voto; se normaliza a 1 cuando existe
+    -- al votar el sistema guarda `valor = 1` (permite cómputo por suma si se desea)
+    valor INTEGER NOT NULL DEFAULT 1,
     
     -- Contenido
     comentario TEXT NULL,
@@ -292,7 +294,8 @@ CREATE TABLE votos (
     CONSTRAINT fk_votos_id_falla 
         FOREIGN KEY (id_falla) REFERENCES fallas(id_falla) ON DELETE CASCADE,
     
-    CONSTRAINT ck_votos_valor CHECK (valor >= 1 AND valor <= 5)
+    -- Restricción: `valor` debe ser 1 (semántica: 1 = voto emitido)
+    CONSTRAINT ck_votos_valor CHECK (valor = 1)
 );
 
 CREATE INDEX idx_votos_id_usuario ON votos(id_usuario);

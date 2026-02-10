@@ -57,7 +57,6 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final FallaRepository fallaRepository;
-    private final NinotRepository ninotRepository;
     
     /**
      * Obtener todos los comentarios del sistema
@@ -100,18 +99,7 @@ public class ComentarioService {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Obtener comentarios por ninot (ahora por su falla)
-     */
-    public List<ComentarioDTO> obtenerPorNinot(Long idNinot) {
-        Ninot ninot = ninotRepository.findById(idNinot)
-                .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + idNinot));
-        Falla falla = ninot.getFalla();
-        
-        return comentarioRepository.findByFallaOrderByCreadoEnDesc(falla).stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
+        // Método obtenerPorNinot eliminado: los comentarios se asocian únicamente a `falla`.
     
     /**
      * Obtener comentario por ID
@@ -127,9 +115,9 @@ public class ComentarioService {
      */
     @Transactional
     public ComentarioDTO crear(ComentarioDTO comentarioDTO) {
-        // Validar que al menos uno (falla o ninot) esté presente
-        if (comentarioDTO.getIdFalla() == null && comentarioDTO.getIdNinot() == null) {
-            throw new IllegalArgumentException("Debe especificar idFalla o idNinot");
+        // Validar que la falla esté presente
+        if (comentarioDTO.getIdFalla() == null) {
+            throw new IllegalArgumentException("Debe especificar idFalla");
         }
         
         Usuario usuario = usuarioRepository.findById(comentarioDTO.getIdUsuario())

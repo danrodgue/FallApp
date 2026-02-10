@@ -26,8 +26,7 @@ public class ComentarioDTO {
     private Long idFalla;
     private String nombreFalla;
     
-    private Long idNinot;
-    private String nombreNinot;
+    // `ninots` eliminado: comentarios se asocian solo a `idFalla`
     
     @NotBlank(message = "El contenido es obligatorio")
     @Size(min = 3, max = 500, message = "El comentario debe tener entre 3 y 500 caracteres")

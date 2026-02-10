@@ -22,7 +22,7 @@ class VotarFallaUseCase(
     /**
      * Ejecuta el voto.
      * 
-     * @param request Datos del voto (idNinot, tipoVoto)
+    * @param request Datos del voto (idFalla, tipoVoto)
      * @return Result con el voto creado o error
      */
     suspend operator fun invoke(request: VotoRequest): Result<Voto> {

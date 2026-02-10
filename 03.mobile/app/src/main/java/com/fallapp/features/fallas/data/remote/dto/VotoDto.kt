@@ -21,7 +21,7 @@ data class VotoDto(
  */
 @Serializable
 data class VotoRequestDto(
-    val idNinot: Long,
+    val idFalla: Long,
     val tipoVoto: String
 )
 

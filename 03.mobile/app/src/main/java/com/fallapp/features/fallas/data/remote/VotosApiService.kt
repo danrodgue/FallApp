@@ -35,6 +35,7 @@ class VotosApiService(
         client.post(ApiConfig.Endpoints.VOTOS) {
             contentType(ContentType.Application.Json)
             attachAuthHeader()
+            // request now includes `idFalla` (server expects idFalla)
             setBody(request)
         }.body()
 
@@ -56,10 +57,10 @@ class VotosApiService(
         }.body()
 
     /**
-     * Obtiene los votos asociados a un ninot/falla concreto.
+     * Obtiene los votos asociados a una falla concreta.
      */
-    suspend fun getVotosFalla(idNinot: Long): ApiResponse<PageResponse<VotoDto>> =
-        client.get("${ApiConfig.API_PATH}/votos/ninot/$idNinot") {
+    suspend fun getVotosFalla(idFalla: Long): ApiResponse<PageResponse<VotoDto>> =
+        client.get("${ApiConfig.API_PATH}/votos/falla/$idFalla") {
             attachAuthHeader()
         }.body()
 }

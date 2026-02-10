@@ -350,13 +350,13 @@ fi
 echo ""
 
 ###############################################################################
-# TEST 12: Votar por ninot con token
+# TEST 12: Votar por falla con token
 ###############################################################################
 ((TOTAL_TESTS++))
-print_test "Votar por ninot con autenticación"
+print_test "Votar por falla con autenticación"
 VOTO_DATA='{
-    "idNinot": 1,
-    "tipoVoto": "ARTISTICO"
+    "idFalla": 1,
+    "tipoVoto": "EXPERIMENTAL"
 }'
 
 VOTO_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/votos" \
