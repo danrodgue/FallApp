@@ -31,14 +31,26 @@ class VotosRepositoryImpl(
             val dtoRequest = request.toDto()
             val response = apiService.crearVoto(dtoRequest)
 
-            if (response.exito && response.datos != null) {
-                Result.Success(response.datos.toDomain())
-            } else {
-                Result.Error(
+            if (!response.exito) {
+                return Result.Error(
                     exception = Exception(response.mensaje ?: "Error al crear voto"),
                     message = response.mensaje
                 )
             }
+
+            // El backend puede no devolver un VotoDTO completo en `datos`,
+            // pero para la UI solo necesitamos saber que se ha registrado el voto.
+            // El listado real de votos se vuelve a cargar desde /votos/mis-votos.
+            val dummyVoto = Voto(
+                idVoto = -1L,
+                idUsuario = -1L,
+                nombreUsuario = "",
+                idFalla = request.idFalla,
+                nombreFalla = "",
+                tipoVoto = request.tipoVoto,
+                fechaCreacion = null
+            )
+            Result.Success(dummyVoto)
         } catch (e: Exception) {
             Result.Error(
                 exception = e,

@@ -13,6 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.client.plugins.contentnegotiation.*
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Servicio API para gestión de votos.
@@ -31,7 +32,15 @@ class VotosApiService(
         header(ApiConfig.AUTH_HEADER, "${ApiConfig.TOKEN_PREFIX}$token")
     }
 
-    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<VotoDto> =
+    /**
+     * Crear voto.
+     *
+     * Aunque la guía documenta que `datos` devuelve un `VotoDTO` completo,
+     * en la práctica el backend puede devolver estructuras diferentes o incluso null.
+     * Por eso modelamos `datos` como `JsonElement` y dejamos que
+     * la capa de repositorio simplemente use el flag `exito`/`mensaje`.
+     */
+    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<JsonElement> =
         client.post(ApiConfig.Endpoints.VOTOS) {
             contentType(ContentType.Application.Json)
             attachAuthHeader()

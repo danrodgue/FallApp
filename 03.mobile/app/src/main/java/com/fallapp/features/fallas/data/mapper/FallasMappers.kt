@@ -149,7 +149,12 @@ fun VotoDto.toDomain(): Voto {
 fun VotoRequest.toDto(): VotoRequestDto {
     return VotoRequestDto(
         idFalla = idFalla,
-        tipoVoto = tipoVoto.name
+        tipoVoto = when (tipoVoto) {
+            // Mapear nombres de dominio a constantes de la API
+            TipoVoto.INGENIOSO -> "MONUMENTO"
+            TipoVoto.CRITICO -> "INGENIO_Y_GRACIA"
+            TipoVoto.ARTISTICO -> "EXPERIMENTAL"
+        }
     )
 }
 
