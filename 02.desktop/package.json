@@ -7,12 +7,18 @@
   "type": "commonjs",
   "main": "./main/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "start": "electron ."
   },
   "dependencies": {
     "electron": "^40.0.0",
     "mongoose": "^9.1.4",
     "node-fetch": "^2.6.9"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
