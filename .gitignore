@@ -16,10 +16,11 @@ build/
 .DS_Store
 Thumbs.db
 
-# Markdown files (except root README.md)
-*.md
-!README.md
+# Markdown files (except specific ones)
 **/*.md
+!README.md
+!GUIA.API.FRONTEND.md
+!**/GUIA.API.FRONTEND.md
 
 # Java compiled files
 *.class
