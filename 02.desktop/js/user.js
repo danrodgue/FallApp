@@ -4,8 +4,11 @@ const API_USER_URL = 'http://35.180.21.42:8080/api/usuarios';
 // Variable para rastrear si estamos en modo edición
 let isEditing = false;
 let currentUserId = null;
+let originalUserData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🔄 Inicializando página de usuario...');
+  
   // Cargar información del usuario
   await loadUserData();
 
@@ -15,10 +18,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelBtn = document.getElementById('cancelBtn');
   const logoutBtn = document.getElementById('logout');
 
-  if (editBtn) editBtn.addEventListener('click', toggleEditMode);
-  if (saveBtn) saveBtn.addEventListener('click', saveUserData);
-  if (cancelBtn) cancelBtn.addEventListener('click', toggleEditMode);
-  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+  if (editBtn) {
+    editBtn.addEventListener('click', toggleEditMode);
+    console.log('✓ Event listener agreg ado a editBtn');
+  } else {
+    console.error('❌ No se encontró el elemento editBtn');
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', saveUserData);
+    console.log('✓ Event listener agregado a saveBtn');
+  } else {
+    console.error('❌ No se encontró el elemento saveBtn');
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', toggleEditMode);
+    console.log('✓ Event listener agregado a cancelBtn');
+  } else {
+    console.error('❌ No se encontró el elemento cancelBtn');
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+    console.log('✓ Event listener agregado a logoutBtn');
+  } else {
+    console.error('❌ No se encontró el elemento logoutBtn');
+  }
+  
+  console.log('✓ Página de usuario inicializada correctamente');
 });
 
 // Cargar datos del usuario desde el backend
@@ -28,11 +56,12 @@ async function loadUserData() {
     const idUsuario = localStorage.getItem('fallapp_user_id');
     
     if (!idUsuario) {
-      console.error('No hay idUsuario en localStorage');
+      console.error('❌ No hay idUsuario en localStorage');
       redirectToLogin();
       return;
     }
 
+    console.log(`📥 Cargando datos del usuario ID: ${idUsuario}`);
     currentUserId = idUsuario;
 
     // Obtener los datos del usuario específico desde la API
@@ -45,9 +74,13 @@ async function loadUserData() {
       throw new Error('Usuario no encontrado');
     }
     
+    // Guardar datos originales para comparación en cancelar
+    originalUserData = JSON.parse(JSON.stringify(userData));
+    
+    console.log('✓ Datos del usuario cargados:', userData);
     populateUserForm(userData);
   } catch (error) {
-    console.error('Error loading user data:', error);
+    console.error('❌ Error loading user data:', error);
     showErrorMessage(`Error al cargar datos: ${error.message}`);
   }
 }
@@ -107,9 +140,10 @@ function toggleEditMode() {
   const fields = document.querySelectorAll('.field input');
 
   if (isEditing) {
+    console.log('✏️ Entrando en modo edición...');
     // Habilitar campos editables (excepto algunos)
     // Los campos no editables son: id, rol, idFalla, estado, fechaRegistro
-    const nonEditableFields = ['userId', 'userRol', 'userIdFalla', 'userEstado', 'userFechaRegistro'];
+    const nonEditableFields = ['userId', 'userRol', 'userIdFalla', 'userEstado', 'userFechaRegistro', 'userName'];
     
     fields.forEach((field) => {
       if (!nonEditableFields.includes(field.id)) {
@@ -122,7 +156,10 @@ function toggleEditMode() {
     editBtn.style.display = 'none';
     saveBtn.style.display = 'inline-flex';
     cancelBtn.style.display = 'inline-flex';
+    
+    console.log('✓ Modo edición activado');
   } else {
+    console.log('🔒 Saliendo del modo edición...');
     // Deshabilitar campos
     fields.forEach((field) => {
       field.disabled = true;
@@ -132,8 +169,16 @@ function toggleEditMode() {
     saveBtn.style.display = 'none';
     cancelBtn.style.display = 'none';
 
-    // Recargar datos para descartar cambios
-    loadUserData();
+    // Recargar datos para descartar cambios (sin hacer petición si tenemos datos originales)
+    if (originalUserData) {
+      console.log('📄 Restaurando datos originales...');
+      populateUserForm(originalUserData);
+    } else {
+      console.log('🔄 Recargando datos desde servidor...');
+      loadUserData();
+    }
+    
+    console.log('✓ Modo edición desactivado');
   }
 }
 
@@ -141,9 +186,16 @@ function toggleEditMode() {
 function validateUserData(formData) {
   const errors = [];
   
+  // Validar que al menos someCompleto no esté vacío
+  if (!formData.nombreCompleto || formData.nombreCompleto.length === 0) {
+    errors.push('El nombre completo es requerido');
+  }
+  
   // Validar email
   if (formData.email && !formData.email.includes('@')) {
     errors.push('El email no es válido');
+  } else if (!formData.email || formData.email.length === 0) {
+    errors.push('El email es requerido');
   }
   
   // Validar teléfono (opcional pero si se proporciona debe tener formato)
@@ -167,7 +219,8 @@ function validateUserData(formData) {
 async function saveUserData() {
   try {
     if (!currentUserId) {
-      showErrorMessage('No se puede identificar al usuario.');
+      showErrorMessage('❌ No se puede identificar al usuario.');
+      console.error('No hay currentUserId');
       return;
     }
 
@@ -180,9 +233,13 @@ async function saveUserData() {
       codigoPostal: document.getElementById('userCodigoPostal').value.trim(),
     };
 
+    console.log('📤 Enviando datos del usuario:', formData);
+
     // Validar datos
     const validationErrors = validateUserData(formData);
     if (validationErrors.length > 0) {
+      const errorMsg = '❌ Errores de validación:\n' + validationErrors.join('\n');
+      console.error(errorMsg);
       showErrorMessage(validationErrors.join('\n'));
       return;
     }
@@ -193,16 +250,32 @@ async function saveUserData() {
     saveBtn.textContent = 'Guardando...';
     saveBtn.disabled = true;
 
+    console.log(`🔄 Actualizando usuario ${currentUserId}...`);
+    
     // Enviar actualización utilizando la función mejorada de api.js
     const result = await actualizarUsuario(currentUserId, formData);
+
+    console.log('✓ Usuario actualizado en el servidor:', result);
+    
+    if (!result.exito) {
+      throw new Error(`Error del servidor: ${result.mensaje}`);
+    }
+
+    // Actualizar los datos originales con los nuevos para que cancelar funcione correctamente
+    // La respuesta tiene estructura: { exito: true, mensaje: "...", datos: {...} }
+    originalUserData = JSON.parse(JSON.stringify(result.datos || result));
+    console.log('✓ Datos guardados en memoria:', originalUserData);
 
     // Deshabilitar modo edición
     isEditing = true;
     toggleEditMode();
 
-    showSuccessMessage('Perfil actualizado correctamente.');
+    showSuccessMessage('✓ Perfil actualizado correctamente.');
+    
+    // Recargar datos del servidor para confirmar que se guardó
+    await loadUserData();
   } catch (error) {
-    console.error('Error saving user data:', error);
+    console.error('❌ Error saving user data:', error);
     showErrorMessage(`Error al guardar: ${error.message}`);
   } finally {
     // Restaurar botón de guardar
@@ -218,14 +291,16 @@ async function saveUserData() {
 function showSuccessMessage(message) {
   const messageDiv = createMessageElement(message, 'success');
   document.body.appendChild(messageDiv);
-  setTimeout(() => messageDiv.remove(), 3000);
+  console.log('✓ ' + message);
+  setTimeout(() => messageDiv.remove(), 4000);
 }
 
 // Mostrar mensaje de error
 function showErrorMessage(message) {
   const messageDiv = createMessageElement(message, 'error');
   document.body.appendChild(messageDiv);
-  setTimeout(() => messageDiv.remove(), 5000);
+  console.error('❌ ' + message);
+  setTimeout(() => messageDiv.remove(), 6000);
 }
 
 // Crear elemento de mensaje
@@ -242,8 +317,10 @@ function createMessageElement(message, type) {
     z-index: 9999;
     animation: slideIn 0.3s ease-out;
     max-width: 400px;
+    min-width: 300px;
     word-wrap: break-word;
     white-space: pre-wrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     ${type === 'success' 
       ? 'background: #10b981; color: white;' 
       : 'background: #ef4444; color: white;'}
@@ -255,6 +332,7 @@ function createMessageElement(message, type) {
 // Manejar cierre de sesión
 function handleLogout() {
   try {
+    console.log('🚪 Cerrando sesión...');
     // Limpiar todos los datos de sesión
     localStorage.removeItem('fallapp_token');
     localStorage.removeItem('fallapp_user_id');
@@ -263,15 +341,23 @@ function handleLogout() {
     localStorage.removeItem('fallapp_user_rol');
     localStorage.removeItem('fallapp_user_idFalla');
     localStorage.removeItem('fallapp_user');
+    
+    console.log('✓ Sesión cerrada, redirigiendo a login...');
+    showSuccessMessage('Sesión cerrada correctamente');
+    
+    // Pequeño delay para que se vea el mensaje
+    setTimeout(() => {
+      window.location.href = '../js/index.html';
+    }, 500);
   } catch (e) {
-    console.error('Error removing user from localStorage:', e);
+    console.error('❌ Error removing user from localStorage:', e);
+    window.location.href = '../js/index.html';
   }
-  // Redirigir a login
-  window.location.href = '../js/index.html';
 }
 
 // Redirigir a login si no hay usuario
 function redirectToLogin() {
+  console.warn('⚠️ Redirigiendo a login...');
   window.location.href = '../js/index.html';
 }
 

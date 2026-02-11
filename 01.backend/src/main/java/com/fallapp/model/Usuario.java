@@ -61,14 +61,13 @@ public class Usuario {
     @Column(name = "telefono", length = 20)
     private String telefono;
 
-    // Campos NO persistidos (no existen en BD - marcados como @Transient)
-    @Transient
+    @Column(name = "direccion", length = 255)
     private String direccion;
 
-    @Transient
+    @Column(name = "ciudad", length = 100)
     private String ciudad;
 
-    @Transient
+    @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
 
     @Transient

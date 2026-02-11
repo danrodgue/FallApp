@@ -11,6 +11,9 @@ function getAuthHeaders() {
     const headers = { 'Content-Type': 'application/json' };
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        console.log('🔐 [API] Token de autorización encontrado');
+    } else {
+        console.warn('⚠️ [API] No hay token de autorización en localStorage');
     }
     return headers;
 }
@@ -123,15 +126,32 @@ async function eliminarFalla(id) {
 // Obtener un usuario por ID
 async function obtenerUsuario(id) {
     try {
-        const respuesta = await fetch(`${API_USUARIOS_URL}/${id}`, {
+        const url = `${API_USUARIOS_URL}/${id}`;
+        console.log(`📥 [API] Obteniendo usuario: ${id} desde ${url}`);
+        
+        const respuesta = await fetch(url, {
             headers: getAuthHeaders()
         });
+        
+        console.log(`📥 [API] Respuesta status: ${respuesta.status} ${respuesta.statusText}`);
+        
         if (!respuesta.ok) {
             const error = await parseErrorResponse(respuesta);
+            console.error(`❌ [API] Error obteniendo usuario: ${error}`);
             throw new Error(error);
         }
-        return await respuesta.json();
+        
+        const resultado = await respuesta.json();
+        console.log('------- USUARIO OBTENIDO -------');
+        console.log(`✓ [API] Usuario obtenido:`, resultado);
+        if (resultado.datos) {
+            console.log(`✓ [API] Email: ${resultado.datos.email}`);
+            console.log(`✓ [API] Nombre: ${resultado.datos.nombreCompleto}`);
+        }
+        console.log('------- FIN USUARIO -------');
+        return resultado;
     } catch (error) {
+        console.error(`❌ [API] Error en obtenerUsuario:`, error);
         throw new Error(`No se pudo obtener el usuario: ${error.message}`);
     }
 }
@@ -139,17 +159,42 @@ async function obtenerUsuario(id) {
 // Actualizar un usuario
 async function actualizarUsuario(id, datos) {
     try {
-        const respuesta = await fetch(`${API_USUARIOS_URL}/${id}`, {
+        const url = `${API_USUARIOS_URL}/${id}`;
+        const headers = getAuthHeaders();
+        const body = JSON.stringify(datos);
+        
+        console.log(`📤 [API] Actualizando usuario: ${id}`);
+        console.log(`📤 [API] URL: ${url}`);
+        console.log(`📤 [API] Headers:`, headers);
+        console.log(`📤 [API] Body:`, body);
+        console.log('------- ENVIANDO PETICIÓN PUT -------');
+        
+        const respuesta = await fetch(url, {
             method: 'PUT',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(datos)
+            headers: headers,
+            body: body
         });
+        
+        console.log(`📥 [API] Respuesta status: ${respuesta.status} ${respuesta.statusText}`);
+        
         if (!respuesta.ok) {
             const error = await parseErrorResponse(respuesta);
+            console.error(`❌ [API] Error en actualizar usuario: ${error}`);
+            console.error(`❌ [API] Status ${respuesta.status} - Body: ${error}`);
             throw new Error(error);
         }
-        return await respuesta.json();
+        
+        const resultado = await respuesta.json();
+        console.log('------- RESPUESTA RECIBIDA -------');
+        console.log(`✓ [API] Usuario actualizado exitosamente:`, resultado);
+        console.log(`✓ [API] exito: ${resultado.exito}`);
+        console.log(`✓ [API] mensaje: ${resultado.mensaje}`);
+        console.log(`✓ [API] datos:`, resultado.datos);
+        console.log('------- FIN RESPUESTA -------');
+        
+        return resultado;
     } catch (error) {
+        console.error(`❌ [API] Error en actualizarUsuario:`, error);
         throw new Error(`No se pudo actualizar el usuario: ${error.message}`);
     }
 }
