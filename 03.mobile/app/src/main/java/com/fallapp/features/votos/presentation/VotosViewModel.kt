@@ -102,8 +102,12 @@ class VotosViewModel(
                     }
                 }
                 is Result.Error -> {
-                    _uiState.update {
-                        it.copy(errorMessage = result.message ?: "Error al cargar tus votos")
+                    // Evitar mostrar el error técnico del backend "Request method 'GET' is not supported"
+                    val msg = result.message ?: ""
+                    if (!msg.contains("Request method 'GET' is not supported", ignoreCase = true)) {
+                        _uiState.update {
+                            it.copy(errorMessage = msg.ifBlank { "Error al cargar tus votos" })
+                        }
                     }
                 }
                 is Result.Loading -> {}
@@ -153,11 +157,17 @@ class VotosViewModel(
                         }
                     }
                     is Result.Error -> {
-                        _uiState.update {
-                            it.copy(
-                                errorMessage = fallasResult.message ?: "Error al cargar ranking",
-                                isLoading = false
-                            )
+                        // Silenciar errores técnicos del backend en ranking que no aportan al usuario final
+                        val msg = fallasResult.message ?: ""
+                        if (!msg.contains("Request method 'GET' is not supported", ignoreCase = true)) {
+                            _uiState.update {
+                                it.copy(
+                                    errorMessage = msg.ifBlank { "Error al cargar ranking" },
+                                    isLoading = false
+                                )
+                            }
+                        } else {
+                            _uiState.update { it.copy(isLoading = false) }
                         }
                     }
                     is Result.Loading -> {}
@@ -191,9 +201,17 @@ class VotosViewModel(
                     loadRanking()
                 }
                 is Result.Error -> {
+                    val raw = result.message ?: ""
+                    val userFriendly = if (raw.contains("JDBC exception executing", ignoreCase = true)
+                        || raw.contains("operator does not exist: tipo_voto", ignoreCase = true)
+                    ) {
+                        "No se ha podido registrar tu voto por un problema en el servidor. Inténtalo más tarde."
+                    } else {
+                        raw.ifBlank { "Error al votar" }
+                    }
                     _uiState.update {
                         it.copy(
-                            errorMessage = result.message ?: "Error al votar",
+                            errorMessage = userFriendly,
                             isLoading = false
                         )
                     }

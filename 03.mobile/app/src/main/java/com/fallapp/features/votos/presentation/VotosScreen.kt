@@ -46,6 +46,7 @@ fun VotosScreen(
     val uiState by viewModel.uiState.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var showInfo by remember { mutableStateOf(false) }
 
     // Mostrar mensajes
     LaunchedEffect(uiState.successMessage) {
@@ -76,6 +77,14 @@ fun VotosScreen(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
+                    },
+                    actions = {
+                        IconButton(onClick = { showInfo = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Información del sistema de votos"
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -110,6 +119,37 @@ fun VotosScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = {
+                    Text(
+                        text = "Cómo funcionan los votos",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "• Cada usuario puede votar una falla una sola vez por categoría.\n" +
+                                    "• Las categorías siguen la guía oficial: Experimental, Ingenio y Gracia, Monumento.\n" +
+                                    "• Tus votos se ligan a tu usuario y se usan para construir el ranking general.\n" +
+                                    "• Puedes ver y gestionar tus votos en la pestaña «Mis Votos».",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showInfo = false }) {
+                        Text("Entendido")
+                    }
+                }
+            )
+        }
+
         when (selectedTab) {
             0 -> VotarTab(
                 fallas = uiState.fallasParaVotar,
