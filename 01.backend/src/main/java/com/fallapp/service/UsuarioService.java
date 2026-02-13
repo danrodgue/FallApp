@@ -94,20 +94,21 @@ public class UsuarioService {
             usuario.setEmail(dto.getEmail());
         }
         
+        // Para campos opcionales: guardar si no está vacío, null si está vacío
         if (dto.getTelefono() != null) {
-            usuario.setTelefono(dto.getTelefono());
+            usuario.setTelefono(dto.getTelefono().isBlank() ? null : dto.getTelefono());
         }
         
         if (dto.getDireccion() != null) {
-            usuario.setDireccion(dto.getDireccion());
+            usuario.setDireccion(dto.getDireccion().isBlank() ? null : dto.getDireccion());
         }
         
         if (dto.getCiudad() != null) {
-            usuario.setCiudad(dto.getCiudad());
+            usuario.setCiudad(dto.getCiudad().isBlank() ? null : dto.getCiudad());
         }
         
         if (dto.getCodigoPostal() != null) {
-            usuario.setCodigoPostal(dto.getCodigoPostal());
+            usuario.setCodigoPostal(dto.getCodigoPostal().isBlank() ? null : dto.getCodigoPostal());
         }
 
         Usuario actualizado = usuarioRepository.save(usuario);
