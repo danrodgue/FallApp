@@ -279,7 +279,11 @@ document.addEventListener('DOMContentLoaded', () => {
         contrasena: password,
         nombreCompleto,
         idFalla,
-        rol: 'casal'  // Especificar explícitamente que es un casal
+        rol: 'casal',  // Especificar explícitamente que es un casal
+        telefono: telefono || undefined,
+        direccion: direccion || undefined,
+        ciudad: ciudad || undefined,
+        codigoPostal: codigoPostal || undefined
       };
 
       const result = await registrarCasal(payload);

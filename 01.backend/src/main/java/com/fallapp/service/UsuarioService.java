@@ -43,6 +43,20 @@ public class UsuarioService {
         usuario.setContrasenaHash(passwordEncoder.encode(request.getContrasena()));
         usuario.setNombreCompleto(request.getNombreCompleto());
         
+        // Asignar campos opcionales si se proporcionan
+        if (request.getTelefono() != null && !request.getTelefono().isBlank()) {
+            usuario.setTelefono(request.getTelefono());
+        }
+        if (request.getDireccion() != null && !request.getDireccion().isBlank()) {
+            usuario.setDireccion(request.getDireccion());
+        }
+        if (request.getCiudad() != null && !request.getCiudad().isBlank()) {
+            usuario.setCiudad(request.getCiudad());
+        }
+        if (request.getCodigoPostal() != null && !request.getCodigoPostal().isBlank()) {
+            usuario.setCodigoPostal(request.getCodigoPostal());
+        }
+        
         // Determinar el rol: usar el proporcionado por la solicitud, o "usuario" por defecto
         Usuario.RolUsuario rolFinal = Usuario.RolUsuario.usuario;
         if (request.getRol() != null && !request.getRol().isBlank()) {
