@@ -922,46 +922,82 @@ Estadísticas de una falla.
 ### 4.4 Eventos (`/api/eventos`)
 
 #### GET `/api/eventos`
-Listar eventos con filtros.
+Listar eventos con filtros y paginación.
 
 **Público**: ✅ Sí
 
 **Parámetros de consulta**:
-- `pagina` (int, default: 0)
-- `tamano` (int, default: 20)
-- `id_falla` (int, opcional): Filtrar por falla
-- `tipo` (string, opcional): Filtrar por tipo
-- `desde_fecha` (date, opcional): Desde fecha
-- `hasta_fecha` (date, opcional): Hasta fecha
-- `ordenar_por` (string, default: "fecha_evento"): fecha_evento, nombre
+- `pagina` (int, default: 0): Número de página (0-based)
+- `tamano` (int, default: 20, max: 100): Tamaño de página
+- `id_falla` (Long, opcional): Filtrar por ID de falla
+- `tipo` (string, opcional): Filtrar por tipo (planta, crema, ofrenda, concierto, etc.)
+- `desde_fecha` (ISO DateTime, opcional): Filtrar desde fecha (formato: 2026-03-01T00:00:00)
+- `hasta_fecha` (ISO DateTime, opcional): Filtrar hasta fecha
+- `ordenar_por` (string, default: "fecha_evento"): Campo de ordenación (fecha_evento, nombre)
 
 **Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
+  "mensaje": null,
   "datos": {
-    "contenido": [
+    "content": [
       {
-        "id_evento": 101,
-        "tipo": "planta",
-        "nombre": "Plantà Falla Grande",
-        "id_falla": 1,
-        "nombre_falla": "Falla Plaza del Ayuntamiento",
-        "fecha_evento": "2026-03-15T18:00:00Z",
-        "ubicacion": "Plaza del Ayuntamiento",
-        "participantes_estimado": 5000
+        "idEvento": 1,
+        "idFalla": 101,
+        "nombreFalla": "Actor Mora-Constitució",
+        "tipo": "concierto",
+        "nombre": "Concierto de Bandas Festeras 2026",
+        "descripcion": "Gran concierto con bandas de música tradicional valenciana.",
+        "fechaEvento": "2026-03-18T20:00:00",
+        "ubicacion": "Plaza del Casal",
+        "direccion": "Calle Mayor, 45 - 46001 Valencia",
+        "urlImagen": "https://ejemplo.com/eventos/concierto-2026.jpg",
+        "participantesEstimado": 300,
+        "creadoPor": {
+          "id": 4,
+          "nombreCompleto": "Administrador del Sistema",
+          "email": "admin@fallapp.es"
+        },
+        "fechaCreacion": "2026-02-13T12:16:05.318682",
+        "actualizadoEn": "2026-02-13T12:16:05.318682"
       }
     ],
-    "pagina_actual": 0,
-    "total_elementos": 450
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 20,
+      "offset": 0
+    },
+    "totalElements": 1,
+    "totalPages": 1,
+    "size": 20,
+    "number": 0,
+    "first": true,
+    "last": true,
+    "empty": false
   }
 }
 ```
 
+**Ejemplo de uso**:
+```bash
+# Listar todos los eventos
+GET /api/eventos?pagina=0&tamano=20
+
+# Filtrar por falla
+GET /api/eventos?id_falla=101&pagina=0&tamano=10
+
+# Filtrar por tipo
+GET /api/eventos?tipo=concierto
+
+# Filtrar por rango de fechas
+GET /api/eventos?desde_fecha=2026-03-01T00:00:00&hasta_fecha=2026-03-31T23:59:59
+```
+
 ---
 
-#### GET `/api/eventos/{id}`
-Obtener evento por ID.
+#### GET `/api/eventos/futuros`
+Obtener todos los eventos futuros (desde la fecha/hora actual).
 
 **Público**: ✅ Sí
 
@@ -969,194 +1005,52 @@ Obtener evento por ID.
 ```json
 {
   "exito": true,
-  "datos": {
-    "id_evento": 101,
-    "tipo": "planta",
-    "nombre": "Plantà Falla Grande",
-    "descripcion": "Plantación del monumento fallero grande",
-    "id_falla": 1,
-    "nombre_falla": "Falla Plaza del Ayuntamiento",
-    "fecha_evento": "2026-03-15T18:00:00Z",
-    "ubicacion": "Plaza del Ayuntamiento",
-    "direccion": "Plaza del Ayuntamiento, s/n",
-    "url_imagen": "https://cdn.fallapp.com/eventos/101.jpg",
-    "participantes_estimado": 5000,
-    "creado_por": {
-      "id": 2,
-      "nombre_completo": "Responsable Falla"
-    },
-    "fecha_creacion": "2026-01-15T10:00:00Z"
-  }
-}
-```
-
----
-
-#### POST `/api/eventos`
-Crear nuevo evento.
-
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
-
-**Petición**:
-```json
-{
-  "id_falla": 1,
-  "tipo": "concierto",
-  "nombre": "Concierto de Música Festera",
-  "descripcion": "Concierto de bandas de música...",
-  "fecha_evento": "2026-03-10T20:00:00Z",
-  "ubicacion": "Casal de la falla",
-  "direccion": "Calle Mayor, 45",
-  "participantes_estimado": 200,
-  "url_imagen": "https://ejemplo.com/imagen.jpg"
-}
-```
-
-**Respuesta exitosa** (201):
-```json
-{
-  "exito": true,
-  "datos": {
-    "id_evento": 501,
-    "nombre": "Concierto de Música Festera",
-    "fecha_evento": "2026-03-10T20:00:00Z",
-    "fecha_creacion": "2026-02-01T11:30:00Z"
-  },
-  "mensaje": "Evento creado correctamente"
-}
-```
-
-**Validaciones**:
-- fecha_evento debe ser futura
-- id_falla debe existir
-- CASAL solo puede crear eventos de su propia falla
-
----
-
-#### PUT `/api/eventos/{id}`
-Actualizar evento.
-
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
-
-**Petición**:
-```json
-{
-  "nombre": "Concierto de Música Festera - ACTUALIZADO",
-  "fecha_evento": "2026-03-10T21:00:00Z",
-  "participantes_estimado": 250
-}
-```
-
-**Respuesta exitosa** (200):
-```json
-{
-  "exito": true,
-  "datos": {
-    "id_evento": 501,
-    "nombre": "Concierto de Música Festera - ACTUALIZADO",
-    "fecha_actualizacion": "2026-02-01T11:45:00Z"
-  },
-  "mensaje": "Evento actualizado correctamente"
-}
-```
-
----
-
-#### PUT `/api/eventos/{id}/imagen`
-Actualizar imagen principal de un evento.
-
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
-
-**Content-Type**: `multipart/form-data`
-
-**Campos del formulario**:
-- `imagen` (file, requerido): Imagen principal del evento (`image/jpeg`, `image/png`, etc.). Tamaño máximo recomendado: **5 MB**.
-
-**Comportamiento**:
-- La imagen se almacena como binario en la tabla `eventos.imagen` (tipo `BYTEA`).
-- Se guarda el `content_type` en `eventos.imagen_content_type`.
-- El campo `url_imagen` se mantiene para compatibilidad con clientes que usen URLs externas.
-
-**Ejemplo (curl)**:
-```bash
-curl -X PUT http://localhost:8080/api/eventos/501/imagen \
-  -H "Authorization: Bearer TOKEN_CASAL" \
-  -H "Content-Type: multipart/form-data" \
-  -F "imagen=@/ruta/local/evento_501.jpg"
-```
-
-**Respuesta exitosa** (200):
-```json
-{
-  "exito": true,
-  "mensaje": "Imagen del evento actualizada correctamente",
-  "datos": null
-}
-```
-
-**Errores**:
-- `400 BAD_REQUEST` / `422 UNPROCESSABLE_ENTITY`: Imagen vacía o tamaño superior a 5 MB
-- `404 NOT_FOUND`: Evento no existe
-- `403 FORBIDDEN`: Sin permisos para modificar este evento
-
----
-
-#### GET `/api/eventos/{id}/imagen`
-Obtener imagen principal de un evento.
-
-**Público**: ✅ Sí (o restringido según política de visibilidad que se configure)
-
-**Respuesta exitosa** (200):
-- Cuerpo: bytes de la imagen almacenada.
-- Cabecera `Content-Type`: `image/jpeg`, `image/png`, etc.
-
-**Ejemplo (curl)**:
-```bash
-curl -X GET http://localhost:8080/api/eventos/501/imagen -o evento_501.jpg
-```
-
-**Errores**:
-- `404 NOT_FOUND`: Evento no existe o no tiene imagen almacenada
-
----
-
-#### DELETE `/api/eventos/{id}`
-Eliminar evento.
-
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
-
-**Respuesta exitosa** (200):
-```json
-{
-  "exito": true,
-  "mensaje": "Evento eliminado correctamente"
+  "mensaje": null,
+  "datos": [
+    {
+      "idEvento": 1,
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "descripcion": "Gran concierto con bandas...",
+      "fechaEvento": "2026-03-18T20:00:00",
+      "ubicacion": "Plaza del Casal",
+      "direccion": "Calle Mayor, 45 - Valencia",
+      "urlImagen": "https://ejemplo.com/eventos/concierto.jpg",
+      "participantesEstimado": 300,
+      "creadoPor": { "id": 4, "nombreCompleto": "Admin", "email": "admin@fallapp.es" },
+      "fechaCreacion": "2026-02-13T12:16:05.318682",
+      "actualizadoEn": "2026-02-13T12:16:05.318682"
+    }
+  ]
 }
 ```
 
 ---
 
 #### GET `/api/eventos/proximos`
-Eventos próximos (próximos 30 días).
+Obtener los próximos N eventos (ordenados por fecha ascendente).
 
 **Público**: ✅ Sí
 
 **Parámetros de consulta**:
-- `dias` (int, default: 30): Días hacia el futuro
-- `limite` (int, default: 50): Máximo de resultados
+- `limite` (int, default: 10, max: 50): Número máximo de eventos a retornar
 
 **Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
+  "mensaje": null,
   "datos": [
     {
-      "id_evento": 101,
-      "nombre": "Plantà Falla Grande",
-      "tipo": "planta",
-      "id_falla": 1,
-      "nombre_falla": "Falla Plaza del Ayuntamiento",
-      "fecha_evento": "2026-03-15T18:00:00Z",
-      "dias_restantes": 42
+      "idEvento": 1,
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "fechaEvento": "2026-03-18T20:00:00",
+      "ubicacion": "Plaza del Casal"
     }
   ]
 }
@@ -1165,26 +1059,248 @@ Eventos próximos (próximos 30 días).
 ---
 
 #### GET `/api/eventos/tipo/{tipo}`
-Eventos filtrados por tipo.
+Obtener eventos filtrados por tipo específico.
 
 **Público**: ✅ Sí
 
-**Tipos válidos**: `planta`, `crema`, `ofrenda`, `concierto`, `exposicion`, `infantil`, `cena`, `teatro`
+**Tipos válidos**: 
+- `planta` - Plantà del monumento
+- `crema` - Cremà de la falla
+- `ofrenda` - Ofrenda floral
+- `infantil` - Eventos infantiles
+- `concierto` - Conciertos
+- `exposicion` - Exposiciones
+- `encuentro` - Encuentros y reuniones
+- `cena` - Cenas y comidas
+- `teatro` - Representaciones teatrales
+- `otro` - Otros eventos
 
 **Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
+  "mensaje": null,
   "datos": [
     {
-      "id_evento": 101,
-      "nombre": "Plantà Falla Grande",
-      "tipo": "planta",
-      "fecha_evento": "2026-03-15T18:00:00Z"
+      "idEvento": 1,
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "fechaEvento": "2026-03-18T20:00:00"
     }
   ]
 }
 ```
+
+---
+
+#### GET `/api/eventos/falla/{idFalla}`
+Obtener eventos de una falla específica (paginado).
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `page` (int, default: 0): Número de página
+- `size` (int, default: 20, max: 100): Tamaño de página
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": {
+    "content": [ /* eventos */ ],
+    "totalElements": 12,
+    "totalPages": 1,
+    "number": 0,
+    "size": 20
+  }
+}
+```
+
+---
+
+#### GET `/api/eventos/{id}`
+Obtener detalles completos de un evento por su ID.
+
+**Público**: ✅ Sí
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": null,
+  "datos": {
+    "idEvento": 1,
+    "idFalla": 101,
+    "nombreFalla": "Actor Mora-Constitució",
+    "tipo": "concierto",
+    "nombre": "Concierto de Bandas Festeras 2026",
+    "descripcion": "Gran concierto con bandas de música tradicional valenciana. Entrada libre hasta completar aforo.",
+    "fechaEvento": "2026-03-18T20:00:00",
+    "ubicacion": "Plaza del Casal",
+    "direccion": "Calle Mayor, 45 - 46001 Valencia",
+    "urlImagen": "https://ejemplo.com/eventos/concierto-2026.jpg",
+    "participantesEstimado": 300,
+    "creadoPor": {
+      "id": 4,
+      "nombreCompleto": "Administrador del Sistema",
+      "email": "admin@fallapp.es"
+    },
+    "fechaCreacion": "2026-02-13T12:16:05.318682",
+    "actualizadoEn": "2026-02-13T12:16:05.318682"
+  }
+}
+```
+
+**Errores**:
+- `404 NOT_FOUND`: Evento no existe
+
+---
+
+#### POST `/api/eventos`
+Crear nuevo evento.
+
+**Autenticación**: 🔒 Requiere autenticación (cualquier usuario autenticado)
+
+**Petición**:
+```json
+{
+  "idFalla": 101,
+  "tipo": "concierto",
+  "nombre": "Concierto de Música Festera",
+  "descripcion": "Concierto de bandas de música valenciana",
+  "fechaEvento": "2026-03-20T20:00:00",
+  "ubicacion": "Casal de la falla",
+  "direccion": "Calle Mayor, 45 - Valencia",
+  "urlImagen": "https://ejemplo.com/imagen.jpg",
+  "participantesEstimado": 200
+}
+```
+
+**Campos requeridos**:
+- `idFalla` (Long): ID de la falla asociada
+- `tipo` (String): Tipo de evento (planta, crema, ofrenda, concierto, etc.)
+- `nombre` (String, max 255): Nombre del evento
+- `fechaEvento` (ISO DateTime): Fecha y hora del evento
+
+**Campos opcionales**:
+- `descripcion` (String): Descripción detallada
+- `ubicacion` (String, max 255): Ubicación del evento
+- `direccion` (String, max 255): Dirección completa
+- `urlImagen` (String, max 500): URL de imagen
+- `participantesEstimado` (Integer, min 0): Estimación de asistentes
+
+**Respuesta exitosa** (201):
+```json
+{
+  "exito": true,
+  "mensaje": "Evento creado exitosamente",
+  "datos": {
+    "idEvento": 2,
+    "nombre": "Concierto de Música Festera",
+    "tipo": "concierto",
+    "fechaEvento": "2026-03-20T20:00:00",
+    "fechaCreacion": "2026-02-13T12:30:00.123456"
+  }
+}
+```
+
+**Validaciones**:
+- `idFalla` debe existir en la base de datos
+- `tipo` debe ser uno de los valores válidos del enum
+- `fechaEvento` debe ser una fecha válida
+- `nombre` no puede estar vacío
+
+**Errores**:
+- `400 BAD_REQUEST`: Validación fallida (campos obligatorios faltantes)
+- `403 FORBIDDEN`: Sin autenticación
+- `404 NOT_FOUND`: Falla no existe
+
+---
+
+#### PUT `/api/eventos/{id}`
+Actualizar evento existente.
+
+**Autenticación**: 🔒 Requiere autenticación (admin o casal de la falla)
+
+**Petición** (enviar objeto completo):
+```json
+{
+  "idFalla": 101,
+  "tipo": "concierto",
+  "nombre": "Concierto de Música Festera - ACTUALIZADO",
+  "descripcion": "Descripción actualizada",
+  "fechaEvento": "2026-03-20T21:00:00",
+  "ubicacion": "Plaza del Casal",
+  "direccion": "Calle Mayor, 45 - Valencia",
+  "urlImagen": "https://ejemplo.com/nueva-imagen.jpg",
+  "participantesEstimado": 250
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Evento actualizado exitosamente",
+  "datos": {
+    "idEvento": 2,
+    "nombre": "Concierto de Música Festera - ACTUALIZADO",
+    "fechaEvento": "2026-03-20T21:00:00",
+    "actualizadoEn": "2026-02-13T13:00:00.123456"
+  }
+}
+```
+
+**Errores**:
+- `400 BAD_REQUEST`: Validación fallida
+- `403 FORBIDDEN`: Sin permisos (no es admin ni casal de la falla)
+- `404 NOT_FOUND`: Evento no existe
+
+
+
+---
+
+#### DELETE `/api/eventos/{id}`
+Eliminar evento del sistema.
+
+**Autenticación**: 🔒 Solo rol ADMIN
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Evento eliminado exitosamente",
+  "datos": null
+}
+```
+
+**Errores**:
+- `403 FORBIDDEN`: Usuario no tiene rol ADMIN
+- `404 NOT_FOUND`: Evento no existe
+
+---
+
+### 📝 Resumen de Endpoints de Eventos
+
+| Método | Endpoint | Autenticación | Descripción |
+|--------|----------|---------------|-------------|
+| GET | `/api/eventos` | ❌ Público | Listar con filtros y paginación |
+| GET | `/api/eventos/futuros` | ❌ Público | Todos los eventos futuros |
+| GET | `/api/eventos/proximos?limite=N` | ❌ Público | Próximos N eventos (max 50) |
+| GET | `/api/eventos/tipo/{tipo}` | ❌ Público | Filtrar por tipo específico |
+| GET | `/api/eventos/falla/{idFalla}` | ❌ Público | Eventos de una falla (paginado) |
+| GET | `/api/eventos/{id}` | ❌ Público | Detalles de un evento |
+| POST | `/api/eventos` | ✅ Usuario | Crear evento |
+| PUT | `/api/eventos/{id}` | ✅ Usuario | Actualizar evento |
+| DELETE | `/api/eventos/{id}` | ✅ Solo ADMIN | Eliminar evento |
+
+**Notas importantes**:
+- ⚠️ Los endpoints de imagen (`/api/eventos/{id}/imagen`) están **DESHABILITADOS** porque la base de datos no tiene las columnas `imagen` y `imagen_content_type`. Usar el campo `urlImagen` en su lugar.
+- La columna `tipo` en PostgreSQL es VARCHAR(30), no ENUM, para compatibilidad con Hibernate.
+- Los tipos de evento válidos son: `planta`, `crema`, `ofrenda`, `infantil`, `concierto`, `exposicion`, `encuentro`, `cena`, `teatro`, `otro`.
 
 ---
 

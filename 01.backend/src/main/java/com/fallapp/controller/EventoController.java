@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,6 +31,42 @@ public class EventoController {
     private final EventoService eventoService;
     
     /**
+     * GET /api/eventos - Listar eventos con filtros opcionales
+     * 
+     * Parámetros:
+     * - pagina (int): Número de página (default: 0)
+     * - tamano (int): Tamaño de página (default: 20, max: 100)
+     * - id_falla (Long): Filtrar por ID de falla
+     * - tipo (String): Filtrar por tipo de evento
+     * - desde_fecha (LocalDateTime): Filtrar desde fecha
+     * - hasta_fecha (LocalDateTime): Filtrar hasta fecha
+     * - ordenar_por (String): Campo para ordenar (default: fecha_evento)
+     */
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<EventoDTO>>> listar(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano,
+            @RequestParam(required = false) Long id_falla,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde_fecha,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta_fecha,
+            @RequestParam(defaultValue = "fecha_evento") String ordenar_por) {
+        
+        tamano = Math.min(tamano, 100); // Máximo 100
+        
+        // Construir Sort
+        Sort sort = Sort.by(Sort.Direction.ASC, "fechaEvento");
+        if ("nombre".equalsIgnoreCase(ordenar_por)) {
+            sort = Sort.by(Sort.Direction.ASC, "nombre");
+        }
+        
+        Pageable pageable = PageRequest.of(pagina, tamano, sort);
+        Page<EventoDTO> eventos = eventoService.listarConFiltros(id_falla, tipo, desde_fecha, hasta_fecha, pageable);
+        
+        return ResponseEntity.ok(ApiResponse.success(eventos));
+    }
+    
+    /**
      * GET /api/eventos/futuros - Obtener eventos futuros
      */
     @GetMapping("/futuros")
@@ -39,6 +77,9 @@ public class EventoController {
     
     /**
      * GET /api/eventos/proximos - Obtener próximos N eventos
+     * 
+     * Parámetros:
+     * - limite (int): Número máximo de eventos (default: 10, max: 50)
      */
     @GetMapping("/proximos")
     public ResponseEntity<ApiResponse<List<EventoDTO>>> obtenerProximos(
@@ -50,12 +91,14 @@ public class EventoController {
     }
     
     /**
-     * GET /api/eventos/{id} - Obtener evento por ID
+     * GET /api/eventos/tipo/{tipo} - Obtener eventos por tipo
+     * 
+     * Tipos válidos: planta, crema, ofrenda, infantil, concierto, exposicion, encuentro, cena, teatro, otro
      */
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EventoDTO>> obtenerPorId(@PathVariable Long id) {
-        EventoDTO evento = eventoService.obtenerPorId(id);
-        return ResponseEntity.ok(ApiResponse.success(evento));
+    @GetMapping("/tipo/{tipo}")
+    public ResponseEntity<ApiResponse<List<EventoDTO>>> obtenerPorTipo(@PathVariable String tipo) {
+        List<EventoDTO> eventos = eventoService.obtenerPorTipo(tipo);
+        return ResponseEntity.ok(ApiResponse.success(eventos));
     }
     
     /**
@@ -73,10 +116,19 @@ public class EventoController {
         Page<EventoDTO> eventos = eventoService.obtenerPorFalla(idFalla, pageable);
         return ResponseEntity.ok(ApiResponse.success(eventos));
     }
+    
+    /**
+     * GET /api/eventos/{id} - Obtener evento por ID
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventoDTO>> obtenerPorId(@PathVariable Long id) {
+        EventoDTO evento = eventoService.obtenerPorId(id);
+        return ResponseEntity.ok(ApiResponse.success(evento));
+    }
 
     /**
      * POST /api/eventos - Crear nuevo evento
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere autenticación (admin o casal de la falla)
      */
     @PostMapping
     public ResponseEntity<ApiResponse<EventoDTO>> crear(
@@ -87,7 +139,7 @@ public class EventoController {
 
     /**
      * PUT /api/eventos/{id} - Actualizar evento existente
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere autenticación (admin o casal de la falla)
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<EventoDTO>> actualizar(
@@ -99,7 +151,7 @@ public class EventoController {
 
     /**
      * DELETE /api/eventos/{id} - Eliminar evento
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere rol ADMIN
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
