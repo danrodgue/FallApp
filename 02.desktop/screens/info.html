@@ -27,6 +27,7 @@
 </head>
 <body class="events-page">
      <script src="../js/config.js"></script>
+     <script src="../js/api.js"></script>
      
      <header class="site-header">
           <div class="header-rect">
@@ -49,41 +50,145 @@
                </div>
 
                <div class="falla-body">
+                    <!-- Formulario principal - Lado izquierdo -->
                     <div class="falla-main">
                          <form id="fallaForm">
                               <div class="falla-helper">Los campos están editables localmente (no persistidos a menos que guardes con backend).</div>
                               
-                              <!-- Sección de imagen de la falla -->
+                              <!-- ID y Nombre en fila superior izquierda, Boceto a la derecha -->
+                              <div class="falla-top-section">
+                                   <div class="falla-fields-top">
+                                        <!-- ID de la falla -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>ID de Falla</label>
+                                                  <input id="fallaId" name="idFalla" readonly />
+                                             </div>
+                                        </div>
+
+                                        <!-- Nombre de la Falla -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Nombre de la Falla</label>
+                                                  <input id="fallaNombre" name="nombre" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Artista -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Artista</label>
+                                                  <input id="fallaArtista" name="artista" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Sección -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Sección</label>
+                                                  <input id="fallaSeccion" name="seccion" disabled />
+                                             </div>
+                                        </div>
+
+                                        <!-- Categoría -->
+                                        <div class="form-row-single">
+                                             <div class="field">
+                                                  <label>Categoría</label>
+                                                  <input id="fallaCategoria" name="categoria" disabled />
+                                             </div>
+                                        </div>
+                                   </div>
+
+                                   <!-- Boceto a la derecha -->
+                                   <div class="falla-image-section falla-image-top">
+                                        <label>Boceto/Imagen de la Falla</label>
+                                        <div class="falla-image-container falla-image-responsive">
+                                             <img id="fallaBoceto" src="" alt="Boceto de la falla" />
+                                             <div class="falla-image-placeholder">No hay imagen disponible</div>
+                                        </div>
+                                   </div>
+                              </div>
+
+                              <!-- Mapa de Ubicación -->
                               <div class="falla-image-section">
-                                   <label>Ubicación de la falla</label>
+                                   <label>Ubicación de la Falla</label>
                                    <div id="mapaUbicacion"></div>
                               </div>
 
+                              <!-- Información de dirección -->
                               <div class="form-row">
                                    <div class="field">
-                                        <label>ID</label>
-                                        <input id="fallaId" name="id" readonly />
+                                        <label>Fallera</label>
+                                        <input id="fallaFallera" name="fallera" disabled />
                                    </div>
                                    <div class="field">
-                                        <label>Fecha</label>
-                                        <input id="fallaFecha" name="fecha" type="datetime-local" disabled />
+                                        <label>Presidente</label>
+                                        <input id="fallaPresidente" name="presidente" disabled />
                                    </div>
                               </div>
 
+                              <!-- Lema -->
                               <div class="form-row">
                                    <div class="field">
-                                        <label>Nombre del Casal</label>
-                                        <input id="fallaUbicacion" name="ubicacion" disabled />
+                                        <label>Lema</label>
+                                        <input id="fallaLema" name="lema" disabled />
                                    </div>
                                    <div class="field">
-                                        <label>Agrupación</label>
-                                        <input id="fallaTipo" name="tipo" disabled />
+                                        <label>Web Oficial</label>
+                                        <input id="fallaWebOficial" name="webOficial" disabled />
                                    </div>
                               </div>
 
-                              <div class="field">
-                                   <label>Descripción</label>
-                                   <textarea id="fallaDescripcion" name="descripcion" rows="6" disabled></textarea>
+                              <!-- Teléfono Contacto y Email Contacto -->
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Teléfono Contacto</label>
+                                        <input id="fallaTelefonoContacto" name="telefonoContacto" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Email Contacto</label>
+                                        <input id="fallaEmailContacto" name="emailContacto" disabled />
+                                   </div>
+                              </div>
+
+                              <!-- Año de Fundación y Distintivo -->
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Año de Fundación</label>
+                                        <input id="fallaAnyoFundacion" name="anyoFundacion" type="number" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Distintivo</label>
+                                        <input id="fallaDistintivo" name="distintivo" disabled />
+                                   </div>
+                              </div>
+
+                              <!-- Estadísticas -->
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Total de Eventos</label>
+                                        <input id="fallaTotalEventos" name="totalEventos" type="number" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Total de Hintos</label>
+                                        <input id="fallaTotalHintos" name="totalHintos" type="number" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Total de Miembros</label>
+                                        <input id="fallaTotalMiembros" name="totalMiembros" type="number" disabled />
+                                   </div>
+                              </div>
+
+                              <!-- Fechas -->
+                              <div class="form-row">
+                                   <div class="field">
+                                        <label>Fecha de Creación</label>
+                                        <input id="fallaFechaCreacion" name="fechaCreacion" type="datetime-local" disabled />
+                                   </div>
+                                   <div class="field">
+                                        <label>Última Actualización</label>
+                                        <input id="fallaFechaActualizacion" name="fechaActualizacion" type="datetime-local" disabled />
+                                   </div>
                               </div>
 
                               <div class="form-actions">

@@ -1,0 +1,127 @@
+package com.fallapp.features.fallas.data.repository
+
+import com.fallapp.core.util.Result
+import com.fallapp.features.fallas.data.mapper.toDomain
+import com.fallapp.features.fallas.data.mapper.toDto
+import com.fallapp.features.fallas.data.remote.NinotsApiService
+import com.fallapp.features.fallas.data.remote.VotosApiService
+import com.fallapp.features.fallas.domain.model.Voto
+import com.fallapp.features.fallas.domain.model.VotoRequest
+import com.fallapp.features.fallas.domain.repository.VotosRepository
+
+/**
+ * Implementación del repositorio de votos.
+ * 
+ * Gestiona las llamadas a la API REST y manejo de errores.
+ * 
+ * @property apiService Servicio de API de votos
+ * 
+ * @author Equipo FallApp
+ * @since 1.0.0
+ */
+class VotosRepositoryImpl(
+    private val apiService: VotosApiService,
+    private val ninotsApiService: NinotsApiService
+) : VotosRepository {
+    
+    override suspend fun crearVoto(request: VotoRequest): Result<Voto> {
+        return try {
+            // Ahora el dominio usa idFalla y la API acepta directamente idFalla,
+            // por lo que no necesitamos resolver ninots.
+            val dtoRequest = request.toDto()
+            val response = apiService.crearVoto(dtoRequest)
+
+            if (!response.exito) {
+                return Result.Error(
+                    exception = Exception(response.mensaje ?: "Error al crear voto"),
+                    message = response.mensaje
+                )
+            }
+
+            // El backend puede no devolver un VotoDTO completo en `datos`,
+            // pero para la UI solo necesitamos saber que se ha registrado el voto.
+            // El listado real de votos se vuelve a cargar desde /votos/mis-votos.
+            val dummyVoto = Voto(
+                idVoto = -1L,
+                idUsuario = -1L,
+                nombreUsuario = "",
+                idFalla = request.idFalla,
+                nombreFalla = "",
+                tipoVoto = request.tipoVoto,
+                fechaCreacion = null
+            )
+            Result.Success(dummyVoto)
+        } catch (e: Exception) {
+            Result.Error(
+                exception = e,
+                message = e.message ?: "Error de conexión al crear voto"
+            )
+        }
+    }
+    
+    override suspend fun getVotosUsuario(idUsuario: Long): Result<List<Voto>> {
+        return try {
+            // Usamos endpoint GET /api/votos/usuario/{idUsuario}
+            val response = apiService.getVotosUsuario(idUsuario)
+
+            if (response.exito && response.datos != null) {
+                val votosDto = response.datos
+                Result.Success(votosDto.map { it.toDomain() })
+            } else {
+                Result.Error(
+                    exception = Exception(response.mensaje ?: "Error al obtener votos"),
+                    message = response.mensaje
+                )
+            }
+        } catch (e: Exception) {
+            Result.Error(
+                exception = e,
+                message = e.message ?: "Error de conexión al obtener votos"
+            )
+        }
+    }
+    
+    override suspend fun eliminarVoto(idVoto: Long): Result<Unit> {
+        return try {
+            val response = apiService.eliminarVoto(idVoto)
+
+            if (response.exito) {
+                Result.Success(Unit)
+            } else {
+                Result.Error(
+                    exception = Exception(response.mensaje ?: "Error al eliminar voto"),
+                    message = response.mensaje
+                )
+            }
+        } catch (e: Exception) {
+            Result.Error(
+                exception = e,
+                message = e.message ?: "Error de conexión al eliminar voto"
+            )
+        }
+    }
+    
+    override suspend fun getVotosFalla(idFalla: Long): Result<List<Voto>> {
+        return try {
+            // Resolver el idNinot real asociado a esta falla
+            // A partir de v2, los votos están asociados directamente a la falla,
+            // por lo que podemos llamar a /api/votos/falla/{idFalla} sin resolver ninots.
+            val response = apiService.getVotosFalla(idFalla)
+
+            if (response.exito && response.datos != null) {
+                val votosDto = response.datos
+                Result.Success(votosDto.map { it.toDomain() })
+            } else {
+                Result.Error(
+                    exception = Exception(response.mensaje ?: "Error al obtener votos de la falla"),
+                    message = response.mensaje
+                )
+            }
+        } catch (e: Exception) {
+            Result.Error(
+                exception = e,
+                message = e.message ?: "Error de conexión al obtener votos de la falla"
+            )
+        }
+    }
+}

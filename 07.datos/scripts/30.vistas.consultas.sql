@@ -274,7 +274,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION obtener_ranking_fallas(
     p_limite INTEGER DEFAULT 10,
-    p_tipo_voto tipo_voto DEFAULT 'rating'
+    p_tipo_voto tipo_voto DEFAULT 'EXPERIMENTAL'
 )
 RETURNS TABLE (
     posicion INTEGER,

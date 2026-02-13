@@ -1,0 +1,910 @@
+package com.fallapp.features.votos.presentation
+
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.draw.clip
+import coil.compose.AsyncImage
+import com.fallapp.features.fallas.domain.model.Falla
+import com.fallapp.features.fallas.domain.model.FallaRanking
+import com.fallapp.features.fallas.domain.model.TipoVoto
+import com.fallapp.features.fallas.domain.model.Voto
+import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+
+/**
+ * Pantalla principal de Votos con 3 tabs:
+ * - Votar: Lista de fallas para votar
+ * - Mis Votos: Votos del usuario
+ * - Ranking: Fallas más votadas
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VotosScreen(
+    onFallaClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: VotosViewModel = koinViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedTab by remember { mutableIntStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showInfo by remember { mutableStateOf(false) }
+
+    // Mostrar mensajes
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearMessages()
+        }
+    }
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Long
+            )
+            viewModel.clearMessages()
+        }
+    }
+
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "Votos",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = { showInfo = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Información del sistema de votos"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+                
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Votar") },
+                        // Icono de fuego en lugar de estrella
+                        icon = { Icon(Icons.Default.Whatshot, contentDescription = null) }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Mis Votos") },
+                        icon = { Icon(Icons.Default.Favorite, null) }
+                    )
+                    Tab(
+                        selected = selectedTab == 2,
+                        onClick = { selectedTab = 2 },
+                        text = { Text("Ranking") },
+                        icon = { Icon(Icons.Default.DateRange, null) }
+                    )
+                }
+            }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        if (showInfo) {
+            AlertDialog(
+                onDismissRequest = { showInfo = false },
+                title = {
+                    Text(
+                        text = "Cómo funcionan los votos",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "• Cada usuario puede votar una falla una sola vez por categoría.\n" +
+                                    "• Las categorías siguen la guía oficial: Experimental, Ingenio y Gracia, Monumento.\n" +
+                                    "• Tus votos se ligan a tu usuario y se usan para construir el ranking general.\n" +
+                                    "• Puedes ver y gestionar tus votos en la pestaña «Mis Votos».",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showInfo = false }) {
+                        Text("Entendido")
+                    }
+                }
+            )
+        }
+
+        when (selectedTab) {
+            0 -> VotarTab(
+                fallas = uiState.fallasParaVotar,
+                isLoading = uiState.isLoading,
+                onVoteClick = { falla, tipoVoto ->
+                    viewModel.votar(falla, tipoVoto)
+                },
+                onFallaClick = onFallaClick,
+                modifier = Modifier.padding(padding)
+            )
+            1 -> MisVotosTab(
+                votos = uiState.misVotos,
+                isLoading = uiState.isLoading,
+                onDeleteVote = { idVoto ->
+                    viewModel.eliminarVoto(idVoto)
+                },
+                onFallaClick = onFallaClick,
+                modifier = Modifier.padding(padding)
+            )
+            2 -> RankingTab(
+                ranking = uiState.ranking,
+                isLoading = uiState.isLoading,
+                selectedTipoVoto = uiState.rankingFilter,
+                onFilterChange = { tipoVoto ->
+                    viewModel.setRankingFilter(tipoVoto)
+                },
+                onFallaClick = onFallaClick,
+                modifier = Modifier.padding(padding)
+            )
+        }
+    }
+}
+
+/**
+ * Tab para votar fallas.
+ */
+@Composable
+private fun VotarTab(
+    fallas: List<Falla>,
+    isLoading: Boolean,
+    onVoteClick: (Falla, TipoVoto) -> Unit,
+    onFallaClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            label = { Text("Buscar tu falla") },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 4.dp)
+        ) {
+            if (isLoading && fallas.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else if (fallas.isEmpty()) {
+                Text(
+                    text = "No hay fallas disponibles",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            } else {
+                val trimmedQuery = searchQuery.trim()
+                if (trimmedQuery.isEmpty()) {
+                    // Modo mazo aleatorio normal
+                    StackedCardDeck(
+                        fallas = fallas,
+                        onVoteClick = onVoteClick,
+                        onFallaClick = onFallaClick
+                    )
+                } else {
+                    // Modo búsqueda directa de falla
+                    val resultados = fallas.filter { falla ->
+                        falla.nombre.contains(trimmedQuery, ignoreCase = true) ||
+                                falla.seccion.contains(trimmedQuery, ignoreCase = true)
+                    }
+
+                    if (resultados.isEmpty()) {
+                        Text(
+                            text = "No se han encontrado fallas para \"$trimmedQuery\"",
+                            modifier = Modifier.align(Alignment.Center),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        // Mostramos una única carta con el mismo formato
+                        val falla = resultados.first()
+                        SwipeFallaCard(
+                            falla = falla,
+                            onVoteClick = { tipoVoto -> onVoteClick(falla, tipoVoto) },
+                            onFallaClick = { onFallaClick(falla.idFalla) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Pila de cartas tipo "Tinder" con swipe horizontal.
+ *
+ * Implementación simplificada y fluida:
+ * - Solo hay UNA carta en el árbol de nodos.
+ * - Al hacer swipe suficiente, la carta actual sale por un lado y la siguiente entra suavemente desde el lado contrario.
+ */
+@Composable
+private fun StackedCardDeck(
+    fallas: List<Falla>,
+    onVoteClick: (Falla, TipoVoto) -> Unit,
+    onFallaClick: (Long) -> Unit
+) {
+    if (fallas.isEmpty()) return
+
+    val scope = rememberCoroutineScope()
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+
+    val activeOffsetX = remember { Animatable(0f) }
+    val activeScale = remember { Animatable(1f) }
+
+    val swipeThreshold = 150f
+    val screenWidth = 800f // valor aproximado para animación de salida
+
+    fun computeNextIndex(direction: Float): Int =
+        if (direction >= 0f) {
+            // Swipe a la derecha → siguiente
+            (currentIndex + 1) % fallas.size
+        } else {
+            // Swipe a la izquierda → anterior
+            (currentIndex - 1 + fallas.size) % fallas.size
+        }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        val activeFalla = fallas[currentIndex]
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    translationX = activeOffsetX.value
+                    scaleX = activeScale.value
+                    scaleY = activeScale.value
+                }
+                .zIndex(10f)
+                .pointerInput(fallas, currentIndex) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, dragAmount ->
+                            scope.launch {
+                                activeOffsetX.snapTo(activeOffsetX.value + dragAmount)
+                                val normalized = (activeOffsetX.value / screenWidth).coerceIn(-1f, 1f)
+                                activeScale.snapTo(1f - 0.05f * kotlin.math.abs(normalized))
+                            }
+                        },
+                        onDragEnd = {
+                            scope.launch {
+                                val shouldSwipe = kotlin.math.abs(activeOffsetX.value) > swipeThreshold
+                                val direction = if (activeOffsetX.value >= 0f) 1f else -1f
+
+                                if (shouldSwipe) {
+                                    // 1) Animar carta actual hacia afuera
+                                    activeOffsetX.animateTo(
+                                        targetValue = direction * screenWidth,
+                                        animationSpec = tween(
+                                            durationMillis = 260,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+
+                                    // 2) Cambiar índice a la siguiente carta
+                                    currentIndex = computeNextIndex(direction)
+
+                                    // 3) Preparar entrada de la nueva carta desde el lado opuesto
+                                    activeOffsetX.snapTo(-direction * screenWidth * 0.5f)
+                                    activeScale.snapTo(0.9f)
+
+                                    // 4) Animar nueva carta al centro
+                                    activeOffsetX.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(
+                                            durationMillis = 280,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                    activeScale.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(
+                                            durationMillis = 280,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                } else {
+                                    // Volver al centro sin cambiar de carta
+                                    activeOffsetX.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(
+                                            durationMillis = 220,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                    activeScale.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(
+                                            durationMillis = 220,
+                                            easing = FastOutSlowInEasing
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    )
+                }
+        ) {
+            SwipeFallaCard(
+                falla = activeFalla,
+                onVoteClick = { tipoVoto -> onVoteClick(activeFalla, tipoVoto) },
+                onFallaClick = { onFallaClick(activeFalla.idFalla) }
+            )
+        }
+
+        // Contador de cartas (igual estilo que te gustaba: posición / total)
+        Text(
+            text = "${currentIndex + 1} / ${fallas.size}",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+/**
+ * Carta tipo "Tinder" para votar una falla.
+ */
+@Composable
+private fun SwipeFallaCard(
+    falla: Falla,
+    onVoteClick: (TipoVoto) -> Unit,
+    onFallaClick: () -> Unit
+) {
+    var showVoteDialog by remember { mutableStateOf(false) }
+    var selectedTipoVoto by remember { mutableStateOf<TipoVoto?>(null) }
+
+    if (showVoteDialog && selectedTipoVoto != null) {
+        AlertDialog(
+            onDismissRequest = { showVoteDialog = false },
+            title = { Text("Confirmar Voto") },
+            text = {
+                Text("¿Votar ${selectedTipoVoto!!.getDisplayName()} para ${falla.nombre}?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onVoteClick(selectedTipoVoto!!)
+                        showVoteDialog = false
+                    }
+                ) {
+                    Text("Votar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showVoteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxSize(),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable(onClick = onFallaClick)
+                .padding(16.dp)
+        ) {
+            // Imagen principal de la falla
+            val imageUrl = falla.imagenes.firstOrNull()
+
+            if (imageUrl != null) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Imagen de ${falla.nombre}",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Sin imagen disponible",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Información de la falla
+            Text(
+                text = falla.nombre,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Text(
+                text = falla.seccion,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            falla.descripcion?.let {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Enlace al mapa
+            TextButton(
+                onClick = onFallaClick
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Ver en el mapa")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Botones de votación
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TipoVoto.entries.forEach { tipoVoto ->
+                    Button(
+                        onClick = {
+                            selectedTipoVoto = tipoVoto
+                            showVoteDialog = true
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = when (tipoVoto) {
+                                TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary
+                                TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary
+                                TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.tertiary
+                            }
+                        )
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = when (tipoVoto) {
+                                    TipoVoto.INGENIOSO -> "🏆"
+                                    TipoVoto.CRITICO -> "😄"
+                                    TipoVoto.ARTISTICO -> "🧪"
+                                },
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = when (tipoVoto) {
+                                    TipoVoto.INGENIOSO -> "Mejor Falla"
+                                    TipoVoto.CRITICO -> "Ingenio y Gracia"
+                                    TipoVoto.ARTISTICO -> "Mejor Experimental"
+                                },
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Tab de mis votos.
+ */
+@Composable
+private fun MisVotosTab(
+    votos: List<Voto>,
+    isLoading: Boolean,
+    onDeleteVote: (Long) -> Unit,
+    onFallaClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        if (isLoading && votos.isEmpty()) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else if (votos.isEmpty()) {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FavoriteBorder,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No has votado aún",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(votos) { voto ->
+                    MiVotoCard(
+                        voto = voto,
+                        onDeleteClick = { onDeleteVote(voto.idVoto) },
+                        onFallaClick = { onFallaClick(voto.idFalla) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Card de un voto del usuario.
+ */
+@Composable
+private fun MiVotoCard(
+    voto: Voto,
+    onDeleteClick: () -> Unit,
+    onFallaClick: () -> Unit
+) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Eliminar Voto") },
+            text = { Text("¿Estás seguro de que quieres eliminar este voto?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteClick()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 2.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(onClick = onFallaClick)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = when (voto.tipoVoto) {
+                            TipoVoto.INGENIOSO -> "🏆"
+                            TipoVoto.CRITICO -> "😄"
+                            TipoVoto.ARTISTICO -> "🧪"
+                        },
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = when (voto.tipoVoto) {
+                            TipoVoto.INGENIOSO -> "Mejor Falla"
+                            TipoVoto.CRITICO -> "Ingenio y Gracia"
+                            TipoVoto.ARTISTICO -> "Mejor Experimental"
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = voto.nombreFalla,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                voto.fechaCreacion?.let {
+                    Text(
+                        text = it.toString().substringBefore('T'),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = { showDeleteDialog = true },
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Icon(Icons.Default.Delete, "Eliminar voto")
+            }
+        }
+    }
+}
+
+/**
+ * Tab de ranking de votos.
+ */
+@Composable
+private fun RankingTab(
+    ranking: List<FallaRanking>,
+    isLoading: Boolean,
+    selectedTipoVoto: TipoVoto?,
+    onFilterChange: (TipoVoto?) -> Unit,
+    onFallaClick: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Filtro de tipo de voto
+        ScrollableTabRow(
+            selectedTabIndex = when (selectedTipoVoto) {
+                null -> 0
+                TipoVoto.INGENIOSO -> 1
+                TipoVoto.CRITICO -> 2
+                TipoVoto.ARTISTICO -> 3
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Tab(
+                selected = selectedTipoVoto == null,
+                onClick = { onFilterChange(null) },
+                text = { Text("Todos") }
+            )
+            TipoVoto.entries.forEach { tipo ->
+                Tab(
+                    selected = selectedTipoVoto == tipo,
+                    onClick = { onFilterChange(tipo) },
+                    text = { Text(tipo.getDisplayName()) }
+                )
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (isLoading && ranking.isEmpty()) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else if (ranking.isEmpty()) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        // Icono de fuego cuando no hay ranking
+                        imageVector = Icons.Default.Whatshot,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No hay votos aún",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(ranking.take(20).withIndex().toList()) { indexed ->
+                        val position = indexed.index + 1
+                        val item = indexed.value
+                        RankingCard(
+                            position = position,
+                            item = item,
+                            selectedTipoVoto = selectedTipoVoto,
+                            onFallaClick = { onFallaClick(item.idFalla) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Card de ranking de una falla.
+ */
+@Composable
+private fun RankingCard(
+    position: Int,
+    item: FallaRanking,
+    selectedTipoVoto: TipoVoto?,
+    onFallaClick: () -> Unit
+) {
+    // Color del badge de votos según la categoría seleccionada en el filtro
+    val chipColor = when (selectedTipoVoto) {
+        null -> MaterialTheme.colorScheme.primaryContainer
+        TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary      // Mejor Falla
+        TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary      // Ingenio y Gracia
+        TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.tertiary     // Experimental
+    }
+    val chipContentColor =
+        if (selectedTipoVoto == null) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onPrimary
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = if (position <= 3) 6.dp else 2.dp
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .clickable(onClick = onFallaClick)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Posición
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = when (position) {
+                    1 -> MaterialTheme.colorScheme.primary
+                    2 -> MaterialTheme.colorScheme.secondary
+                    3 -> MaterialTheme.colorScheme.tertiary
+                    else -> MaterialTheme.colorScheme.surfaceVariant
+                },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = position.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = if (position <= 3) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            }
+
+            // Información de la falla
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.seccion ?: "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Número de votos
+            Surface(
+                shape = MaterialTheme.shapes.small,
+                color = chipColor
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        // Icono de fuego en el badge de votos
+                        imageVector = Icons.Default.Whatshot,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = chipContentColor
+                    )
+                    Text(
+                        text = item.votos.toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = chipContentColor
+                    )
+                }
+            }
+        }
+    }
+}

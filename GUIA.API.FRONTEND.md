@@ -1,388 +1,1027 @@
 # 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
 
-**Versión:** 0.4.1  
-**Fecha:** 2026-02-01  
-**IP Pública AWS:** http://35.180.21.42:8080  
-**Entorno:** Desarrollo
+> **📱 Guía para Desarrolladores Frontend**  
+> **Versión API:** 2.0  
+> **Última actualización:** 2026-02-11  
+> **Sistema de Votación:** v4.0 (Votos directos a FALLAS por categoría)  
+> **URL Base:** http://35.180.21.42:8080/api  
+> **Doc Técnica:** [04.API-REST.md](04.docs/especificaciones/04.API-REST.md)
 
 ---
 
-## 📋 Índice
-
-1. [Introducción](#introducción)
-2. [URL Base](#url-base)
-3. [Autenticación JWT](#autenticación-jwt)
-4. [Formato de Respuestas](#formato-de-respuestas)
-5. [Endpoints Públicos](#endpoints-públicos)
-6. [Endpoints Autenticados](#endpoints-autenticados)
-7. [Endpoints Solo ADMIN](#endpoints-solo-admin)
-8. [Códigos de Error](#códigos-de-error)
-9. [Ejemplos de Integración](#ejemplos-de-integración)
+> ⚠️ **Nota para Desarrolladores**: Esta guía está basada en la especificación oficial [04.API-REST.md](04.docs/especificaciones/04.API-REST.md). 
+> Para detalles técnicos completos, consulta ese documento.
 
 ---
 
-## 📌 Introducción
+## 1. Resumen
 
-Esta guía describe todos los endpoints disponibles en la API REST de FallApp para integración con aplicaciones **Desktop (Electron)** y **Mobile (Android/iOS)**.
+API REST para FallApp que proporciona acceso a datos de fallas valencianas, gestión de usuarios, eventos, ninots y sistema de votación.
 
-### Niveles de Seguridad
+**Características**:
+- Autenticación basada en JWT
+- Control de acceso por roles (ADMIN, CASAL, USUARIO)
+- Rutas públicas y protegidas
+- Paginación en listados
+- Filtros y búsqueda avanzada
+- Documentación OpenAPI 3.0
 
-| Nivel | Descripción | Endpoints |
-|-------|-------------|-----------|
-| **🌐 PÚBLICO** | Sin autenticación | Todos los GET (browse), login, registro |
-| **🔐 AUTENTICADO** | Requiere JWT token | POST/PUT fallas, eventos, ninots, comentarios, votos |
-| **👑 ADMIN** | Solo administradores | DELETE fallas, eventos, ninots, comentarios |
-
----
-
-## 🌍 URL Base
-
-### Desarrollo (AWS)
-```
-http://35.180.21.42:8080
-```
-
-### Localhost (pruebas locales en servidor)
-```
-http://localhost:8080
-```
-
-**Importante:** 
-- Asegúrate de que el puerto **8080** esté abierto en AWS Security Group
-- En Android, agrega `android:usesCleartextTraffic="true"` en AndroidManifest.xml
-- En desarrollo, CORS está configurado con `*` (cualquier origen)
+**URL Base**: `http://35.180.21.42:8080/api`
 
 ---
 
-## 🔑 Autenticación JWT
+## 2. Arquitectura General
 
-### 1. Registro de Usuario
+### 2.1 Estructura de Capas
 
-**Endpoint:** `POST /api/auth/registro`  
-**Autenticación:** No requerida  
-**Descripción:** Crear una nueva cuenta de usuario
-
-#### Request
-```json
-{
-  "email": "usuario@example.com",
-  "contrasena": "miPassword123",
-  "nombreCompleto": "Juan Pérez García",
-  "idFalla": 1
-}
+```
+┌─────────────────────────────────────┐
+│   CLIENTES (Electron + Android)     │
+└──────────────┬──────────────────────┘
+               │ HTTP/REST (JSON)
+               ▼
+┌─────────────────────────────────────┐
+│  CONTROLADORES (Controllers)        │
+│  - Validación de entrada            │
+│  - Mapeo de rutas HTTP              │
+│  - Respuestas HTTP                  │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│  SERVICIOS (Services)               │
+│  - Lógica de negocio                │
+│  - Validaciones complejas           │
+│  - Transformación de datos          │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│  REPOSITORIOS (Repositories)        │
+│  - Acceso a base de datos (JPA)    │
+│  - Consultas SQL                    │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│  BASE DE DATOS (PostgreSQL)         │
+└─────────────────────────────────────┘
 ```
 
-**Validaciones:**
-- `email`: Formato válido, único en el sistema
-- `contrasena`: Mínimo 6 caracteres
-- `nombreCompleto`: Entre 3 y 200 caracteres
-- `idFalla`: Opcional, para asociar usuario a una falla
+### 2.2 Convenciones REST
 
-#### Response (201 Created)
+| Método HTTP | Operación | Ejemplo |
+|-------------|-----------|---------|
+| `GET` | Leer/Consultar | `GET /api/fallas` → Listar fallas |
+| `POST` | Crear | `POST /api/fallas` → Crear nueva falla |
+| `PUT` | Actualizar completo | `PUT /api/fallas/1` → Actualizar falla #1 |
+| `DELETE` | Eliminar | `DELETE /api/fallas/1` → Eliminar falla #1 |
+
+### 2.3 Formatos de Respuesta
+
+**Respuesta exitosa**:
 ```json
 {
   "exito": true,
-  "mensaje": "Usuario registrado exitosamente",
+  "datos": { ... },
+  "mensaje": "Operación completada con éxito"
+}
+```
+
+**Respuesta con error**:
+```json
+{
+  "exito": false,
+  "error": {
+    "codigo": "VALIDACION_FALLIDA",
+    "mensaje": "El campo 'nombre' es obligatorio",
+    "detalles": ["nombre: no puede estar vacío"]
+  },
+  "ruta": "/api/fallas",
+  "timestamp": "2026-02-01T10:30:00Z"
+}
+```
+
+---
+
+## 3. Autenticación y Seguridad
+
+### 3.1 JWT (JSON Web Token)
+
+**Flujo de autenticación**:
+1. Cliente envía credenciales a `/api/auth/iniciar-sesion`
+2. Servidor valida y devuelve JWT
+3. Cliente incluye JWT en header `Authorization: Bearer <token>`
+4. Servidor valida token en cada petición protegida
+
+**Estructura del token JWT**:
+```json
+{
+  "sub": "usuario@ejemplo.com",
+  "id_usuario": 123,
+  "rol": "CASAL",
+  "id_falla": 45,
+  "iat": 1706780400,
+  "exp": 1706866800
+}
+```
+
+**Duración del token**: 24 horas
+
+### 3.2 Headers Requeridos
+
+| Header | Valor | Descripción |
+|--------|-------|-------------|
+| `Authorization` | `Bearer <token>` | Token JWT (rutas protegidas) |
+| `Content-Type` | `application/json` | Formato de cuerpo de petición |
+| `Accept` | `application/json` | Formato de respuesta esperado |
+
+### 3.3 Roles y Permisos
+
+| Rol | Código | Permisos |
+|-----|--------|----------|
+| **Administrador** | `ADMIN` | Acceso total, gestión de usuarios |
+| **Casal** | `CASAL` | Gestión de su propia falla y eventos |
+| **Usuario** | `USUARIO` | Visualización y votación |
+
+---
+
+## 4. Recursos y Rutas
+
+### 4.1 Autenticación (`/api/auth`)
+
+#### POST `/api/auth/iniciar-sesion`
+Autenticación de usuario con email y contraseña.
+
+**Público**: ✅ Sí
+
+**Petición**:
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "contrasena": "MiContraseña123!"
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
   "datos": {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
     "tipo": "Bearer",
-    "expiraEn": 86400,
+    "expiracion": "2026-02-02T10:30:00Z",
     "usuario": {
-      "idUsuario": 42,
-      "email": "usuario@example.com",
-      "nombreCompleto": "Juan Pérez García",
-      "rol": "FALLERO",
-      "idFalla": 1,
-      "nombreFalla": "Falla Convento Jerusalén"
+      "id": 123,
+      "email": "usuario@ejemplo.com",
+      "nombre_completo": "Juan Pérez",
+      "rol": "CASAL",
+      "id_falla": 45
     }
-  },
-  "timestamp": "2026-02-01T18:30:00"
+  }
 }
 ```
+
+**Errores**:
+- `401 UNAUTHORIZED`: Credenciales incorrectas
+- `403 FORBIDDEN`: Usuario desactivado
 
 ---
 
-### 2. Login
+#### POST `/api/auth/registrar`
+Registro de nuevo usuario.
 
-**Endpoint:** `POST /api/auth/login`  
-**Autenticación:** No requerida  
-**Descripción:** Iniciar sesión y obtener token JWT
+**Público**: ✅ Sí
 
-#### Request
+**Petición**:
 ```json
 {
-  "email": "usuario@example.com",
-  "contrasena": "miPassword123"
+  "email": "nuevo@ejemplo.com",
+  "contrasena": "Contraseña123!",
+  "nombre_completo": "María García",
+  "telefono": "+34612345678"
 }
 ```
 
-#### Response (200 OK)
+**Respuesta exitosa** (201):
 ```json
 {
   "exito": true,
-  "mensaje": "Login exitoso",
   "datos": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3VhcmlvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjc1MjY0MDAwLCJleHAiOjE2NzUzNTA0MDB9.signature",
-    "tipo": "Bearer",
-    "expiraEn": 86400,
-    "usuario": {
-      "idUsuario": 42,
-      "email": "usuario@example.com",
-      "nombreCompleto": "Juan Pérez García",
-      "rol": "FALLERO",
-      "idFalla": 1,
-      "nombreFalla": "Falla Convento Jerusalén",
-      "ultimoAcceso": "2026-02-01T18:30:00"
-    }
+    "id": 124,
+    "email": "nuevo@ejemplo.com",
+    "nombre_completo": "María García",
+    "rol": "USUARIO",
+    "activo": true,
+    "fecha_registro": "2026-02-01T10:30:00Z"
   },
-  "timestamp": "2026-02-01T18:30:00"
+  "mensaje": "Usuario registrado con éxito"
 }
 ```
 
-#### Error (401 Unauthorized)
-```json
-{
-  "exito": false,
-  "mensaje": "Credenciales inválidas",
-  "datos": null,
-  "timestamp": "2026-02-01T18:30:00"
-}
-```
+**Validaciones**:
+- Email único
+- Contraseña mínimo 8 caracteres
+- Nombre obligatorio
 
 ---
 
-### 3. Usar Token JWT
+#### POST `/api/auth/renovar-token`
+Renovar token JWT antes de expiración.
 
-Para endpoints autenticados, incluye el token en el header `Authorization`:
+**Autenticación**: 🔒 Requerida
 
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-**Ejemplo cURL:**
-```bash
-curl -X POST http://35.180.21.42:8080/api/fallas \
-  -H "Authorization: Bearer TU_TOKEN_AQUI" \
-  -H "Content-Type: application/json" \
-  -d '{"nombre":"Nueva Falla","seccion":"8A","presidente":"Juan García",...}'
-```
-
-**Duración del Token:** 24 horas (86400 segundos)
-
----
-
-## 📦 Formato de Respuestas
-
-Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
-
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "mensaje": "Operación exitosa",
-  "datos": { ... },
-  "timestamp": "2026-02-01T18:30:00"
-}
-```
-
-### Respuesta Exitosa (2xx)
-```json
-{
-  "exito": true,
-  "mensaje": "Falla creada exitosamente",
   "datos": {
-    "idFalla": 348,
-    "nombre": "Falla Ejemplo",
-    ...
-  },
-  "timestamp": "2026-02-01T18:30:00"
-}
-```
-
-### Respuesta con Error (4xx, 5xx)
-```json
-{
-  "exito": false,
-  "mensaje": "Falla no encontrada con ID: 999",
-  "datos": null,
-  "timestamp": "2026-02-01T18:30:00"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "expiracion": "2026-02-03T10:30:00Z"
+  }
 }
 ```
 
 ---
 
-## 🌐 Endpoints Públicos
+#### POST `/api/auth/cerrar-sesion`
+Cerrar sesión (invalida token actual).
 
-### FALLAS
+**Autenticación**: 🔒 Requerida
 
-#### GET /api/fallas - Listar fallas con paginación
-**Autenticación:** No requerida  
-**Query Params:**
-- `pagina` (int, default: 0): Número de página (0-indexed)
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Sesión cerrada correctamente"
+}
+```
+
+---
+
+#### GET `/api/auth/perfil`
+Obtener información del usuario autenticado.
+
+**Autenticación**: 🔒 Requerida
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id": 123,
+    "email": "usuario@ejemplo.com",
+    "nombre_completo": "Juan Pérez",
+    "rol": "CASAL",
+    "id_falla": 45,
+    "nombre_falla": "Falla Plaza del Ayuntamiento",
+    "activo": true,
+    "fecha_registro": "2025-01-15T08:00:00Z",
+    "ultimo_acceso": "2026-02-01T10:30:00Z"
+  }
+}
+```
+
+---
+
+### 4.2 Usuarios (`/api/usuarios`)
+
+#### GET `/api/usuarios`
+Listar todos los usuarios (paginado).
+
+**Autenticación**: 🔒 ADMIN
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0): Número de página
 - `tamano` (int, default: 20): Elementos por página
+- `rol` (string, opcional): Filtrar por rol (ADMIN, CASAL, USUARIO)
+- `activo` (boolean, opcional): Filtrar por estado
 
-**Response:**
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id": 1,
+        "email": "admin@fallapp.com",
+        "nombre_completo": "Administrador FallApp",
+        "rol": "ADMIN",
+        "activo": true,
+        "fecha_registro": "2025-01-01T00:00:00Z"
+      },
+      {
+        "id": 2,
+        "email": "casal@falla.com",
+        "nombre_completo": "Responsable Falla",
+        "rol": "CASAL",
+        "id_falla": 10,
+        "activo": true,
+        "fecha_registro": "2025-01-10T12:00:00Z"
+      }
+    ],
+    "pagina_actual": 0,
+    "tamano_pagina": 20,
+    "total_elementos": 150,
+    "total_paginas": 8
+  }
+}
+```
+
+---
+
+#### GET `/api/usuarios/{id}`
+Obtener usuario por ID.
+
+**Autenticación**: 🔒 ADMIN o propio usuario
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id": 123,
+    "email": "usuario@ejemplo.com",
+    "nombre_completo": "Juan Pérez",
+    "telefono": "+34612345678",
+    "rol": "CASAL",
+    "id_falla": 45,
+    "activo": true,
+    "fecha_registro": "2025-06-15T10:00:00Z",
+    "ultimo_acceso": "2026-02-01T09:45:00Z"
+  }
+}
+```
+
+**Errores**:
+- `404 NOT_FOUND`: Usuario no existe
+- `403 FORBIDDEN`: Sin permisos para ver este usuario
+
+---
+
+#### PUT `/api/usuarios/{id}`
+Actualizar información de usuario.
+
+**Autenticación**: 🔒 ADMIN o propio usuario
+
+**Petición**:
+```json
+{
+  "nombre_completo": "Juan Pérez García",
+  "telefono": "+34612345679",
+  "email": "nuevo_email@ejemplo.com"
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id": 123,
+    "email": "nuevo_email@ejemplo.com",
+    "nombre_completo": "Juan Pérez García",
+    "telefono": "+34612345679",
+    "rol": "CASAL",
+    "activo": true,
+    "fecha_actualizacion": "2026-02-01T10:35:00Z"
+  },
+  "mensaje": "Usuario actualizado correctamente"
+}
+```
+
+**Restricciones**:
+- No se puede cambiar el rol (solo ADMIN puede hacerlo con ruta específica)
+- Email debe ser único
+
+---
+
+#### PUT `/api/usuarios/{id}/foto`
+Actualizar foto de perfil del usuario.
+
+**Autenticación**: 🔒 ADMIN o propio usuario
+
+**Content-Type**: `multipart/form-data`
+
+**Campos del formulario**:
+- `foto` (file, requerido): Imagen de perfil (`image/jpeg`, `image/png`, etc.). Tamaño máximo recomendado: **2 MB**.
+
+**Comportamiento**:
+- La imagen se almacena en la base de datos en un campo binario (`BYTEA`).
+- Se guarda también el `content_type` original para devolver la cabecera HTTP correcta.
+
+**Ejemplo (curl)**:
+```bash
+curl -X PUT http://localhost:8080/api/usuarios/123/foto \
+  -H "Authorization: Bearer TOKEN_USUARIO" \
+  -H "Content-Type: multipart/form-data" \
+  -F "foto=@/ruta/local/foto_perfil.jpg"
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Foto de perfil actualizada",
+  "datos": null
+}
+```
+
+**Errores**:
+- `400 BAD_REQUEST`: Imagen vacía o tamaño superior a 2 MB
+- `404 NOT_FOUND`: Usuario no existe
+- `403 FORBIDDEN`: Sin permisos para actualizar este usuario
+
+---
+
+#### GET `/api/usuarios/{id}/foto`
+Obtener la foto de perfil de un usuario.
+
+**Autenticación**: 🔒 ADMIN o propio usuario (recomendado, según política de privacidad)
+
+**Respuesta exitosa** (200):
+- Cuerpo: bytes de la imagen en bruto.
+- Cabecera `Content-Type`: `image/jpeg`, `image/png`, etc. según el tipo almacenado.
+
+**Ejemplo (curl)**:
+```bash
+curl -X GET http://localhost:8080/api/usuarios/123/foto \
+  -H "Authorization: Bearer TOKEN_USUARIO" \
+  -o foto_perfil_123.jpg
+```
+
+**Errores**:
+- `404 NOT_FOUND`: Usuario no existe o no tiene foto almacenada
+- `403 FORBIDDEN`: Sin permisos para ver esta imagen
+
+---
+
+#### DELETE `/api/usuarios/{id}`
+Eliminar usuario (borrado lógico: `activo = false`).
+
+**Autenticación**: 🔒 ADMIN
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Usuario eliminado correctamente"
+}
+```
+
+**Errores**:
+- `404 NOT_FOUND`: Usuario no existe
+- `409 CONFLICT`: No se puede eliminar usuario con datos relacionados
+
+---
+
+#### PUT `/api/usuarios/{id}/estado`
+Activar o desactivar usuario.
+
+**Autenticación**: 🔒 ADMIN
+
+**Petición**:
+```json
+{
+  "activo": false
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id": 123,
+    "activo": false
+  },
+  "mensaje": "Estado de usuario actualizado"
+}
+```
+
+---
+
+#### GET `/api/usuarios/{id}/votos`
+Obtener votos realizados por un usuario.
+
+**Autenticación**: 🔒 ADMIN o propio usuario
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 20)
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id": 501,
+        "id_ninot": 34,
+        "nombre_ninot": "El Caloret",
+        "id_falla": 12,
+        "nombre_falla": "Falla Convento Jerusalén",
+        "tipo_voto": "favorito",
+        "fecha_voto": "2026-01-28T15:30:00Z"
+      }
+    ],
+    "pagina_actual": 0,
+    "total_elementos": 5
+  }
+}
+```
+
+---
+
+### 4.3 Fallas (`/api/fallas`)
+
+#### GET `/api/fallas`
+Listar todas las fallas con filtros opcionales.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 50)
+- `seccion` (string, opcional): Filtrar por sección (ej: "1A", "7C")
+- `categoria` (string, opcional): Filtrar por categoría (especial, primera, segunda, etc.)
+- `activas` (boolean, default: true): Solo fallas activas
+- `ordenar_por` (string, default: "nombre"): nombre, anyo_fundacion, seccion
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id_falla": 1,
+        "nombre": "Falla Plaza del Ayuntamiento",
+        "seccion": "1A",
+        "presidente": "Juan García López",
+        "anyo_fundacion": 1942,
+        "categoria": "especial",
+        "ubicacion": {
+          "latitud": 39.4699,
+          "longitud": -0.3763,
+          "direccion": "Plaza del Ayuntamiento, Valencia"
+        },
+        "estadisticas": {
+          "total_eventos": 12,
+          "total_ninots": 3,
+          "total_votos": 1250
+        }
+      }
+    ],
+    "pagina_actual": 0,
+    "tamano_pagina": 50,
+    "total_elementos": 347,
+    "total_paginas": 7
+  }
+}
+```
+
+---
+
+#### GET `/api/fallas/{id}`
+Obtener información detallada de una falla.
+
+**Público**: ✅ Sí
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_falla": 1,
+    "nombre": "Falla Plaza del Ayuntamiento",
+    "seccion": "1A",
+    "presidente": "Juan García López",
+    "artista": "Miguel Santaeulalia",
+    "lema": "La Valencia eterna",
+    "anyo_fundacion": 1942,
+    "categoria": "especial",
+    "distintivo": "brillants",
+    "ubicacion": {
+      "latitud": 39.4699,
+      "longitud": -0.3763,
+      "direccion": "Plaza del Ayuntamiento, Valencia"
+    },
+    "descripcion": "Falla histórica ubicada en el corazón de Valencia...",
+    "contacto": {
+      "web_oficial": "https://fallaplazaayuntamiento.com",
+      "email": "info@fallaplaza.com",
+      "telefono": "+34963123456"
+    },
+    "estadisticas": {
+      "total_eventos": 12,
+      "total_ninots": 3,
+      "total_votos": 1250,
+      "proximos_eventos": 2
+    },
+    "fecha_ultima_actualizacion": "2026-01-25T14:30:00Z"
+  }
+}
+```
+
+**Errores**:
+- `404 NOT_FOUND`: Falla no existe
+
+---
+
+#### POST `/api/fallas`
+Crear nueva falla.
+
+**Autenticación**: 🔒 ADMIN
+
+**Petición**:
+```json
+{
+  "nombre": "Falla Nueva Campanar",
+  "seccion": "8C",
+  "presidente": "María Sánchez",
+  "artista": "José Martínez",
+  "lema": "Valencia al món",
+  "anyo_fundacion": 2024,
+  "categoria": "tercera",
+  "ubicacion": {
+    "latitud": 39.4850,
+    "longitud": -0.3950,
+    "direccion": "Calle Campanar, 45"
+  },
+  "descripcion": "Nueva falla en el barrio de Campanar",
+  "contacto": {
+    "email": "contacto@fallacampanar.com",
+    "telefono": "+34963555666"
+  }
+}
+```
+
+**Respuesta exitosa** (201):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_falla": 348,
+    "nombre": "Falla Nueva Campanar",
+    "seccion": "8C",
+    "fecha_creacion": "2026-02-01T11:00:00Z"
+  },
+  "mensaje": "Falla creada correctamente"
+}
+```
+
+**Validaciones**:
+- Nombre único
+- Sección válida
+- Coordenadas válidas (lat: -90 a 90, lon: -180 a 180)
+- Año fundación <= año actual
+
+---
+
+#### PUT `/api/fallas/{id}`
+Actualizar información de falla.
+
+**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+
+**Petición**:
+```json
+{
+  "nombre": "Falla Plaza del Ayuntamiento - Actualizada",
+  "presidente": "Nuevo Presidente",
+  "descripcion": "Descripción actualizada...",
+  "contacto": {
+    "web_oficial": "https://nueva-web.com",
+    "telefono": "+34963999888"
+  }
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_falla": 1,
+    "nombre": "Falla Plaza del Ayuntamiento - Actualizada",
+    "fecha_actualizacion": "2026-02-01T11:15:00Z"
+  },
+  "mensaje": "Falla actualizada correctamente"
+}
+```
+
+**Restricciones CASAL**:
+- Solo puede actualizar su propia falla
+- No puede cambiar: nombre, sección, categoría, año fundación
+
+---
+
+#### DELETE `/api/fallas/{id}`
+Eliminar falla (borrado lógico).
+
+**Autenticación**: 🔒 ADMIN
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Falla eliminada correctamente"
+}
+```
+
+**Errores**:
+- `409 CONFLICT`: Falla tiene eventos o ninots asociados
+
+---
+
+#### GET `/api/fallas/buscar`
+Búsqueda de fallas por texto.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `texto` (string, requerido): Texto a buscar
+- `campos` (string[], opcional): Campos donde buscar (nombre, lema, artista, presidente)
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 20)
+
+**Ejemplo**: `/api/fallas/buscar?texto=ayuntamiento&campos=nombre,lema`
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id_falla": 1,
+        "nombre": "Falla Plaza del Ayuntamiento",
+        "seccion": "1A",
+        "coincidencias": {
+          "campo": "nombre",
+          "fragmento": "...Plaza del Ayuntamiento..."
+        }
+      }
+    ],
+    "total_elementos": 3
+  }
+}
+```
+
+---
+
+#### GET `/api/fallas/cercanas`
+Fallas cercanas a una ubicación.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `latitud` (decimal, requerido): Latitud del punto
+- `longitud` (decimal, requerido): Longitud del punto
+- `radio_km` (decimal, default: 1.0): Radio de búsqueda en kilómetros
+- `limite` (int, default: 10): Máximo de resultados
+
+**Ejemplo**: `/api/fallas/cercanas?latitud=39.4699&longitud=-0.3763&radio_km=2.0`
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": [
+    {
+      "id_falla": 1,
+      "nombre": "Falla Plaza del Ayuntamiento",
+      "distancia_km": 0.15,
+      "ubicacion": {
+        "latitud": 39.4699,
+        "longitud": -0.3763
+      }
+    },
+    {
+      "id_falla": 5,
+      "nombre": "Falla Convento Jerusalén",
+      "distancia_km": 0.82,
+      "ubicacion": {
+        "latitud": 39.4756,
+        "longitud": -0.3650
+      }
+    }
+  ]
+}
+```
+
+---
+
+#### GET `/api/fallas/{id}/eventos`
+Obtener eventos de una falla.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `tipo` (string, opcional): Filtrar por tipo (planta, crema, ofrenda)
+- `desde_fecha` (date, opcional): Eventos desde fecha
+- `hasta_fecha` (date, opcional): Eventos hasta fecha
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": [
+    {
+      "id_evento": 101,
+      "tipo": "planta",
+      "nombre": "Plantà Falla Grande",
+      "descripcion": "Plantà de la falla grande 2026",
+      "fecha_evento": "2026-03-15T18:00:00Z",
+      "ubicacion": "Plaza del Ayuntamiento"
+    },
+    {
+      "id_evento": 102,
+      "tipo": "crema",
+      "nombre": "Cremà",
+      "fecha_evento": "2026-03-19T01:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+#### GET `/api/fallas/{id}/ninots`
+Obtener ninots de una falla.
+
+**Público**: ✅ Sí
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": [
+    {
+      "id_ninot": 34,
+      "nombre_ninot": "El Caloret",
+      "titulo_obra": "Valencia bajo el sol",
+      "altura_metros": 15.5,
+      "artista_constructor": "Miguel Santaeulalia",
+      "url_imagen_principal": "https://cdn.fallapp.com/ninots/34-principal.jpg",
+      "premiado": false,
+      "estadisticas": {
+        "total_votos": 450,
+        "puntuacion_media": 4.5
+      }
+    }
+  ]
+}
+```
+
+---
+
+#### GET `/api/fallas/{id}/estadisticas`
+Estadísticas de una falla.
+
+**Público**: ✅ Sí
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_falla": 1,
+    "nombre": "Falla Plaza del Ayuntamiento",
+    "estadisticas": {
+      "eventos": {
+        "total": 12,
+        "por_tipo": {
+          "planta": 2,
+          "crema": 1,
+          "ofrenda": 1,
+          "concierto": 5,
+          "exposicion": 3
+        },
+        "proximos": 2
+      },
+      "ninots": {
+        "total": 3,
+        "premiados": 1,
+        "total_votos": 1250,
+        "puntuacion_media": 4.2
+      },
+      "usuarios": {
+        "responsables": 1,
+        "seguidores": 320
+      }
+    }
+  }
+}
+```
+
+---
+
+### 4.4 Eventos (`/api/eventos`)
+
+#### GET `/api/eventos`
+Listar eventos con filtros y paginación.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0): Número de página (0-based)
+- `tamano` (int, default: 20, max: 100): Tamaño de página
+- `id_falla` (Long, opcional): Filtrar por ID de falla
+- `tipo` (string, opcional): Filtrar por tipo (planta, crema, ofrenda, concierto, etc.)
+- `desde_fecha` (ISO DateTime, opcional): Filtrar desde fecha (formato: 2026-03-01T00:00:00)
+- `hasta_fecha` (ISO DateTime, opcional): Filtrar hasta fecha
+- `ordenar_por` (string, default: "fecha_evento"): Campo de ordenación (fecha_evento, nombre)
+
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
   "mensaje": null,
   "datos": {
-    "contenido": [
+    "content": [
       {
-        "idFalla": 1,
-        "nombre": "Falla Convento Jerusalén",
-        "seccion": "1A",
-        "fallera": "María García López",
-        "presidente": "Juan Martínez Sánchez",
-        "artista": "Manolo Martín",
-        "lema": "La Falla del Pueblo",
-        "anyoFundacion": 1942,
-        "distintivo": "Especial",
-        "urlBoceto": "https://fallapp.es/bocetos/1.jpg",
-        "experim": false,
-        "latitud": 39.4699,
-        "longitud": -0.3763,
-        "descripcion": "Falla tradicional del centro de Valencia",
-        "webOficial": "https://fallaconvento.com",
-        "telefonoContacto": "+34961234567",
-        "emailContacto": "info@fallaconvento.com",
-        "categoria": "ESPECIAL",
-        "totalEventos": 12,
-        "totalNinots": 8,
-        "totalMiembros": 245,
-        "fechaCreacion": "2025-01-15T10:00:00",
-        "fechaActualizacion": "2026-01-20T14:30:00"
+        "idEvento": 1,
+        "idFalla": 101,
+        "nombreFalla": "Actor Mora-Constitució",
+        "tipo": "concierto",
+        "nombre": "Concierto de Bandas Festeras 2026",
+        "descripcion": "Gran concierto con bandas de música tradicional valenciana.",
+        "fechaEvento": "2026-03-18T20:00:00",
+        "ubicacion": "Plaza del Casal",
+        "direccion": "Calle Mayor, 45 - 46001 Valencia",
+        "urlImagen": "https://ejemplo.com/eventos/concierto-2026.jpg",
+        "participantesEstimado": 300,
+        "creadoPor": {
+          "id": 4,
+          "nombreCompleto": "Administrador del Sistema",
+          "email": "admin@fallapp.es"
+        },
+        "fechaCreacion": "2026-02-13T12:16:05.318682",
+        "actualizadoEn": "2026-02-13T12:16:05.318682"
       }
     ],
-    "paginaActual": 0,
-    "totalElementos": 347,
-    "totalPaginas": 18,
-    "tamano": 20,
-    "esUltima": false,
-    "esPrimera": true
-  },
-  "timestamp": "2026-02-01T18:30:00"
-}
-```
-
----
-
-#### GET /api/fallas/{id} - Obtener falla por ID
-**Autenticación:** No requerida  
-**Path Param:** `id` (Long)
-
-**Response:**
-```json
-{
-  "exito": true,
-  "datos": {
-    "idFalla": 1,
-    "nombre": "Falla Convento Jerusalén",
-    "seccion": "1A",
-    "presidente": "Juan Martínez Sánchez",
-    "anyoFundacion": 1942,
-    "latitud": 39.4699,
-    "longitud": -0.3763,
-    "categoria": "ESPECIAL",
-    "totalEventos": 12
+    "pageable": {
+      "pageNumber": 0,
+      "pageSize": 20,
+      "offset": 0
+    },
+    "totalElements": 1,
+    "totalPages": 1,
+    "size": 20,
+    "number": 0,
+    "first": true,
+    "last": true,
+    "empty": false
   }
 }
 ```
 
----
+**Ejemplo de uso**:
+```bash
+# Listar todos los eventos
+GET /api/eventos?pagina=0&tamano=20
 
-#### GET /api/fallas/buscar - Buscar fallas por texto
-**Autenticación:** No requerida  
-**Query Param:** `texto` (String)
+# Filtrar por falla
+GET /api/eventos?id_falla=101&pagina=0&tamano=10
 
-**Ejemplo:** `GET /api/fallas/buscar?texto=convento`
+# Filtrar por tipo
+GET /api/eventos?tipo=concierto
 
-**Response:**
-```json
-{
-  "exito": true,
-  "datos": [
-    {
-      "idFalla": 1,
-      "nombre": "Falla Convento Jerusalén",
-      "seccion": "1A"
-    },
-    {
-      "idFalla": 45,
-      "nombre": "Falla Convento San Francisco",
-      "seccion": "3B"
-    }
-  ]
-}
+# Filtrar por rango de fechas
+GET /api/eventos?desde_fecha=2026-03-01T00:00:00&hasta_fecha=2026-03-31T23:59:59
 ```
 
 ---
 
-#### GET /api/fallas/cercanas - Buscar fallas cercanas
-**Autenticación:** No requerida  
-**Query Params:**
-- `latitud` (double, requerido)
-- `longitud` (double, requerido)
-- `radio` (double, default: 5.0): Radio en kilómetros
+#### GET `/api/eventos/futuros`
+Obtener todos los eventos futuros (desde la fecha/hora actual).
 
-**Ejemplo:** `GET /api/fallas/cercanas?latitud=39.4699&longitud=-0.3763&radio=2.0`
+**Público**: ✅ Sí
 
-**Response:**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "datos": [
-    {
-      "idFalla": 1,
-      "nombre": "Falla Convento Jerusalén",
-      "latitud": 39.4699,
-      "longitud": -0.3763,
-      "distancia": 0.3
-    },
-    {
-      "idFalla": 5,
-      "nombre": "Falla Mercat Central",
-      "latitud": 39.4740,
-      "longitud": -0.3785,
-      "distancia": 1.2
-    }
-  ]
-}
-```
-
----
-
-#### GET /api/fallas/seccion/{seccion} - Fallas por sección
-**Autenticación:** No requerida  
-**Path Param:** `seccion` (String) - Ejemplo: "1A", "2B"
-
----
-
-#### GET /api/fallas/categoria/{categoria} - Fallas por categoría
-**Autenticación:** No requerida  
-**Path Param:** `categoria` (String) - Ejemplo: "ESPECIAL", "PRIMERA"
-
----
-
-### EVENTOS
-
-#### GET /api/eventos/futuros - Eventos futuros
-**Autenticación:** No requerida
-
-**Response:**
-```json
-{
-  "exito": true,
+  "mensaje": null,
   "datos": [
     {
       "idEvento": 1,
-      "idFalla": 1,
-      "nombreFalla": "Falla Convento Jerusalén",
-      "tipo": "PLANTÀ",
-      "nombre": "Plantà 2026",
-      "descripcion": "Plantà de la falla gran",
-      "fechaEvento": "2026-03-15T08:00:00",
-      "ubicacion": "Plaza del Convento",
-      "participantesEstimado": 500
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "descripcion": "Gran concierto con bandas...",
+      "fechaEvento": "2026-03-18T20:00:00",
+      "ubicacion": "Plaza del Casal",
+      "direccion": "Calle Mayor, 45 - Valencia",
+      "urlImagen": "https://ejemplo.com/eventos/concierto.jpg",
+      "participantesEstimado": 300,
+      "creadoPor": { "id": 4, "nombreCompleto": "Admin", "email": "admin@fallapp.es" },
+      "fechaCreacion": "2026-02-13T12:16:05.318682",
+      "actualizadoEn": "2026-02-13T12:16:05.318682"
     }
   ]
 }
@@ -390,129 +1029,28 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ---
 
-#### GET /api/eventos/proximos - Próximos N eventos
-**Autenticación:** No requerida  
-**Query Param:** `limite` (int, default: 10, max: 50)
+#### GET `/api/eventos/proximos`
+Obtener los próximos N eventos (ordenados por fecha ascendente).
 
----
+**Público**: ✅ Sí
 
-#### GET /api/eventos/{id} - Evento por ID
-**Autenticación:** No requerida
+**Parámetros de consulta**:
+- `limite` (int, default: 10, max: 50): Número máximo de eventos a retornar
 
----
-
-#### GET /api/eventos/falla/{idFalla} - Eventos de una falla
-**Autenticación:** No requerida  
-**Query Params:**
-- `page` (int, default: 0)
-- `size` (int, default: 20, max: 100)
-
-**Response:**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "datos": {
-    "content": [
-      {
-        "idEvento": 5,
-        "tipo": "OFRENDA",
-        "nombre": "Ofrenda de Flores",
-        "fechaEvento": "2026-03-17T17:00:00"
-      }
-    ],
-    "pageable": { ... },
-    "totalElements": 12
-  }
-}
-```
-
----
-
-### NINOTS
-
-#### GET /api/ninots - Listar ninots con paginación
-**Autenticación:** No requerida  
-**Query Params:**
-- `page` (int, default: 0)
-- `size` (int, default: 20)
-
-**Response:**
-```json
-{
-  "exito": true,
-  "datos": {
-    "content": [
-      {
-        "idNinot": 1,
-        "idFalla": 1,
-        "nombreFalla": "Falla Convento Jerusalén",
-        "nombreNinot": "El Político Corrupto",
-        "tituloObra": "La Trampa del Poder",
-        "altura": 3.5,
-        "ancho": 2.0,
-        "imagenes": [
-          "https://fallapp.es/ninots/1_1.jpg",
-          "https://fallapp.es/ninots/1_2.jpg"
-        ],
-        "premiado": true,
-        "totalVotos": 245,
-        "votosIngenioso": 80,
-        "votosCritico": 95,
-        "votosArtistico": 70,
-        "fechaCreacion": "2026-01-10T12:00:00"
-      }
-    ],
-    "totalElements": 128
-  }
-}
-```
-
----
-
-#### GET /api/ninots/{id} - Ninot por ID
-**Autenticación:** No requerida
-
----
-
-#### GET /api/ninots/falla/{idFalla} - Ninots de una falla
-**Autenticación:** No requerida
-
----
-
-#### GET /api/ninots/premiados - Ninots premiados
-**Autenticación:** No requerida  
-**Query Params:**
-- `page` (int, default: 0)
-- `size` (int, default: 20)
-
----
-
-### COMENTARIOS
-
-#### GET /api/comentarios - Comentarios filtrados
-**Autenticación:** No requerida  
-**Query Params:**
-- `idFalla` (Long, opcional)
-- `idNinot` (Long, opcional)
-
-**Ejemplo:** `GET /api/comentarios?idFalla=1`
-
-**Response:**
-```json
-{
-  "exito": true,
+  "mensaje": null,
   "datos": [
     {
-      "idComentario": 1,
-      "idUsuario": 5,
-      "nombreUsuario": "María García",
-      "idFalla": 1,
-      "nombreFalla": "Falla Convento Jerusalén",
-      "idNinot": null,
-      "nombreNinot": null,
-      "contenido": "¡Espectacular la plantà de este año! Enhorabuena al casal",
-      "fechaCreacion": "2026-03-16T10:30:00",
-      "fechaActualizacion": "2026-03-16T10:30:00"
+      "idEvento": 1,
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "fechaEvento": "2026-03-18T20:00:00",
+      "ubicacion": "Plaza del Casal"
     }
   ]
 }
@@ -520,1172 +1058,1266 @@ Todas las respuestas siguen el formato estándar `ApiResponse<T>`:
 
 ---
 
-#### GET /api/comentarios/{id} - Comentario por ID
-**Autenticación:** No requerida
+#### GET `/api/eventos/tipo/{tipo}`
+Obtener eventos filtrados por tipo específico.
 
----
+**Público**: ✅ Sí
 
-### ESTADÍSTICAS
+**Tipos válidos**: 
+- `planta` - Plantà del monumento
+- `crema` - Cremà de la falla
+- `ofrenda` - Ofrenda floral
+- `infantil` - Eventos infantiles
+- `concierto` - Conciertos
+- `exposicion` - Exposiciones
+- `encuentro` - Encuentros y reuniones
+- `cena` - Cenas y comidas
+- `teatro` - Representaciones teatrales
+- `otro` - Otros eventos
 
-#### GET /api/estadisticas/resumen - Resumen general
-**Autenticación:** No requerida
-
-**Response:**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "datos": {
-    "totalFallas": 347,
-    "totalEventos": 1245,
-    "totalNinots": 982,
-    "totalUsuarios": 4567,
-    "totalVotos": 12890,
-    "totalComentarios": 3456
-  }
-}
-```
-
----
-
-#### GET /api/estadisticas/fallas - Estadísticas de fallas
-**Autenticación:** No requerida
-
-**Response:**
-```json
-{
-  "exito": true,
-  "datos": {
-    "totalFallas": 347,
-    "fallasPorCategoria": {
-      "ESPECIAL": 15,
-      "PRIMERA": 45,
-      "SEGUNDA": 80,
-      "TERCERA": 120,
-      "INFANTIL": 87
-    },
-    "fallasPorSeccion": {
-      "1A": 8,
-      "2A": 12,
-      "3B": 15
+  "mensaje": null,
+  "datos": [
+    {
+      "idEvento": 1,
+      "tipo": "concierto",
+      "nombre": "Concierto de Bandas Festeras 2026",
+      "idFalla": 101,
+      "nombreFalla": "Actor Mora-Constitució",
+      "fechaEvento": "2026-03-18T20:00:00"
     }
-  }
+  ]
 }
 ```
 
 ---
 
-#### GET /api/estadisticas/votos - Estadísticas de votos
-**Autenticación:** No requerida
+#### GET `/api/eventos/falla/{idFalla}`
+Obtener eventos de una falla específica (paginado).
 
----
+**Público**: ✅ Sí
 
-#### GET /api/estadisticas/usuarios - Estadísticas de usuarios
-**Autenticación:** No requerida
+**Parámetros de consulta**:
+- `page` (int, default: 0): Número de página
+- `size` (int, default: 20, max: 100): Tamaño de página
 
----
-
-#### GET /api/estadisticas/actividad - Actividad reciente
-**Autenticación:** No requerida
-
----
-
-#### GET /api/estadisticas/eventos - Estadísticas de eventos
-**Autenticación:** No requerida
-
----
-
-### USUARIOS
-
-#### GET /api/usuarios/{id} - Usuario por ID (perfil público)
-**Autenticación:** No requerida
-
-**Response:**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
+  "mensaje": null,
   "datos": {
-    "idUsuario": 5,
-    "nombreCompleto": "María García López",
-    "email": "maria@example.com",
-    "rol": "FALLERO",
-    "idFalla": 1,
-    "nombreFalla": "Falla Convento Jerusalén"
+    "content": [ /* eventos */ ],
+    "totalElements": 12,
+    "totalPages": 1,
+    "number": 0,
+    "size": 20
   }
 }
 ```
 
 ---
 
-## 🔐 Endpoints Autenticados
+#### GET `/api/eventos/{id}`
+Obtener detalles completos de un evento por su ID.
 
-**Requieren header:** `Authorization: Bearer {token}`
+**Público**: ✅ Sí
 
-### FALLAS
-
-#### POST /api/fallas - Crear nueva falla
-**Autenticación:** Requerida (usuario autenticado)
-
-**Request:**
-```json
-{
-  "nombre": "Nueva Falla Ruzafa Norte",
-  "seccion": "5B",
-  "fallera": "Ana Martínez Pérez",
-  "presidente": "Carlos Gómez Ruiz",
-  "artista": "Vicente López",
-  "lema": "Tradición y Futuro",
-  "anyoFundacion": 2010,
-  "distintivo": "Primera",
-  "urlBoceto": "https://example.com/boceto.jpg",
-  "experim": false,
-  "latitud": 39.4650,
-  "longitud": -0.3700,
-  "descripcion": "Falla joven del barrio de Ruzafa",
-  "webOficial": "https://fallaruzafanorte.com",
-  "telefonoContacto": "+34961987654",
-  "emailContacto": "info@fallaruzafanorte.com",
-  "categoria": "PRIMERA"
-}
-```
-
-**Validaciones:**
-- `nombre`: Obligatorio, máximo 255 caracteres
-- `seccion`: Obligatorio, máximo 5 caracteres (ej: "1A", "5B")
-- `presidente`: Obligatorio
-- `anyoFundacion`: Obligatorio, >= 1900
-- `latitud`: Entre -90 y 90
-- `longitud`: Entre -180 y 180
-- `emailContacto`: Formato de email válido
-
-**Response (201 Created):**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "mensaje": "Falla creada exitosamente",
+  "mensaje": null,
   "datos": {
-    "idFalla": 348,
-    "nombre": "Nueva Falla Ruzafa Norte",
-    "seccion": "5B",
-    "fechaCreacion": "2026-02-01T18:45:00"
+    "idEvento": 1,
+    "idFalla": 101,
+    "nombreFalla": "Actor Mora-Constitució",
+    "tipo": "concierto",
+    "nombre": "Concierto de Bandas Festeras 2026",
+    "descripcion": "Gran concierto con bandas de música tradicional valenciana. Entrada libre hasta completar aforo.",
+    "fechaEvento": "2026-03-18T20:00:00",
+    "ubicacion": "Plaza del Casal",
+    "direccion": "Calle Mayor, 45 - 46001 Valencia",
+    "urlImagen": "https://ejemplo.com/eventos/concierto-2026.jpg",
+    "participantesEstimado": 300,
+    "creadoPor": {
+      "id": 4,
+      "nombreCompleto": "Administrador del Sistema",
+      "email": "admin@fallapp.es"
+    },
+    "fechaCreacion": "2026-02-13T12:16:05.318682",
+    "actualizadoEn": "2026-02-13T12:16:05.318682"
   }
 }
 ```
 
----
-
-#### PUT /api/fallas/{id} - Actualizar falla
-**Autenticación:** Requerida (usuario autenticado)
-
-**Request:** Mismo formato que POST, campos opcionales se pueden omitir
-
-**Response (200 OK):**
-```json
-{
-  "exito": true,
-  "mensaje": "Falla actualizada exitosamente",
-  "datos": { ... }
-}
-```
+**Errores**:
+- `404 NOT_FOUND`: Evento no existe
 
 ---
 
-### EVENTOS
+#### POST `/api/eventos`
+Crear nuevo evento.
 
-#### POST /api/eventos - Crear evento
-**Autenticación:** Requerida
+**Autenticación**: 🔒 Requiere autenticación (cualquier usuario autenticado)
 
-**Request:**
+**Petición**:
 ```json
 {
-  "idFalla": 1,
-  "tipo": "MASCLETÀ",
-  "nombre": "Mascletà Día Grande",
-  "descripcion": "Mascletà especial para el día grande de la falla",
-  "fechaEvento": "2026-03-18T14:00:00",
-  "ubicacion": "Plaza del Ayuntamiento",
-  "participantesEstimado": 10000
+  "idFalla": 101,
+  "tipo": "concierto",
+  "nombre": "Concierto de Música Festera",
+  "descripcion": "Concierto de bandas de música valenciana",
+  "fechaEvento": "2026-03-20T20:00:00",
+  "ubicacion": "Casal de la falla",
+  "direccion": "Calle Mayor, 45 - Valencia",
+  "urlImagen": "https://ejemplo.com/imagen.jpg",
+  "participantesEstimado": 200
 }
 ```
 
-**Validaciones:**
-- `idFalla`: Obligatorio, debe existir
-- `tipo`: Obligatorio (ej: "PLANTÀ", "OFRENDA", "CREMÀ", "MASCLETÀ", "PAELLA")
-- `nombre`: Obligatorio, máximo 255 caracteres
-- `fechaEvento`: Obligatorio, formato ISO 8601
-- `participantesEstimado`: >= 0
+**Campos requeridos**:
+- `idFalla` (Long): ID de la falla asociada
+- `tipo` (String): Tipo de evento (planta, crema, ofrenda, concierto, etc.)
+- `nombre` (String, max 255): Nombre del evento
+- `fechaEvento` (ISO DateTime): Fecha y hora del evento
 
-**Response (201 Created):**
+**Campos opcionales**:
+- `descripcion` (String): Descripción detallada
+- `ubicacion` (String, max 255): Ubicación del evento
+- `direccion` (String, max 255): Dirección completa
+- `urlImagen` (String, max 500): URL de imagen
+- `participantesEstimado` (Integer, min 0): Estimación de asistentes
+
+**Respuesta exitosa** (201):
 ```json
 {
   "exito": true,
   "mensaje": "Evento creado exitosamente",
   "datos": {
-    "idEvento": 125,
-    "tipo": "MASCLETÀ",
-    "nombre": "Mascletà Día Grande",
-    "fechaEvento": "2026-03-18T14:00:00"
+    "idEvento": 2,
+    "nombre": "Concierto de Música Festera",
+    "tipo": "concierto",
+    "fechaEvento": "2026-03-20T20:00:00",
+    "fechaCreacion": "2026-02-13T12:30:00.123456"
+  }
+}
+```
+
+**Validaciones**:
+- `idFalla` debe existir en la base de datos
+- `tipo` debe ser uno de los valores válidos del enum
+- `fechaEvento` debe ser una fecha válida
+- `nombre` no puede estar vacío
+
+**Errores**:
+- `400 BAD_REQUEST`: Validación fallida (campos obligatorios faltantes)
+- `403 FORBIDDEN`: Sin autenticación
+- `404 NOT_FOUND`: Falla no existe
+
+---
+
+#### PUT `/api/eventos/{id}`
+Actualizar evento existente.
+
+**Autenticación**: 🔒 Requiere autenticación (admin o casal de la falla)
+
+**Petición** (enviar objeto completo):
+```json
+{
+  "idFalla": 101,
+  "tipo": "concierto",
+  "nombre": "Concierto de Música Festera - ACTUALIZADO",
+  "descripcion": "Descripción actualizada",
+  "fechaEvento": "2026-03-20T21:00:00",
+  "ubicacion": "Plaza del Casal",
+  "direccion": "Calle Mayor, 45 - Valencia",
+  "urlImagen": "https://ejemplo.com/nueva-imagen.jpg",
+  "participantesEstimado": 250
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Evento actualizado exitosamente",
+  "datos": {
+    "idEvento": 2,
+    "nombre": "Concierto de Música Festera - ACTUALIZADO",
+    "fechaEvento": "2026-03-20T21:00:00",
+    "actualizadoEn": "2026-02-13T13:00:00.123456"
+  }
+}
+```
+
+**Errores**:
+- `400 BAD_REQUEST`: Validación fallida
+- `403 FORBIDDEN`: Sin permisos (no es admin ni casal de la falla)
+- `404 NOT_FOUND`: Evento no existe
+
+
+
+---
+
+#### DELETE `/api/eventos/{id}`
+Eliminar evento del sistema.
+
+**Autenticación**: 🔒 Solo rol ADMIN
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Evento eliminado exitosamente",
+  "datos": null
+}
+```
+
+**Errores**:
+- `403 FORBIDDEN`: Usuario no tiene rol ADMIN
+- `404 NOT_FOUND`: Evento no existe
+
+---
+
+### 📝 Resumen de Endpoints de Eventos
+
+| Método | Endpoint | Autenticación | Descripción |
+|--------|----------|---------------|-------------|
+| GET | `/api/eventos` | ❌ Público | Listar con filtros y paginación |
+| GET | `/api/eventos/futuros` | ❌ Público | Todos los eventos futuros |
+| GET | `/api/eventos/proximos?limite=N` | ❌ Público | Próximos N eventos (max 50) |
+| GET | `/api/eventos/tipo/{tipo}` | ❌ Público | Filtrar por tipo específico |
+| GET | `/api/eventos/falla/{idFalla}` | ❌ Público | Eventos de una falla (paginado) |
+| GET | `/api/eventos/{id}` | ❌ Público | Detalles de un evento |
+| POST | `/api/eventos` | ✅ Usuario | Crear evento |
+| PUT | `/api/eventos/{id}` | ✅ Usuario | Actualizar evento |
+| DELETE | `/api/eventos/{id}` | ✅ Solo ADMIN | Eliminar evento |
+
+**Notas importantes**:
+- ⚠️ Los endpoints de imagen (`/api/eventos/{id}/imagen`) están **DESHABILITADOS** porque la base de datos no tiene las columnas `imagen` y `imagen_content_type`. Usar el campo `urlImagen` en su lugar.
+- La columna `tipo` en PostgreSQL es VARCHAR(30), no ENUM, para compatibilidad con Hibernate.
+- Los tipos de evento válidos son: `planta`, `crema`, `ofrenda`, `infantil`, `concierto`, `exposicion`, `encuentro`, `cena`, `teatro`, `otro`.
+
+---
+
+### 4.5 Ninots (`/api/ninots`)
+
+#### GET `/api/ninots`
+Listar ninots con filtros.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 20)
+- `id_falla` (int, opcional): Filtrar por falla
+- `premiado` (boolean, opcional): Solo ninots premiados
+- `ordenar_por` (string, default: "nombre_ninot"): nombre_ninot, altura_metros, total_votos
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id_ninot": 34,
+        "nombre_ninot": "El Caloret",
+        "titulo_obra": "Valencia bajo el sol",
+        "id_falla": 1,
+        "nombre_falla": "Falla Plaza del Ayuntamiento",
+        "altura_metros": 15.5,
+        "artista_constructor": "Miguel Santaeulalia",
+        "url_imagen_principal": "https://cdn.fallapp.com/ninots/34.jpg",
+        "premiado": false,
+        "estadisticas": {
+          "total_votos": 450,
+          "puntuacion_media": 4.5
+        }
+      }
+    ],
+    "pagina_actual": 0,
+    "total_elementos": 120
   }
 }
 ```
 
 ---
 
-#### PUT /api/eventos/{id} - Actualizar evento
-**Autenticación:** Requerida
+#### GET `/api/ninots/{id}`
+Obtener ninot por ID.
 
----
+**Público**: ✅ Sí
 
-### NINOTS
-
-#### POST /api/ninots - Crear ninot
-**Autenticación:** Requerida
-
-**Request:**
-```json
-{
-  "idFalla": 1,
-  "nombreNinot": "El Influencer",
-  "tituloObra": "La Era Digital",
-  "altura": 4.2,
-  "ancho": 2.5,
-  "imagenes": [
-    "https://fallapp.es/ninots/nuevo_1.jpg",
-    "https://fallapp.es/ninots/nuevo_2.jpg"
-  ],
-  "premiado": false
-}
-```
-
-**Validaciones:**
-- `idFalla`: Obligatorio
-- `nombreNinot`: Obligatorio, máximo 255 caracteres
-- `altura`: >= 0.1
-- `ancho`: >= 0.1
-- `imagenes`: Array de URLs
-
-**Response (201 Created):**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "mensaje": "Ninot creado exitosamente",
   "datos": {
-    "idNinot": 983,
-    "nombreNinot": "El Influencer",
-    "totalVotos": 0
+    "id_ninot": 34,
+    "nombre_ninot": "El Caloret",
+    "titulo_obra": "Valencia bajo el sol",
+    "descripcion": "Representación del calor valenciano...",
+    "id_falla": 1,
+    "nombre_falla": "Falla Plaza del Ayuntamiento",
+    "dimensiones": {
+      "altura_metros": 15.5,
+      "ancho_metros": 8.2
+    },
+    "material_principal": "Madera y cartón",
+    "artista_constructor": "Miguel Santaeulalia",
+    "anyo_construccion": 2026,
+    "imagenes": {
+      "principal": "https://cdn.fallapp.com/ninots/34-principal.jpg",
+      "adicionales": [
+        "https://cdn.fallapp.com/ninots/34-lateral1.jpg",
+        "https://cdn.fallapp.com/ninots/34-lateral2.jpg"
+      ]
+    },
+    "premiado": false,
+    "categoria_premio": null,
+    "estadisticas": {
+      "total_votos": 450,
+      "puntuacion_media": 4.5,
+      "votos_por_tipo": {
+        "favorito": 320,
+        "ingenioso": 90,
+        "critico": 40
+      }
+    },
+    "fecha_creacion": "2026-01-10T12:00:00Z"
   }
 }
 ```
 
 ---
 
-#### PUT /api/ninots/{id} - Actualizar ninot
-**Autenticación:** Requerida
+#### POST `/api/ninots`
+Crear nuevo ninot.
 
----
+**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
 
-### COMENTARIOS
-
-#### POST /api/comentarios - Crear comentario
-**Autenticación:** Requerida
-
-**Request (comentario en falla):**
+**Petición**:
 ```json
 {
-  "idUsuario": 5,
-  "idFalla": 1,
-  "contenido": "¡Espectacular la plantà de este año! Enhorabuena al casal"
+  "id_falla": 1,
+  "nombre_ninot": "La Fallera Mayor",
+  "titulo_obra": "Tradición valenciana",
+  "descripcion": "Homenaje a la fallera mayor...",
+  "altura_metros": 12.5,
+  "ancho_metros": 6.0,
+  "material_principal": "Madera y poliestireno",
+  "artista_constructor": "José Martínez",
+  "anyo_construccion": 2026,
+  "url_imagen_principal": "https://ejemplo.com/ninot.jpg"
 }
 ```
 
-**Request (comentario en ninot):**
-```json
-{
-  "idUsuario": 5,
-  "idNinot": 15,
-  "contenido": "Este ninot merece el premio, muy crítico y artístico"
-}
-```
-
-**Validaciones:**
-- `idUsuario`: Obligatorio (debe coincidir con usuario autenticado)
-- `idFalla` O `idNinot`: Uno de los dos obligatorio (no ambos)
-- `contenido`: Entre 3 y 500 caracteres
-
-**Response (201 Created):**
+**Respuesta exitosa** (201):
 ```json
 {
   "exito": true,
-  "mensaje": "Comentario creado exitosamente",
   "datos": {
-    "idComentario": 456,
-    "contenido": "¡Espectacular la plantà...",
-    "fechaCreacion": "2026-02-01T19:00:00"
+    "id_ninot": 121,
+    "nombre_ninot": "La Fallera Mayor",
+    "id_falla": 1,
+    "fecha_creacion": "2026-02-01T12:00:00Z"
+  },
+  "mensaje": "Ninot creado correctamente"
+}
+```
+
+**Validaciones**:
+- id_falla debe existir
+- altura_metros y ancho_metros > 0
+- CASAL solo puede crear ninots de su propia falla
+
+---
+
+#### PUT `/api/ninots/{id}`
+Actualizar ninot.
+
+**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+
+**Petición**:
+```json
+{
+  "descripcion": "Descripción actualizada...",
+  "url_imagen_principal": "https://nueva-imagen.jpg"
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_ninot": 121,
+    "fecha_actualizacion": "2026-02-01T12:15:00Z"
+  },
+  "mensaje": "Ninot actualizado correctamente"
+}
+```
+
+---
+
+#### DELETE `/api/ninots/{id}`
+Eliminar ninot.
+
+**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Ninot eliminado correctamente"
+}
+```
+
+**Errores**:
+- `409 CONFLICT`: Ninot tiene votos asociados (no se puede eliminar)
+
+---
+
+#### GET `/api/ninots/{id}/votos`
+Obtener votos de un ninot.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 50)
+- `tipo_voto` (string, opcional): Filtrar por tipo
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [
+      {
+        "id_voto": 1001,
+        "id_usuario": 123,
+        "nombre_usuario": "Juan Pérez",
+        "tipo_voto": "favorito",
+        "fecha_voto": "2026-01-28T15:30:00Z"
+      }
+    ],
+    "total_votos": 450,
+    "votos_por_tipo": {
+      "favorito": 320,
+      "ingenioso": 90,
+      "critico": 40
+    }
   }
 }
 ```
 
 ---
 
-#### PUT /api/comentarios/{id} - Actualizar comentario
-**Autenticación:** Requerida (solo autor o ADMIN)
+#### GET `/api/ninots/clasificacion`
+Clasificación de ninots por votos.
 
-**Request:**
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `tipo_voto` (string, opcional): Filtrar por tipo de voto
+- `limite` (int, default: 10): Máximo de resultados
+
+**Respuesta exitosa** (200):
 ```json
 {
-  "contenido": "Contenido actualizado del comentario"
+  "exito": true,
+  "datos": [
+    {
+      "posicion": 1,
+      "id_ninot": 34,
+      "nombre_ninot": "El Caloret",
+      "id_falla": 1,
+      "nombre_falla": "Falla Plaza del Ayuntamiento",
+      "total_votos": 1250,
+      "puntuacion_media": 4.8
+    },
+    {
+      "posicion": 2,
+      "id_ninot": 56,
+      "nombre_ninot": "La Paella Gigant",
+      "id_falla": 5,
+      "nombre_falla": "Falla Convento Jerusalén",
+      "total_votos": 980,
+      "puntuacion_media": 4.5
+    }
+  ]
 }
 ```
 
 ---
 
-### VOTOS
+### 4.6 Votos (`/api/votos`)
 
-#### POST /api/votos - Votar por un ninot
-**Autenticación:** Requerida
+> **📖 Documentación Completa**: Ver [05.SISTEMA-VOTACION.md](05.SISTEMA-VOTACION.md) para especificación detallada del sistema de votación.
 
-**Request:**
+**Modelo Actual (v4.0)**: Votos directos a **fallas** por categoría de concurso fallero.
+
+#### POST `/api/votos`
+Registrar voto a una falla en una categoría específica.
+
+**Autenticación**: 🔒 Requerida (JWT)
+
+**Petición**:
 ```json
 {
-  "idNinot": 15,
-  "tipoVoto": "ARTISTICO"
+  "idFalla": 15,
+  "tipoVoto": "EXPERIMENTAL"
 }
 ```
 
-**Tipos de voto válidos:**
-- `"INGENIOSO"`
-- `"CRITICO"`
-- `"ARTISTICO"`
+**Tipos de voto válidos (v4.0)**:
+- `EXPERIMENTAL`: Categoría Experimental (fallas innovadoras y vanguardistas)
+- `INGENIO_Y_GRACIA`: Categoría Ingenio y Gracia (sátira e ingenio valenciano)
+- `MONUMENTO`: Categoría Monumento (excelencia artística y técnica)
 
-**Validaciones:**
-- Usuario solo puede votar 1 vez por ninot por tipo
-- `idNinot` debe existir
-- `tipoVoto` debe ser uno de los 3 valores permitidos
-
-**Response (201 Created):**
+**Respuesta exitosa** (201):
 ```json
 {
-  "exito": true,
-  "mensaje": "Voto registrado",
-  "datos": {
-    "idVoto": 789,
+  "success": true,
+  "data": {
+    "idVoto": 342,
     "idUsuario": 5,
-    "nombreUsuario": "María García",
-    "idNinot": 15,
-    "nombreNinot": "El Influencer",
-    "tipoVoto": "ARTISTICO",
-    "fechaCreacion": "2026-02-01T19:05:00"
-  }
+    "nombreUsuario": "Juan García",
+    "idFalla": 15,
+    "nombreFalla": "Falla Plaza del Ayuntamiento",
+    "tipoVoto": "EXPERIMENTAL",
+    "valor": 1,
+    "fechaCreacion": "2026-02-10T10:45:30Z"
+  },
+  "message": "Voto registrado exitosamente",
+  "timestamp": "2026-02-10T10:45:30Z"
 }
 ```
 
-**Error (400 Bad Request) - Voto duplicado:**
+**Validaciones**:
+- ✅ JWT válido en header `Authorization: Bearer {token}`
+- ✅ `idFalla` debe existir en tabla `fallas`
+- ✅ `tipoVoto` debe ser uno de los 3 valores válidos
+- ✅ No debe existir voto previo (usuario + falla + tipo) - Garantizado por constraint DB
+
+**Errores**:
+- `409 CONFLICT`: Ya has votado esta falla en esta categoría
+- `404 NOT_FOUND`: Falla no existe
+- `400 BAD_REQUEST`: Tipo de voto inválido
+- `401 UNAUTHORIZED`: Token JWT inválido o ausente
+
+---
+
+#### GET `/api/votos/usuario/{idUsuario}`
+Obtener votos de un usuario específico.
+
+**Autenticación**: 🔒 Requerida (JWT)
+
+**Control de Acceso**:
+- Usuario solo puede ver sus propios votos
+- ADMIN puede ver votos de cualquier usuario
+
+**Respuesta exitosa** (200):
 ```json
 {
-  "exito": false,
-  "mensaje": "Ya has votado por este ninot con tipo ARTISTICO",
-  "datos": null
+  "success": true,
+  "data": [
+    {
+      "idVoto": 342,
+      "idFalla": 15,
+      "nombreFalla": "Falla Plaza del Ayuntamiento",
+      "seccion": "Especial",
+      "tipoVoto": "EXPERIMENTAL",
+      "valor": 1,
+      "fechaCreacion": "2026-02-10T10:45:30Z"
+    },
+    {
+      "idVoto": 343,
+      "idFalla": 15,
+      "nombreFalla": "Falla Plaza del Ayuntamiento",
+      "seccion": "Especial",
+      "tipoVoto": "INGENIO_Y_GRACIA",
+      "valor": 1,
+      "fechaCreacion": "2026-02-10T11:20:15Z"
+    }
+  ],
+  "timestamp": "2026-02-10T15:00:00Z"
+}
+```
+
+**Errores**:
+- `403 FORBIDDEN`: No tienes permisos para ver votos de este usuario
+- `404 NOT_FOUND`: Usuario no existe
+
+---
+
+#### GET `/api/votos/falla/{idFalla}`
+Obtener todos los votos de una falla.
+
+**Público**: ✅ Sí (no requiere autenticación)
+
+**Query Parameters**:
+- `tipo` (opcional): Filtrar por tipo (`EXPERIMENTAL`, `INGENIO_Y_GRACIA`, `MONUMENTO`)
+
+**Ejemplos**:
+- `GET /api/votos/falla/15` - Todos los votos
+- `GET /api/votos/falla/15?tipo=EXPERIMENTAL` - Solo votos EXPERIMENTAL
+
+**Respuesta exitosa** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "idFalla": 15,
+    "nombreFalla": "Falla Plaza del Ayuntamiento",
+    "estadisticas": {
+      "totalVotos": 428,
+      "votosExperimental": 156,
+      "votosIngenioYGracia": 98,
+      "votosMonumento": 174
+    },
+    "votos": [
+      {
+        "idVoto": 342,
+        "tipoVoto": "EXPERIMENTAL",
+        "fechaCreacion": "2026-02-10T10:45:30Z"
+      }
+    ]
+  },
+  "timestamp": "2026-02-10T15:00:00Z"
 }
 ```
 
 ---
 
-#### GET /api/votos/usuario/{idUsuario} - Votos de un usuario
-**Autenticación:** Requerida (solo el propio usuario o ADMIN)
+#### DELETE `/api/votos/{idVoto}`
+Eliminar voto propio.
+
+**Autenticación**: 🔒 Requerida (JWT)
+
+**Control de Acceso**:
+- Usuario solo puede eliminar sus propios votos
+- ADMIN puede eliminar cualquier voto
+
+**Respuesta exitosa** (200):
+```json
+{
+  "success": true,
+  "message": "Voto eliminado exitosamente",
+  "timestamp": "2026-02-10T11:30:00Z"
+}
+```
+
+**Errores**:
+- `403 FORBIDDEN`: No tienes permisos para eliminar este voto
+- `404 NOT_FOUND`: Voto no existe
 
 ---
 
-#### GET /api/votos/ninot/{idNinot} - Votos de un ninot
-**Autenticación:** Requerida
+#### GET `/api/estadisticas/votos`
+Estadísticas y rankings de votación.
+
+**Público**: ✅ Sí (no requiere autenticación)
+
+**Respuesta exitosa** (200):
+```json
+{
+  "success": true,
+  "data": {
+    "topExperimental": [
+      {
+        "posicion": 1,
+        "idFalla": 15,
+        "nombreFalla": "Falla Plaza del Ayuntamiento",
+        "seccion": "Especial",
+        "totalVotos": 156
+      }
+    ],
+    "topIngenioYGracia": [
+      {
+        "posicion": 1,
+        "idFalla": 45,
+        "nombreFalla": "Falla Na Jordana",
+        "seccion": "Segunda A",
+        "totalVotos": 189
+      }
+    ],
+    "topMonumento": [
+      {
+        "posicion": 1,
+        "idFalla": 8,
+        "nombreFalla": "Falla Sueca-Literato Azorín",
+        "seccion": "Especial",
+        "totalVotos": 234
+      }
+    ],
+    "estadisticasGenerales": {
+      "totalVotos": 12456,
+      "usuariosActivos": 1834,
+      "fallasVotadas": 312,
+      "promedioVotosPorUsuario": 6.8
+    }
+  },
+  "timestamp": "2026-02-10T15:00:00Z"
+}
+```
+
+**Nota**: Ver [05.SISTEMA-VOTACION.md](05.SISTEMA-VOTACION.md) para:
+- Lógica de negocio completa
+- Flujos de usuario
+- Casos de prueba
+- Implementación móvil/desktop
+- Métricas y KPIs
 
 ---
 
-#### DELETE /api/votos/{idVoto} - Eliminar voto
-**Autenticación:** Requerida (solo autor del voto)
+### 4.7 Comentarios (`/api/comentarios`)
 
----
+#### GET `/api/comentarios`
+Listar comentarios con filtros.
 
-### USUARIOS
+**Público**: ✅ Sí
 
-#### GET /api/usuarios - Listar usuarios
-**Autenticación:** Requerida
+**Parámetros de consulta**:
+- `pagina` (int, default: 0)
+- `tamano` (int, default: 20)
+- `id_falla` (int, opcional): Comentarios de una falla
+- `id_ninot` (int, opcional): Comentarios de un ninot
+- `ordenar_por` (string, default: "fecha_desc"): fecha_desc, fecha_asc
 
----
-
-#### PUT /api/usuarios/{id} - Actualizar perfil
-**Autenticación:** Requerida (solo el propio usuario)
-
----
-
-## 👑 Endpoints Solo ADMIN
-
-**Requieren:** `Authorization: Bearer {token}` + usuario con rol `ADMIN`
-
-### DELETE /api/fallas/{id} - Eliminar falla
-**Autenticación:** ADMIN
-
-**Response (200 OK):**
+**Respuesta exitosa** (200):
 ```json
 {
   "exito": true,
-  "mensaje": "Falla eliminada exitosamente",
-  "datos": null
+  "datos": {
+    "contenido": [
+      {
+        "id_comentario": 501,
+        "contenido": "¡Impresionante el trabajo del artista!",
+        "id_usuario": 123,
+        "nombre_usuario": "Juan Pérez",
+        "id_ninot": 34,
+        "nombre_ninot": "El Caloret",
+        "fecha_creacion": "2026-01-28T16:00:00Z",
+        "fecha_actualizacion": null
+      }
+    ],
+    "total_elementos": 250
+  }
 }
 ```
 
-**⚠️ Atención:** Esto eliminará también eventos, ninots y votos asociados (cascada)
-
 ---
 
-### DELETE /api/eventos/{id} - Eliminar evento
-**Autenticación:** ADMIN
+#### GET `/api/comentarios/{id}`
+Obtener comentario por ID.
 
----
+**Público**: ✅ Sí
 
-### DELETE /api/ninots/{id} - Eliminar ninot
-**Autenticación:** ADMIN
-
-**⚠️ Atención:** Esto eliminará también los votos asociados
-
----
-
-### DELETE /api/comentarios/{id} - Eliminar comentario
-**Autenticación:** ADMIN
-
----
-
-## ⚠️ Códigos de Error
-
-| Código | Descripción | Ejemplo |
-|--------|-------------|---------|
-| **200** | OK | GET exitoso |
-| **201** | Created | POST exitoso (recurso creado) |
-| **400** | Bad Request | Datos inválidos, validación fallida |
-| **401** | Unauthorized | Token JWT inválido o expirado |
-| **403** | Forbidden | Token válido pero sin permisos (ej: no ADMIN) |
-| **404** | Not Found | Recurso no encontrado (ID inválido) |
-| **409** | Conflict | Conflicto (ej: email duplicado, voto duplicado) |
-| **500** | Internal Server Error | Error del servidor |
-
-### Ejemplos de Respuestas de Error
-
-#### 400 Bad Request - Validación
+**Respuesta exitosa** (200):
 ```json
 {
-  "exito": false,
-  "mensaje": "El nombre es obligatorio",
-  "datos": null,
-  "timestamp": "2026-02-01T19:10:00"
-}
-```
-
-#### 401 Unauthorized - Token inválido
-```json
-{
-  "exito": false,
-  "mensaje": "Token JWT inválido o expirado",
-  "datos": null,
-  "timestamp": "2026-02-01T19:10:00"
-}
-```
-
-#### 403 Forbidden - Sin permisos
-```json
-{
-  "exito": false,
-  "mensaje": "No tienes permisos para realizar esta acción",
-  "datos": null,
-  "timestamp": "2026-02-01T19:10:00"
-}
-```
-
-#### 404 Not Found
-```json
-{
-  "exito": false,
-  "mensaje": "Falla no encontrada con ID: 999",
-  "datos": null,
-  "timestamp": "2026-02-01T19:10:00"
-}
-```
-
-#### 409 Conflict - Voto duplicado
-```json
-{
-  "exito": false,
-  "mensaje": "Ya has votado por este ninot con tipo ARTISTICO",
-  "datos": null,
-  "timestamp": "2026-02-01T19:10:00"
-}
-```
-
----
-
-## 💻 Ejemplos de Integración
-
-### JavaScript (Desktop - Electron/Browser)
-
-```javascript
-// =================================
-// 1. CONFIGURACIÓN BASE
-// =================================
-const API_BASE_URL = 'http://35.180.21.42:8080';
-
-// Guardar token en localStorage
-function saveToken(token) {
-  localStorage.setItem('jwt_token', token);
-}
-
-// Obtener token guardado
-function getToken() {
-  return localStorage.getItem('jwt_token');
-}
-
-// =================================
-// 2. REGISTRO
-// =================================
-async function registrarUsuario(email, password, nombreCompleto, idFalla) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/registro`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        contrasena: password,
-        nombreCompleto,
-        idFalla
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.exito) {
-      // Guardar token automáticamente
-      saveToken(data.datos.token);
-      console.log('Usuario registrado:', data.datos.usuario);
-      return data.datos;
-    } else {
-      console.error('Error registro:', data.mensaje);
-      throw new Error(data.mensaje);
-    }
-  } catch (error) {
-    console.error('Error de red:', error);
-    throw error;
-  }
-}
-
-// =================================
-// 3. LOGIN
-// =================================
-async function login(email, password) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        contrasena: password
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.exito) {
-      saveToken(data.datos.token);
-      console.log('Login exitoso:', data.datos.usuario);
-      return data.datos;
-    } else {
-      throw new Error(data.mensaje);
-    }
-  } catch (error) {
-    console.error('Error login:', error);
-    throw error;
-  }
-}
-
-// =================================
-// 4. OBTENER FALLAS (público)
-// =================================
-async function obtenerFallas(pagina = 0, tamano = 20) {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/fallas?pagina=${pagina}&tamano=${tamano}`
-    );
-    
-    const data = await response.json();
-    
-    if (data.exito) {
-      console.log('Total fallas:', data.datos.totalElementos);
-      return data.datos.contenido;
-    }
-  } catch (error) {
-    console.error('Error obteniendo fallas:', error);
-    throw error;
-  }
-}
-
-// =================================
-// 5. CREAR FALLA (autenticado)
-// =================================
-async function crearFalla(fallaData) {
-  const token = getToken();
-  
-  if (!token) {
-    throw new Error('Debes iniciar sesión primero');
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/fallas`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(fallaData)
-    });
-
-    const data = await response.json();
-    
-    if (data.exito) {
-      console.log('Falla creada:', data.datos);
-      return data.datos;
-    } else {
-      throw new Error(data.mensaje);
-    }
-  } catch (error) {
-    console.error('Error creando falla:', error);
-    throw error;
-  }
-}
-
-// =================================
-// 6. VOTAR POR NINOT (autenticado)
-// =================================
-async function votarNinot(idNinot, tipoVoto) {
-  const token = getToken();
-  
-  if (!token) {
-    throw new Error('Debes iniciar sesión primero');
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/votos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        idNinot,
-        tipoVoto  // "INGENIOSO", "CRITICO", "ARTISTICO"
-      })
-    });
-
-    const data = await response.json();
-    
-    if (data.exito) {
-      console.log('Voto registrado:', data.datos);
-      return data.datos;
-    } else {
-      throw new Error(data.mensaje);
-    }
-  } catch (error) {
-    console.error('Error votando:', error);
-    throw error;
-  }
-}
-
-// =================================
-// 7. OBTENER ESTADÍSTICAS (público)
-// =================================
-async function obtenerEstadisticas() {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/estadisticas/resumen`);
-    const data = await response.json();
-    
-    if (data.exito) {
-      console.log('Estadísticas:', data.datos);
-      return data.datos;
-    }
-  } catch (error) {
-    console.error('Error obteniendo estadísticas:', error);
-    throw error;
-  }
-}
-
-// =================================
-// EJEMPLO DE USO
-// =================================
-async function ejemploCompleto() {
-  try {
-    // 1. Registro
-    await registrarUsuario(
-      'test@example.com',
-      'password123',
-      'Usuario Test',
-      1
-    );
-
-    // 2. Login (si ya estás registrado)
-    // await login('test@example.com', 'password123');
-
-    // 3. Obtener fallas
-    const fallas = await obtenerFallas(0, 10);
-    console.log('Primeras 10 fallas:', fallas);
-
-    // 4. Crear nueva falla
-    const nuevaFalla = await crearFalla({
-      nombre: 'Falla Ejemplo JS',
-      seccion: '9Z',
-      presidente: 'Test User',
-      anyoFundacion: 2020,
-      latitud: 39.47,
-      longitud: -0.38
-    });
-
-    // 5. Votar por ninot
-    await votarNinot(1, 'ARTISTICO');
-
-    // 6. Ver estadísticas
-    const stats = await obtenerEstadisticas();
-    console.log('Total fallas:', stats.totalFallas);
-
-  } catch (error) {
-    console.error('Error en flujo completo:', error.message);
+  "exito": true,
+  "datos": {
+    "id_comentario": 501,
+    "contenido": "¡Impresionante el trabajo del artista!",
+    "id_usuario": 123,
+    "nombre_usuario": "Juan Pérez",
+    "id_ninot": 34,
+    "nombre_ninot": "El Caloret",
+    "id_falla": 1,
+    "nombre_falla": "Falla Plaza del Ayuntamiento",
+    "fecha_creacion": "2026-01-28T16:00:00Z",
+    "fecha_actualizacion": null
   }
 }
 ```
 
 ---
 
-### Kotlin (Android)
+#### POST `/api/comentarios`
+Crear comentario.
 
-```kotlin
-// =================================
-// 1. MODELO DE DATOS
-// =================================
-data class ApiResponse<T>(
-    val exito: Boolean,
-    val mensaje: String?,
-    val datos: T?,
-    val timestamp: String
-)
+**Autenticación**: 🔒 Requerida
 
-data class LoginRequest(
-    val email: String,
-    val contrasena: String
-)
-
-data class LoginResponse(
-    val token: String,
-    val tipo: String,
-    val expiraEn: Long,
-    val usuario: Usuario
-)
-
-data class Usuario(
-    val idUsuario: Long,
-    val email: String,
-    val nombreCompleto: String,
-    val rol: String,
-    val idFalla: Long?,
-    val nombreFalla: String?
-)
-
-data class FallaDTO(
-    val idFalla: Long?,
-    val nombre: String,
-    val seccion: String,
-    val presidente: String,
-    val anyoFundacion: Int,
-    val latitud: Double?,
-    val longitud: Double?,
-    val categoria: String?
-)
-
-data class VotoRequest(
-    val idNinot: Long,
-    val tipoVoto: String  // "INGENIOSO", "CRITICO", "ARTISTICO"
-)
-
-// =================================
-// 2. RETROFIT INTERFACE
-// =================================
-interface FallAppApi {
-    @POST("/api/auth/login")
-    suspend fun login(@Body request: LoginRequest): ApiResponse<LoginResponse>
-
-    @POST("/api/auth/registro")
-    suspend fun registro(@Body request: RegistroRequest): ApiResponse<LoginResponse>
-
-    @GET("/api/fallas")
-    suspend fun obtenerFallas(
-        @Query("pagina") pagina: Int = 0,
-        @Query("tamano") tamano: Int = 20
-    ): ApiResponse<PaginatedResponse<FallaDTO>>
-
-    @GET("/api/fallas/{id}")
-    suspend fun obtenerFalla(@Path("id") id: Long): ApiResponse<FallaDTO>
-
-    @POST("/api/fallas")
-    suspend fun crearFalla(
-        @Header("Authorization") token: String,
-        @Body falla: FallaDTO
-    ): ApiResponse<FallaDTO>
-
-    @POST("/api/votos")
-    suspend fun votar(
-        @Header("Authorization") token: String,
-        @Body voto: VotoRequest
-    ): ApiResponse<VotoDTO>
-
-    @GET("/api/estadisticas/resumen")
-    suspend fun obtenerEstadisticas(): ApiResponse<Estadisticas>
-}
-
-// =================================
-// 3. CONFIGURACIÓN RETROFIT
-// =================================
-object RetrofitClient {
-    private const val BASE_URL = "http://35.180.21.42:8080"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    val api: FallAppApi = retrofit.create(FallAppApi::class.java)
-}
-
-// =================================
-// 4. REPOSITORY
-// =================================
-class FallAppRepository(private val api: FallAppApi) {
-    
-    private var jwtToken: String? = null
-
-    // Login
-    suspend fun login(email: String, password: String): Result<LoginResponse> {
-        return try {
-            val response = api.login(LoginRequest(email, password))
-            if (response.exito && response.datos != null) {
-                jwtToken = response.datos.token
-                Result.success(response.datos)
-            } else {
-                Result.failure(Exception(response.mensaje ?: "Error de login"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // Obtener fallas (público)
-    suspend fun obtenerFallas(pagina: Int = 0): Result<List<FallaDTO>> {
-        return try {
-            val response = api.obtenerFallas(pagina, 20)
-            if (response.exito && response.datos != null) {
-                Result.success(response.datos.contenido)
-            } else {
-                Result.failure(Exception(response.mensaje ?: "Error"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // Crear falla (autenticado)
-    suspend fun crearFalla(falla: FallaDTO): Result<FallaDTO> {
-        val token = jwtToken ?: return Result.failure(Exception("No autenticado"))
-        
-        return try {
-            val response = api.crearFalla("Bearer $token", falla)
-            if (response.exito && response.datos != null) {
-                Result.success(response.datos)
-            } else {
-                Result.failure(Exception(response.mensaje ?: "Error"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // Votar (autenticado)
-    suspend fun votar(idNinot: Long, tipoVoto: String): Result<VotoDTO> {
-        val token = jwtToken ?: return Result.failure(Exception("No autenticado"))
-        
-        return try {
-            val response = api.votar("Bearer $token", VotoRequest(idNinot, tipoVoto))
-            if (response.exito && response.datos != null) {
-                Result.success(response.datos)
-            } else {
-                Result.failure(Exception(response.mensaje ?: "Error"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-}
-
-// =================================
-// 5. VIEWMODEL (ejemplo)
-// =================================
-class MainViewModel : ViewModel() {
-    private val repository = FallAppRepository(RetrofitClient.api)
-    
-    private val _fallas = MutableLiveData<List<FallaDTO>>()
-    val fallas: LiveData<List<FallaDTO>> = _fallas
-
-    private val _loginState = MutableLiveData<LoginState>()
-    val loginState: LiveData<LoginState> = _loginState
-
-    fun login(email: String, password: String) {
-        viewModelScope.launch {
-            _loginState.value = LoginState.Loading
-            
-            val result = repository.login(email, password)
-            result.onSuccess { loginResponse ->
-                _loginState.value = LoginState.Success(loginResponse.usuario)
-            }.onFailure { error ->
-                _loginState.value = LoginState.Error(error.message ?: "Error")
-            }
-        }
-    }
-
-    fun cargarFallas() {
-        viewModelScope.launch {
-            val result = repository.obtenerFallas()
-            result.onSuccess { listaFallas ->
-                _fallas.value = listaFallas
-            }
-        }
-    }
-
-    fun crearFalla(falla: FallaDTO) {
-        viewModelScope.launch {
-            repository.crearFalla(falla)
-        }
-    }
-
-    fun votarNinot(idNinot: Long, tipo: String) {
-        viewModelScope.launch {
-            repository.votar(idNinot, tipo)
-        }
-    }
-}
-
-sealed class LoginState {
-    object Loading : LoginState()
-    data class Success(val usuario: Usuario) : LoginState()
-    data class Error(val mensaje: String) : LoginState()
-}
-
-// =================================
-// 6. ACTIVITY (ejemplo)
-// =================================
-class MainActivity : AppCompatActivity() {
-    private val viewModel: MainViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // Observar login
-        viewModel.loginState.observe(this) { state ->
-            when (state) {
-                is LoginState.Loading -> {
-                    // Mostrar progress
-                }
-                is LoginState.Success -> {
-                    Toast.makeText(this, "Bienvenido ${state.usuario.nombreCompleto}", Toast.LENGTH_SHORT).show()
-                }
-                is LoginState.Error -> {
-                    Toast.makeText(this, state.mensaje, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        // Observar fallas
-        viewModel.fallas.observe(this) { fallas ->
-            // Actualizar RecyclerView
-        }
-
-        // Login
-        btnLogin.setOnClickListener {
-            viewModel.login("user@example.com", "password123")
-        }
-
-        // Cargar fallas
-        viewModel.cargarFallas()
-
-        // Votar
-        btnVotar.setOnClickListener {
-            viewModel.votarNinot(1, "ARTISTICO")
-        }
-    }
+**Petición**:
+```json
+{
+  "contenido": "¡Impresionante el trabajo del artista!",
+  "id_ninot": 34,
+  "id_falla": null
 }
 ```
 
-**AndroidManifest.xml - Permitir HTTP (desarrollo):**
-```xml
-<application
-    android:usesCleartextTraffic="true"
-    ...>
+**Nota**: Se puede comentar un ninot O una falla (no ambos).
+
+**Respuesta exitosa** (201):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_comentario": 501,
+    "contenido": "¡Impresionante el trabajo del artista!",
+    "fecha_creacion": "2026-02-01T13:00:00Z"
+  },
+  "mensaje": "Comentario creado correctamente"
+}
+```
+
+**Validaciones**:
+- contenido mínimo 3 caracteres, máximo 500
+- Debe especificar id_ninot O id_falla
+
+---
+
+#### PUT `/api/comentarios/{id}`
+Editar comentario propio.
+
+**Autenticación**: 🔒 Requerida (propio comentario)
+
+**Petición**:
+```json
+{
+  "contenido": "¡Impresionante! Actualizado con más detalles..."
+}
+```
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "id_comentario": 501,
+    "contenido": "¡Impresionante! Actualizado con más detalles...",
+    "fecha_actualizacion": "2026-02-01T13:15:00Z"
+  },
+  "mensaje": "Comentario actualizado correctamente"
+}
+```
+
+**Errores**:
+- `403 FORBIDDEN`: Solo puedes editar tus propios comentarios
+
+---
+
+#### DELETE `/api/comentarios/{id}`
+Eliminar comentario.
+
+**Autenticación**: 🔒 ADMIN o propio comentario
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "mensaje": "Comentario eliminado correctamente"
+}
 ```
 
 ---
 
-### CURL (Testing rápido)
+### 4.8 Estadísticas (`/api/estadisticas`)
+
+#### GET `/api/estadisticas/resumen`
+Resumen general del sistema.
+
+**Público**: ✅ Sí
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "fallas": {
+      "total": 347,
+      "activas": 340,
+      "por_categoria": {
+        "especial": 15,
+        "primera": 45,
+        "segunda": 80,
+        "tercera": 120,
+        "sin_categoria": 87
+      }
+    },
+    "eventos": {
+      "total": 1250,
+      "proximos_30_dias": 85
+    },
+    "ninots": {
+      "total": 890,
+      "premiados": 45
+    },
+    "votos": {
+      "total": 12500,
+      "usuarios_activos": 3200
+    },
+    "usuarios": {
+      "total": 5600,
+      "activos": 5200,
+      "por_rol": {
+        "ADMIN": 5,
+        "CASAL": 340,
+        "USUARIO": 4855
+      }
+    }
+  }
+}
+```
+
+---
+
+#### GET `/api/estadisticas/clasificacion-fallas`
+Clasificación de fallas más votadas.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `limite` (int, default: 10)
+- `tipo_voto` (string, opcional): Filtrar por tipo de voto
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": [
+    {
+      "posicion": 1,
+      "id_falla": 1,
+      "nombre": "Falla Plaza del Ayuntamiento",
+      "seccion": "1A",
+      "total_votos": 3500,
+      "total_ninots": 3,
+      "total_eventos": 12
+    },
+    {
+      "posicion": 2,
+      "id_falla": 5,
+      "nombre": "Falla Convento Jerusalén",
+      "seccion": "2B",
+      "total_votos": 2800,
+      "total_ninots": 2,
+      "total_eventos": 8
+    }
+  ]
+}
+```
+
+---
+
+#### GET `/api/estadisticas/actividad-reciente`
+Últimos eventos y votos del sistema.
+
+**Público**: ✅ Sí
+
+**Parámetros de consulta**:
+- `limite` (int, default: 20)
+
+**Respuesta exitosa** (200):
+```json
+{
+  "exito": true,
+  "datos": {
+    "ultimos_eventos": [
+      {
+        "id_evento": 450,
+        "nombre": "Concierto de Música Festera",
+        "id_falla": 12,
+        "nombre_falla": "Falla Convento",
+        "fecha_creacion": "2026-02-01T10:00:00Z"
+      }
+    ],
+    "ultimos_votos": [
+      {
+        "id_voto": 12501,
+        "id_ninot": 67,
+        "nombre_ninot": "El Toro de Fuego",
+        "tipo_voto": "favorito",
+        "fecha_voto": "2026-02-01T13:25:00Z"
+      }
+    ],
+    "ultimos_comentarios": [
+      {
+        "id_comentario": 890,
+        "contenido": "¡Qué artista más bueno!",
+        "id_ninot": 34,
+        "fecha_creacion": "2026-02-01T13:20:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 5. Paginación
+
+Todas las rutas que devuelven listas utilizan **paginación estándar**:
+
+### Parámetros de consulta:
+- `pagina` (int, default: 0): Número de página (comienza en 0)
+- `tamano` (int, default: 20): Elementos por página
+- `ordenar_por` (string, opcional): Campo de ordenación
+- `direccion` (string, opcional): `ASC` o `DESC`
+
+### Estructura de respuesta paginada:
+```json
+{
+  "exito": true,
+  "datos": {
+    "contenido": [ /* array de elementos */ ],
+    "pagina_actual": 0,
+    "tamano_pagina": 20,
+    "total_elementos": 347,
+    "total_paginas": 18,
+    "primera_pagina": true,
+    "ultima_pagina": false
+  }
+}
+```
+
+---
+
+## 6. Códigos de Estado HTTP
+
+| Código | Significado | Uso |
+|--------|-------------|-----|
+| `200 OK` | Éxito | GET, PUT, DELETE exitosos |
+| `201 CREATED` | Creado | POST exitoso |
+| `204 NO CONTENT` | Sin contenido | DELETE exitoso (sin respuesta) |
+| `400 BAD REQUEST` | Petición incorrecta | Validación fallida |
+| `401 UNAUTHORIZED` | No autenticado | Token JWT ausente o inválido |
+| `403 FORBIDDEN` | Sin permisos | Usuario no tiene permisos |
+| `404 NOT FOUND` | No encontrado | Recurso no existe |
+| `409 CONFLICT` | Conflicto | Duplicado o restricción violada |
+| `422 UNPROCESSABLE ENTITY` | Entidad no procesable | Error de lógica de negocio |
+| `500 INTERNAL SERVER ERROR` | Error del servidor | Error inesperado |
+
+---
+
+## 7. Códigos de Error Personalizados
+
+| Código | Descripción |
+|--------|-------------|
+| `VALIDACION_FALLIDA` | Error de validación de campos |
+| `CREDENCIALES_INVALIDAS` | Email o contraseña incorrectos |
+| `TOKEN_INVALIDO` | Token JWT inválido o expirado |
+| `TOKEN_EXPIRADO` | Token JWT expirado |
+| `SIN_PERMISOS` | Usuario sin permisos para esta operación |
+| `RECURSO_NO_ENCONTRADO` | Recurso no existe |
+| `DUPLICADO` | Recurso duplicado (email, nombre, etc.) |
+| `RESTRICCION_VIOLADA` | Restricción de integridad violada |
+| `VOTO_DUPLICADO` | Usuario ya votó este ninot |
+| `FALLA_CON_DEPENDENCIAS` | No se puede eliminar falla con eventos/ninots |
+
+---
+
+## 8. Filtros y Búsqueda
+
+### 8.1 Operadores de Filtro
+
+Los filtros se aplican mediante parámetros de consulta:
+
+**Ejemplos**:
+- `/api/fallas?seccion=1A` → Fallas de sección 1A
+- `/api/eventos?tipo=planta&desde_fecha=2026-03-01` → Eventos de tipo plantà desde marzo
+- `/api/usuarios?rol=CASAL&activo=true` → Usuarios CASAL activos
+
+### 8.2 Búsqueda Full-Text
+
+Ruta: `/api/fallas/buscar?texto=ayuntamiento`
+
+Busca en campos: nombre, lema, artista, presidente usando índice GIN de PostgreSQL.
+
+---
+
+## 9. Límites y Cuotas
+
+| Límite | Valor |
+|--------|-------|
+| Tamaño máximo de página | 100 elementos |
+| Peticiones por minuto | 60 (sin autenticación), 300 (autenticado) |
+| Tamaño máximo de cuerpo de petición | 10 MB |
+| Tamaño máximo de comentario | 500 caracteres |
+| Imágenes por ninot | 1 principal + 5 adicionales |
+
+---
+
+## 10. Seguridad
+
+### 10.1 CORS (Cross-Origin Resource Sharing)
+
+**Orígenes permitidos**:
+- `http://localhost:3000` (desarrollo frontend)
+- `http://localhost:5173` (Vite dev server)
+- `https://fallapp.com` (producción)
+
+**Métodos permitidos**: GET, POST, PUT, DELETE, OPTIONS
+
+### 10.2 Validación de Entrada
+
+- **Todos los campos** se validan en el servidor
+- **SQL Injection**: Protegido mediante JPA/Hibernate
+- **XSS**: Sanitización automática de campos de texto
+
+### 10.3 Rate Limiting
+
+- Usuarios no autenticados: **60 peticiones/minuto**
+- Usuarios autenticados: **300 peticiones/minuto**
+- ADMIN: sin límite
+
+---
+
+## 11. Versionado de API
+
+**Versión actual**: `1.0`
+
+**URL con versión** (opcional): `/api/v1/fallas`
+
+**Header de versión**:
+```
+X-API-Version: 1.0
+```
+
+**Política de cambios**:
+- **Cambios compatibles**: Sin incremento de versión (nuevos campos opcionales)
+- **Cambios incompatibles**: Nueva versión (v2, v3, etc.)
+
+---
+
+## 12. Documentación OpenAPI
+
+**URL Swagger UI**: `http://localhost:8080/swagger-ui.html`
+
+**URL OpenAPI JSON**: `http://localhost:8080/v3/api-docs`
+
+**Características**:
+- Prueba de endpoints interactiva
+- Esquemas de petición/respuesta
+- Autenticación JWT integrada
+
+---
+
+## 13. Ejemplos de Uso
+
+### 13.1 Flujo completo de autenticación y votación
 
 ```bash
-# =================================
-# 1. REGISTRO
-# =================================
-curl -X POST http://35.180.21.42:8080/api/auth/registro \
+# 1. Registrar usuario
+curl -X POST http://localhost:8080/api/auth/registrar \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
-    "contrasena": "password123",
-    "nombreCompleto": "Usuario Test",
-    "idFalla": 1
+    "email": "usuario@ejemplo.com",
+    "contrasena": "MiContraseña123!",
+    "nombre_completo": "Juan Pérez"
   }'
 
-# =================================
-# 2. LOGIN
-# =================================
-curl -X POST http://35.180.21.42:8080/api/auth/login \
+# 2. Iniciar sesión
+curl -X POST http://localhost:8080/api/auth/iniciar-sesion \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com"
-    "contrasena": "password123"
+    "email": "usuario@ejemplo.com",
+    "contrasena": "MiContraseña123!"
   }'
 
-# Guardar token en variable (Linux/Mac)
-TOKEN=$(curl -s -X POST http://35.180.21.42:8080/api/auth/login \
+# Respuesta:
+# { "datos": { "token": "eyJhbGci..." } }
+
+# 3. Votar un ninot
+curl -X POST http://localhost:8080/api/votos \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","contrasena":"password123"}' \
-  | jq -r '.datos.token')
-
-echo $TOKEN
-
-# =================================
-# 3. OBTENER FALLAS (público)
-# =================================
-curl http://35.180.21.42:8080/api/fallas?pagina=0&tamano=10
-
-# =================================
-# 4. BUSCAR FALLAS (público)
-# =================================
-curl "http://35.180.21.42:8080/api/fallas/buscar?texto=convento"
-
-# =================================
-# 5. ESTADÍSTICAS (público)
-# =================================
-curl http://35.180.21.42:8080/api/estadisticas/resumen | jq
-
-# =================================
-# 6. CREAR FALLA (autenticado)
-# =================================
-curl -X POST http://35.180.21.42:8080/api/fallas \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGci..." \
   -d '{
-    "nombre": "Falla Test CURL",
-    "seccion": "9Z",
-    "presidente": "Test User",
-    "anyoFundacion": 2020,
-    "latitud": 39.47,
-    "longitud": -0.38
+    "id_ninot": 34,
+    "tipo_voto": "favorito"
   }'
 
-# =================================
-# 7. VOTAR (autenticado)
-# =================================
-curl -X POST http://35.180.21.42:8080/api/votos \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "idNinot": 1,
-    "tipoVoto": "ARTISTICO"
-  }'
+# 4. Ver mis votos
+curl -X GET http://localhost:8080/api/votos/mis-votos \
+  -H "Authorization: Bearer eyJhbGci..."
+```
 
-# =================================
-# 8. CREAR COMENTARIO (autenticado)
-# =================================
-curl -X POST http://35.180.21.42:8080/api/comentarios \
-  -H "Authorization: Bearer $TOKEN" \
+### 13.2 Búsqueda de fallas cercanas
+
+```bash
+# Buscar fallas en un radio de 2 km
+curl -X GET "http://localhost:8080/api/fallas/cercanas?latitud=39.4699&longitud=-0.3763&radio_km=2.0"
+```
+
+### 13.3 Crear evento (CASAL)
+
+```bash
+curl -X POST http://localhost:8080/api/eventos \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer TOKEN_CASAL" \
   -d '{
-    "idUsuario": 5,
-    "idFalla": 1,
-    "contenido": "¡Excelente falla!"
+    "id_falla": 1,
+    "tipo": "concierto",
+    "nombre": "Concierto de Bandas",
+    "fecha_evento": "2026-03-10T20:00:00Z",
+    "ubicacion": "Casal de la falla"
   }'
 ```
 
 ---
 
-## 📚 Recursos Adicionales
+## 14. Testing de la API
 
-### Swagger UI (Documentación Interactiva)
-```
-http://35.180.21.42:8080/swagger-ui.html
-```
+### 14.1 Herramientas Recomendadas
 
-Permite:
-- Ver todos los endpoints disponibles
-- Probar requests directamente desde el navegador
-- Ver esquemas de datos detallados
+- **Postman**: Colección de pruebas
+- **Insomnia**: Cliente REST alternativo
+- **curl**: Pruebas desde terminal
+- **HTTPie**: Cliente HTTP moderno
 
-### OpenAPI Docs (JSON)
-```
-http://35.180.21.42:8080/v3/api-docs
-```
+### 14.2 Colección Postman
 
----
+Importar colección desde: `/docs/postman/FallApp.postman_collection.json`
 
-## 🔧 Troubleshooting
-
-### Error: "Failed to connect to 35.180.21.42:8080"
-**Causa:** Puerto 8080 no abierto en AWS Security Group  
-**Solución:** 
-1. AWS Console → EC2 → Security Groups
-2. Agregar regla TCP 8080, source 0.0.0.0/0
-3. Guardar (no reiniciar instancia)
-
-### Error: "Cleartext HTTP traffic not permitted" (Android)
-**Solución:** Agregar en AndroidManifest.xml:
-```xml
-<application android:usesCleartextTraffic="true">
-```
-
-### Error 401: "Token JWT inválido o expirado"
-**Causa:** Token expirado (24h) o formato incorrecto  
-**Solución:**
-- Hacer login nuevamente
-- Verificar header: `Authorization: Bearer TOKEN` (con espacio)
-
-### Error 403: "No tienes permisos para realizar esta acción"
-**Causa:** Endpoint requiere rol ADMIN  
-**Solución:**
-- Verificar que el endpoint no requiera ADMIN
-- Contactar admin para elevar permisos
-
-### Error 400: Validación fallida
-**Causa:** Datos enviados no cumplen validaciones  
-**Solución:** Revisar mensaje de error y validaciones del endpoint
+**Variables de entorno**:
+- `BASE_URL`: `http://localhost:8080`
+- `TOKEN_ADMIN`: `eyJhbGci...` (obtenido tras login)
+- `TOKEN_CASAL`: `eyJhbGci...`
+- `TOKEN_USUARIO`: `eyJhbGci...`
 
 ---
 
-## 📞 Contacto
+## 15. Próximas Características (Roadmap)
 
-**Equipo Backend:** fallapp-backend@example.com  
-**Slack:** #fallapp-api  
-**Documentación:** /srv/FallApp/04.docs/
+### Versión 1.1 (Marzo 2026)
+- [ ] Carga de imágenes (multipart/form-data)
+- [ ] Notificaciones push
+- [ ] Exportación de datos (CSV, PDF)
+
+### Versión 1.2 (Abril 2026)
+- [ ] Geolocalización avanzada (PostGIS)
+- [ ] Chat en tiempo real (WebSockets)
+- [ ] Sistema de mensajería entre usuarios
+
+### Versión 2.0 (Mayo 2026)
+- [ ] GraphQL API
+- [ ] Sistema de caché avanzado (Redis)
+- [ ] Búsqueda con Elasticsearch
 
 ---
 
-**Última actualización:** 2026-02-01  
-**Versión API:** 0.4.1  
-**Estado:** Desarrollo activo
+## 16. Contacto y Soporte
+
+**Documentación adicional**:
+- Guía de desarrollo: `/04.docs/01.GUIA-PROGRAMACION.md`
+- ADRs: `/04.docs/arquitectura/`
+- Base de datos: `/04.docs/especificaciones/03.BASE-DATOS.md`
+
+**Issues y bugs**: GitHub Issues
+
+**Email de soporte**: soporte@fallapp.com
+
+---
+
+**Última actualización**: 2026-02-01  
+**Versión del documento**: 1.0  
+**Estado**: ✅ Aprobada para implementación

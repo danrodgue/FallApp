@@ -14,10 +14,10 @@ import java.time.LocalDateTime;
  * Tabla: votos
  */
 @Entity
-@Table(name = "votos", 
+@Table(name = "votos",
        uniqueConstraints = @UniqueConstraint(
-           name = "uk_usuario_ninot_tipo",
-           columnNames = {"id_usuario", "id_ninot", "tipo_voto"}
+           name = "uk_usuario_falla_tipo",
+           columnNames = {"id_usuario", "id_falla", "tipo_voto"}
        ))
 @Data
 @NoArgsConstructor
@@ -35,26 +35,31 @@ public class Voto {
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ninot", nullable = false)
-    @NotNull(message = "El ninot es obligatorio")
-    private Ninot ninot;
+    @JoinColumn(name = "id_falla", nullable = false)
+    @NotNull(message = "La falla es obligatoria")
+    private Falla falla;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_voto", nullable = false, length = 20, columnDefinition = "tipo_voto")
+    @Column(name = "tipo_voto", nullable = false, length = 30)
     private TipoVoto tipoVoto;
 
     @CreationTimestamp
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    @Column(name = "fecha_voto", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
+
+    /**
+     * Campo `valor` en la tabla `votos`.
+     * Se utiliza como indicador de presencia de voto y siempre deberá valer 1 cuando exista el voto.
+     */
+    @Column(name = "valor", nullable = false)
+    private Integer valor = 1;
 
     /**
      * Enum para tipos de voto
      */
     public enum TipoVoto {
-        favorito,
-        ingenioso,
-        critico,
-        artistico,
-        rating
+        EXPERIMENTAL,
+        INGENIO_Y_GRACIA,
+        MONUMENTO
     }
 }

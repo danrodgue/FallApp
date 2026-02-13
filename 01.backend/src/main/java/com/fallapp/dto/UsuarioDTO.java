@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 /**
  * DTO para transferencia de datos de Usuario
  * No incluye información sensible como contraseñas
+ * Actualizado: 2026-02-04 - Añadidos campos de dirección
  */
 @Data
 @Builder
@@ -23,6 +24,10 @@ public class UsuarioDTO {
     private Long idFalla;
     private String nombreFalla;
     private Boolean activo;
+    private String telefono;
+    private String direccion;
+    private String ciudad;
+    private String codigoPostal;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
 }

@@ -3,11 +3,9 @@ package com.fallapp.service;
 import com.fallapp.dto.ComentarioDTO;
 import com.fallapp.model.Comentario;
 import com.fallapp.model.Falla;
-import com.fallapp.model.Ninot;
 import com.fallapp.model.Usuario;
 import com.fallapp.repository.ComentarioRepository;
 import com.fallapp.repository.FallaRepository;
-import com.fallapp.repository.NinotRepository;
 import com.fallapp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,8 +55,6 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final FallaRepository fallaRepository;
-    private final NinotRepository ninotRepository;
-    
     /**
      * Obtener todos los comentarios del sistema
      * 
@@ -100,17 +96,7 @@ public class ComentarioService {
                 .collect(Collectors.toList());
     }
     
-    /**
-     * Obtener comentarios por ninot
-     */
-    public List<ComentarioDTO> obtenerPorNinot(Long idNinot) {
-        Ninot ninot = ninotRepository.findById(idNinot)
-                .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + idNinot));
-        
-        return comentarioRepository.findByNinotOrderByCreadoEnDesc(ninot).stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
+        // Método obtenerPorNinot eliminado: los comentarios se asocian únicamente a `falla`.
     
     /**
      * Obtener comentario por ID
@@ -126,9 +112,9 @@ public class ComentarioService {
      */
     @Transactional
     public ComentarioDTO crear(ComentarioDTO comentarioDTO) {
-        // Validar que al menos uno (falla o ninot) esté presente
-        if (comentarioDTO.getIdFalla() == null && comentarioDTO.getIdNinot() == null) {
-            throw new IllegalArgumentException("Debe especificar idFalla o idNinot");
+        // Validar que la falla esté presente
+        if (comentarioDTO.getIdFalla() == null) {
+            throw new IllegalArgumentException("Debe especificar idFalla");
         }
         
         Usuario usuario = usuarioRepository.findById(comentarioDTO.getIdUsuario())
@@ -142,12 +128,6 @@ public class ComentarioService {
             Falla falla = fallaRepository.findById(comentarioDTO.getIdFalla())
                     .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + comentarioDTO.getIdFalla()));
             comentario.setFalla(falla);
-        }
-        
-        if (comentarioDTO.getIdNinot() != null) {
-            Ninot ninot = ninotRepository.findById(comentarioDTO.getIdNinot())
-                    .orElseThrow(() -> new RuntimeException("Ninot no encontrado con ID: " + comentarioDTO.getIdNinot()));
-            comentario.setNinot(ninot);
         }
         
         Comentario comentarioSaved = comentarioRepository.save(comentario);
@@ -190,8 +170,6 @@ public class ComentarioService {
                 .nombreUsuario(comentario.getUsuario() != null ? comentario.getUsuario().getNombreCompleto() : null)
                 .idFalla(comentario.getFalla() != null ? comentario.getFalla().getIdFalla() : null)
                 .nombreFalla(comentario.getFalla() != null ? comentario.getFalla().getNombre() : null)
-                .idNinot(comentario.getNinot() != null ? comentario.getNinot().getIdNinot() : null)
-                .nombreNinot(comentario.getNinot() != null ? comentario.getNinot().getNombreNinot() : null)
                 .contenido(comentario.getContenido())
                 .fechaCreacion(comentario.getCreadoEn())
                 .fechaActualizacion(comentario.getActualizadoEn())

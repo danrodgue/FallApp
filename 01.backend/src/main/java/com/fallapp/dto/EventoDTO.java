@@ -37,7 +37,30 @@ public class EventoDTO {
     
     private String ubicacion;
     
+    @Size(max = 255, message = "La dirección no puede exceder 255 caracteres")
+    private String direccion;
+    
+    @Size(max = 500, message = "La URL de la imagen no puede exceder 500 caracteres")
+    private String urlImagen;
+    
     @Min(value = 0, message = "Los participantes estimados no pueden ser negativos")
     private Integer participantesEstimado;
     
+    // Campos de auditoría (solo lectura)
+    private UsuarioSimpleDTO creadoPor;
+    private LocalDateTime fechaCreacion;
+    private LocalDateTime actualizadoEn;
+    
+    /**
+     * DTO simplificado para usuario (para campos de auditoría)
+     */
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UsuarioSimpleDTO {
+        private Long id;
+        private String nombreCompleto;
+        private String email;
+    }
 }

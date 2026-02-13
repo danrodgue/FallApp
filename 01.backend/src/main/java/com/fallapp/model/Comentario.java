@@ -37,10 +37,6 @@ public class Comentario {
     @JoinColumn(name = "id_falla")
     private Falla falla;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ninot")
-    private Ninot ninot;
-
     @Column(name = "contenido", nullable = false, length = 500)
     @NotBlank(message = "El contenido es obligatorio")
     @Size(min = 3, max = 500, message = "El comentario debe tener entre 3 y 500 caracteres")

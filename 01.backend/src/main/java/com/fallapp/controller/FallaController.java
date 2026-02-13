@@ -3,6 +3,7 @@ package com.fallapp.controller;
 import com.fallapp.dto.ApiResponse;
 import com.fallapp.dto.FallaDTO;
 import com.fallapp.dto.PaginatedResponse;
+import com.fallapp.dto.UbicacionDTO;
 import com.fallapp.service.FallaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,6 +39,15 @@ public class FallaController {
     public ResponseEntity<ApiResponse<FallaDTO>> obtenerPorId(@PathVariable Long id) {
         FallaDTO falla = fallaService.obtenerPorId(id);
         return ResponseEntity.ok(ApiResponse.success(falla));
+    }
+
+    @GetMapping("/{id}/ubicacion")
+    @Operation(summary = "Obtener ubicación GPS de una falla por ID", 
+               description = "Retorna las coordenadas GPS (latitud, longitud) de una falla específica. Útil para mapas y geolocalización.")
+    public ResponseEntity<ApiResponse<UbicacionDTO>> obtenerUbicacion(
+            @Parameter(description = "ID de la falla") @PathVariable Long id) {
+        UbicacionDTO ubicacion = fallaService.obtenerUbicacion(id);
+        return ResponseEntity.ok(ApiResponse.success(ubicacion));
     }
 
     @GetMapping("/buscar")

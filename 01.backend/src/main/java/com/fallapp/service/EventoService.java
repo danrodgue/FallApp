@@ -9,9 +9,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,7 +85,21 @@ public class EventoService {
         dto.setDescripcion(evento.getDescripcion());
         dto.setFechaEvento(evento.getFechaEvento());
         dto.setUbicacion(evento.getUbicacion());
+        dto.setDireccion(evento.getDireccion());
+        dto.setUrlImagen(evento.getUrlImagen());
         dto.setParticipantesEstimado(evento.getParticipantesEstimado());
+        
+        // Campos de auditoría
+        if (evento.getCreadoPor() != null) {
+            EventoDTO.UsuarioSimpleDTO creador = new EventoDTO.UsuarioSimpleDTO();
+            creador.setId(evento.getCreadoPor().getIdUsuario());
+            creador.setNombreCompleto(evento.getCreadoPor().getNombreCompleto());
+            creador.setEmail(evento.getCreadoPor().getEmail());
+            dto.setCreadoPor(creador);
+        }
+        dto.setFechaCreacion(evento.getCreadoEn());
+        dto.setActualizadoEn(evento.getActualizadoEn());
+        
         return dto;
     }
 
@@ -166,6 +183,99 @@ public class EventoService {
     }
 
     /**
+     * Devuelve la entidad Evento completa (incluyendo campos perezosos como la imagen).
+     */
+    @Transactional(readOnly = true)
+    public Evento obtenerEntidadPorId(Long id) {
+        return eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+    }
+
+    /**
+     * Actualiza la imagen principal de un evento almacenando la imagen como binario en BD.
+     *
+     * NOTA: Funcionalidad deshabilitada - la BD no tiene columnas imagen/imagen_content_type.
+     * Usar url_imagen en su lugar.
+     *
+     * - Valida un tamaño máximo razonable (por defecto 5 MB)
+     * - Guarda los bytes en campo BYTEA
+     * - Guarda el Content-Type para devolver la cabecera adecuada
+     */
+    /*
+    @Transactional
+    public void actualizarImagen(Long idEvento, MultipartFile imagen) {
+        if (imagen == null || imagen.isEmpty()) {
+            throw new RuntimeException("La imagen del evento no puede estar vacía");
+        }
+
+        long maxBytes = 5 * 1024 * 1024; // 5 MB
+        if (imagen.getSize() > maxBytes) {
+            throw new RuntimeException("La imagen del evento supera el tamaño máximo permitido (5 MB)");
+        }
+
+        Evento evento = eventoRepository.findById(idEvento)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + idEvento));
+
+        try {
+            evento.setImagen(imagen.getBytes());
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("No se ha podido leer la imagen del evento");
+        }
+
+        String contentType = imagen.getContentType();
+        if (contentType == null || contentType.isBlank()) {
+            contentType = MediaType.IMAGE_JPEG_VALUE;
+        }
+        evento.setImagenContentType(contentType);
+
+        eventoRepository.save(evento);
+    }
+    */
+    /**
+     * Listar eventos con filtros opcionales (paginado)
+     */
+    public Page<EventoDTO> listarConFiltros(Long idFalla, String tipo, LocalDateTime desdeFecha, 
+                                              LocalDateTime hastaFecha, Pageable pageable) {
+        Page<Evento> eventos;
+        
+        // Aplicar filtros según parámetros
+        if (idFalla != null && tipo != null) {
+            Falla falla = fallaRepository.findById(idFalla)
+                    .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
+            Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
+            eventos = eventoRepository.findByFallaAndTipo(falla, tipoEvento, pageable);
+        } else if (idFalla != null) {
+            Falla falla = fallaRepository.findById(idFalla)
+                    .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
+            eventos = eventoRepository.findByFalla(falla, pageable);
+        } else if (tipo != null) {
+            Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
+            eventos = eventoRepository.findByTipo(tipoEvento, pageable);
+        } else if (desdeFecha != null && hastaFecha != null) {
+            eventos = eventoRepository.findByFechaEventoBetween(desdeFecha, hastaFecha, pageable);
+        } else {
+            eventos = eventoRepository.findAll(pageable);
+        }
+        
+        List<EventoDTO> dtos = eventos.getContent().stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+        return new PageImpl<>(dtos, pageable, eventos.getTotalElements());
+    }
+    
+    /**
+     * Obtener eventos por tipo
+     */
+    public List<EventoDTO> obtenerPorTipo(String tipo) {
+        Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
+        Pageable pageable = Pageable.ofSize(100); // Límite razonable
+        Page<Evento> eventos = eventoRepository.findByTipo(tipoEvento, pageable);
+        return eventos.getContent().stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+    
+    /**
      * Mapear DTO a entidad
      */
     private void mapearDTOAEntidad(EventoDTO dto, Evento entidad, Falla falla) {
@@ -174,6 +284,8 @@ public class EventoService {
         entidad.setDescripcion(dto.getDescripcion());
         entidad.setFechaEvento(dto.getFechaEvento());
         entidad.setUbicacion(dto.getUbicacion());
+        entidad.setDireccion(dto.getDireccion());
+        entidad.setUrlImagen(dto.getUrlImagen());
         entidad.setParticipantesEstimado(dto.getParticipantesEstimado());
         
         if (dto.getTipo() != null) {

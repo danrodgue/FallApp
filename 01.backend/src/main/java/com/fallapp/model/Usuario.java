@@ -70,6 +70,12 @@ public class Usuario {
     @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
 
+    @Transient
+    private byte[] fotoPerfil;
+
+    @Transient
+    private String fotoPerfilContentType;
+
     /**
      * Enum para roles de usuario
      */

@@ -33,7 +33,7 @@ public class Evento {
     private Falla falla;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, length = 20, columnDefinition = "tipo_evento")
+    @Column(name = "tipo", nullable = false, length = 30)
     private TipoEvento tipo;
 
     @Column(name = "nombre", nullable = false, length = 255)

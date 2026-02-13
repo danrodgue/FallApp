@@ -20,8 +20,8 @@ public class VotoDTO {
     private Long idVoto;
     private Long idUsuario;
     private String nombreUsuario;
-    private Long idNinot;
-    private String nombreNinot;
+    private Long idFalla;
+    private String nombreFalla;
     private String tipoVoto;
     private LocalDateTime fechaCreacion;
 }

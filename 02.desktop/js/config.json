@@ -1,5 +1,5 @@
 {
-  "apiBase": "http://127.0.0.1:8080",
+  "apiBase": "http://35.180.21.42:8080",
   "apiUser": "mi_usuario",
   "apiPassword": "mi_contraseña"
 }

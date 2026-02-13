@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
       logoutBtn.addEventListener('click', function() {
          try {
             localStorage.removeItem('fallapp_user');
+            localStorage.removeItem('fallapp_token');
+            localStorage.removeItem('fallapp_user_email');
+            localStorage.removeItem('fallapp_user_nombre');
+            localStorage.removeItem('fallapp_user_rol');
+            localStorage.removeItem('fallapp_user_idFalla');
+            localStorage.removeItem('fallapp_user_id');
          } catch (e) {
             console.error('Error removing user:', e);
          }
@@ -18,10 +24,23 @@ document.addEventListener('DOMContentLoaded', function () {
    }
 
    const params = new URLSearchParams(window.location.search);
-   const id = params.get('id') || '95'; // Por defecto usa ID 95
+   let id = params.get('id');
+   
+   // Si no hay id en URL, obtener el idFalla del usuario autenticado
+   if (!id) {
+      const idFallaStored = localStorage.getItem('fallapp_user_idFalla');
+      if (idFallaStored) {
+         id = idFallaStored;
+         console.log('Usando idFalla del usuario autenticado:', id);
+      } else {
+         console.warn('No hay id en URL ni idFalla en localStorage, usando ID por defecto: 95');
+         id = '95'; // Por defecto usa ID 95
+      }
+   }
+   
    // Base del backend (Spring Boot): ajusta puerto si es necesario
-   window._recurso = window._recurso || 'http://localhost/api/fallas';
    window._apiBase = window._apiBase || 'http://35.180.21.42:8080/api';
+   window._recurso = window._recurso || (window._apiBase + '/fallas');
 
    // Cargar datos desde backend si hay id, si no, usar stub
    if (id) {
@@ -67,10 +86,12 @@ function loadFallaById(id) {
       })
       .then(json => {
          console.log('Falla cargada del backend:', json);
-         populateForm(json);
+         // El API devuelve { exito, mensaje, datos: { ... } }
+         const fallaData = json.datos || json;
+         populateForm(fallaData);
          // Si la falla tiene coordenadas, inicializar el mapa directamente
-         if (json.latitud && json.longitud) {
-            initMapa(json.latitud, json.longitud, id);
+         if (fallaData.latitud && fallaData.longitud) {
+            initMapa(fallaData.latitud, fallaData.longitud, id);
          } else {
             // Si no hay coordenadas, intentar cargar del endpoint de ubicación
             loadUbicacionMapa(id);
@@ -98,12 +119,10 @@ function loadFallaById(id) {
                   tipo: 'Caída', 
                   descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', 
                   estado: 'abierta', 
-                  reportado_por: 'Juan Pérez',
-                  latitud: 39.4699,
-                  longitud: -0.3763
+                  reportado_por: 'Juan Pérez'
                };
                populateForm(ejemplo);
-               initMapa(ejemplo.latitud, ejemplo.longitud, id);
+               loadUbicacionMapa(id);
             });
          } else {
             console.warn('API bridge no disponible, usando stub');
@@ -115,19 +134,17 @@ function loadFallaById(id) {
                tipo: 'Caída', 
                descripcion: 'El usuario se tropezó con un bordillo y sufrió una caída leve.', 
                estado: 'abierta', 
-               reportado_por: 'Juan Pérez',
-               latitud: 39.4699,
-               longitud: -0.3763
+               reportado_por: 'Juan Pérez'
             };
             populateForm(ejemplo);
-            initMapa(ejemplo.latitud, ejemplo.longitud, id);
+            loadUbicacionMapa(id);
          }
       });
 }
 
 function loadUbicacionMapa(fallaId) {
    // Obtener las coordenadas desde el endpoint específico de ubicación
-   const ubicacionUrl = `${window._apiBase}/fallas/${fallaId}/ubicacion`;
+   const ubicacionUrl = `http://35.180.21.42:8080/api/fallas/${fallaId}/ubicacion`;
    console.log('Cargando ubicación desde:', ubicacionUrl);
    
    fetch(ubicacionUrl)
@@ -137,9 +154,9 @@ function loadUbicacionMapa(fallaId) {
       })
       .then(data => {
          console.log('Datos de ubicación recibidos:', data);
-         // Se espera que el endpoint devuelva { latitude, longitude } o { lat, lng } o { latitud, longitud }
-         const lat = data.latitude || data.lat || data.latitud;
-         const lng = data.longitude || data.lng || data.longitud;
+         // El endpoint devuelve { exito, mensaje, datos: { latitud, longitud, ... } }
+         const lat = data.datos?.latitud || data.latitude || data.lat || data.latitud;
+         const lng = data.datos?.longitud || data.longitude || data.lng || data.longitud;
          
          console.log('Coordenadas extraídas - lat:', lat, 'lng:', lng);
          
@@ -252,31 +269,132 @@ function populateForm(data) {
    const el = (id) => document.getElementById(id);
    if (!el('fallaId')) return; // formulario no presente
    
-   // Mapear los campos que devuelve el API a los campos del formulario
-   el('fallaId').value = data.id || data.idFalla || '';
+   // ID de Falla
+   const idFalla = data.id || data.idFalla || '';
+   if (el('fallaId')) el('fallaId').value = idFalla;
    
-   // Fecha: soportar diferentes formatos
-   if (data.fecha) {
-      el('fallaFecha').value = formatDateForInput(data.fecha);
-   } else if (data.fechaReporte) {
-      el('fallaFecha').value = formatDateForInput(data.fechaReporte);
+   // Nombre de la Falla
+   const nombre = data.nombre || data.ubicacion || data.direccion || '';
+   if (el('fallaNombre')) el('fallaNombre').value = nombre;
+   
+   // Sección
+   const seccion = data.seccion || '';
+   if (el('fallaSeccion')) el('fallaSeccion').value = seccion;
+   
+   // Fallera
+   const fallera = data.fallera || '';
+   if (el('fallaFallera')) el('fallaFallera').value = fallera;
+   
+   // Presidente
+   const presidente = data.presidente || '';
+   if (el('fallaPresidente')) el('fallaPresidente').value = presidente;
+   
+   // Artista
+   const artista = data.artista || '';
+   if (el('fallaArtista')) el('fallaArtista').value = artista;
+   
+   // Lema
+   const lema = data.lema || '';
+   if (el('fallaLema')) el('fallaLema').value = lema;
+   
+   // Web Oficial
+   const webOficial = data.webOficial || data.weOficial || '';
+   if (el('fallaWebOficial')) el('fallaWebOficial').value = webOficial;
+   
+   // Teléfono Contacto
+   const telefonoContacto = data.telefonoContacto || data.telefonoContacto || '';
+   if (el('fallaTelefonoContacto')) el('fallaTelefonoContacto').value = telefonoContacto;
+   
+   // Email Contacto
+   const emailContacto = data.emailContacto || data.correoContacto || '';
+   if (el('fallaEmailContacto')) el('fallaEmailContacto').value = emailContacto;
+   
+   // Año de Fundación
+   const anyoFundacion = data.anyoFundacion || '';
+   if (el('fallaAnyoFundacion')) el('fallaAnyoFundacion').value = anyoFundacion;
+   
+   // Distintivo
+   const distintivo = data.distintivo || '';
+   if (el('fallaDistintivo')) el('fallaDistintivo').value = distintivo;
+   
+   // URL Boceto - Mostrar imagen
+   // Buscar en múltiples nombres de campo posibles
+   const uriBoceto = data.uriBoceto 
+      || data.imagenUrl 
+      || data.imagen 
+      || data.boceto 
+      || data.urlBoceto 
+      || data.fotoUrl 
+      || data.foto 
+      || '';
+   
+   console.log('Búsqueda de imagen Boceto:');
+   console.log('  - uriBoceto:', data.uriBoceto);
+   console.log('  - imagenUrl:', data.imagenUrl);
+   console.log('  - imagen:', data.imagen);
+   console.log('  - boceto:', data.boceto);
+   console.log('  - urlBoceto:', data.urlBoceto);
+   console.log('  - fotoUrl:', data.fotoUrl);
+   console.log('  - foto:', data.foto);
+   console.log('  - URL final encontrada:', uriBoceto);
+   
+   const bocetoImg = el('fallaBoceto');
+   const bocetoContainer = bocetoImg ? bocetoImg.parentElement : null;
+   
+   if (uriBoceto && bocetoImg) {
+      console.log('✓ Configurando imagen Boceto con URL:', uriBoceto);
+      bocetoImg.src = uriBoceto;
+      if (bocetoContainer) {
+         bocetoContainer.style.display = 'block';
+      }
+      bocetoImg.onerror = function() {
+         console.warn('✗ Error cargando imagen del Boceto:', uriBoceto);
+         if (this.parentElement) {
+            this.parentElement.style.display = 'block'; // Mostrar contenedor
+         }
+      };
+      bocetoImg.onload = function() {
+         console.log('✓ Imagen Boceto cargada correctamente');
+      };
+   } else {
+      // Si no hay URL, ocultar el contenedor pero mostrar placeholder
+      console.log('✗ No hay URL de boceto disponible - mostrando placeholder');
+      bocetoImg.src = ''; // Asegurar que src esté vacío para mostrar placeholder
    }
    
-   // Ubicación: puede venir como ubicacion, nombre, direccion, etc.
-   el('fallaUbicacion').value = data.ubicacion || data.nombre || data.direccion || data.casal || '';
+   // Categoría
+   const categoria = data.categoria || '';
+   if (el('fallaCategoria')) el('fallaCategoria').value = categoria;
    
-   // Tipo: puede venir como tipo, agrupacion, categoria, etc.
-   el('fallaTipo').value = data.tipo || data.agrupacion || data.categoria || '';
+   // Estadísticas
+   const totalEventos = data.totalEventos || 0;
+   if (el('fallaTotalEventos')) el('fallaTotalEventos').value = totalEventos;
    
-   // Descripción
-   el('fallaDescripcion').value = data.descripcion || data.detalles || '';
+   const totalHintos = data.totalNinots || data.totalHintos || 0;
+   if (el('fallaTotalHintos')) el('fallaTotalHintos').value = totalHintos;
    
-   // Actualizar side panel
+   const totalMiembros = data.totalMiembros || 0;
+   if (el('fallaTotalMiembros')) el('fallaTotalMiembros').value = totalMiembros;
+   
+   // Fechas - Formatear correctamente
+   const fechaCreacion = data.fechaCreacion || '';
+   if (el('fallaFechaCreacion')) el('fallaFechaCreacion').value = formatDateForInput(fechaCreacion);
+   
+   const fechaActualizacion = data.fechaActualizacion || '';
+   if (el('fallaFechaActualizacion')) el('fallaFechaActualizacion').value = formatDateForInput(fechaActualizacion);
+   
+   // Actualizar side panel con nombre o lema
    const side = document.getElementById('sideSummary');
-   const descText = data.descripcion || data.detalles || '';
-   if (side) side.textContent = descText.slice(0, 140) + (descText && descText.length > 140 ? '...' : '');
+   const resumen = nombre || lema || fallera || '';
+   if (side && resumen) {
+      side.textContent = resumen.slice(0, 140) + (resumen.length > 140 ? '...' : '');
+   }
    
-   console.log('Formulario poblado con datos:', data);
+   // Log de diagnóstico
+   console.log('=== DIAGNÓSTICO POPULATE FORM ===');
+   console.log('Datos completos:', data);
+   console.log('Campos disponibles en data:', Object.keys(data));
+   console.log('====================================');
 }
 
 // Helper para formatear fechas para input datetime-local
@@ -297,35 +415,200 @@ function formatDateForInput(dateStr) {
    return dateStr || '';
 }
 
+// Validar datos de falla
+function validateFallaData(data) {
+   const errors = [];
+   
+   if (!data.nombre || data.nombre.trim().length === 0) {
+      errors.push('El nombre de la falla es obligatorio');
+   }
+   
+   if (!data.seccion || data.seccion.trim().length === 0) {
+      errors.push('La sección es obligatoria');
+   }
+   
+   if (!data.presidente || data.presidente.trim().length === 0) {
+      errors.push('El nombre del presidente es obligatorio');
+   }
+   
+   if (data.anyoFundacion) {
+      const year = parseInt(data.anyoFundacion);
+      if (isNaN(year) || year < 1900 || year > new Date().getFullYear()) {
+         errors.push('El año de fundación debe estar entre 1900 y ' + new Date().getFullYear());
+      }
+   }
+   
+   if (data.emailContacto) {
+      if (!data.emailContacto.includes('@') || !data.emailContacto.includes('.')) {
+         errors.push('El email contacto no es válido');
+      }
+   }
+   
+   return errors;
+}
+
+// Mostrar notificación mejorada
+function showNotificationFalla(message, type = 'info') {
+   const notification = document.createElement('div');
+   notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      z-index: 9999;
+      animation: slideIn 0.3s ease-out;
+      max-width: 400px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      ${type === 'success' ? 'background: #10b981; color: white;' : 
+        type === 'error' ? 'background: #ef4444; color: white;' :
+        type === 'warning' ? 'background: #f59e0b; color: white;' :
+        'background: #3b82f6; color: white;'}
+   `;
+   notification.textContent = message;
+   document.body.appendChild(notification);
+   
+   const timeout = type === 'error' ? 5000 : 3000;
+   setTimeout(() => notification.remove(), timeout);
+}
+
 function saveFalla() {
-   const payload = {
-      id: document.getElementById('fallaId').value,
-      fecha: document.getElementById('fallaFecha').value,
-      ubicacion: document.getElementById('fallaUbicacion').value,
-      tipo: document.getElementById('fallaTipo').value,
-      descripcion: document.getElementById('fallaDescripcion').value,
+   const formData = {
+      nombre: document.getElementById('fallaNombre').value.trim(),
+      seccion: document.getElementById('fallaSeccion').value.trim(),
+      fallera: document.getElementById('fallaFallera').value.trim(),
+      presidente: document.getElementById('fallaPresidente').value.trim(),
+      artista: document.getElementById('fallaArtista').value.trim(),
+      lema: document.getElementById('fallaLema').value.trim(),
+      webOficial: document.getElementById('fallaWebOficial').value.trim(),
+      telefonoContacto: document.getElementById('fallaTelefonoContacto').value.trim(),
+      emailContacto: document.getElementById('fallaEmailContacto').value.trim(),
+      anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || null,
+      distintivo: document.getElementById('fallaDistintivo').value.trim(),
+      categoria: document.getElementById('fallaCategoria').value.trim(),
+      totalEventos: parseInt(document.getElementById('fallaTotalEventos').value) || 0,
+      totalNinots: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
+      totalMiembros: parseInt(document.getElementById('fallaTotalMiembros').value) || 0,
    };
 
-   // Si tiene id => actualizar (PUT), si no => crear (POST)
-   const id = payload.id;
-   const url = id ? (window._recurso + '/' + id) : window._recurso;
-   const method = id ? 'put' : 'post';
-
-   if (window.api && window.api.saveFalla) {
-      window.api.saveFalla(payload).then(json => {
-         alert('Cambios guardados');
-         const side = document.getElementById('sideSummary'); if(side) side.textContent = (json.descripcion||payload.descripcion||'').slice(0,140) + ((json.descripcion||payload.descripcion) && (json.descripcion||payload.descripcion).length>140? '...':'');
-         setEditMode(false);
-         if (json.id) document.getElementById('fallaId').value = json.id;
-      }).catch(err => {
-         console.error('Error guardando:', err);
-         alert('Error al guardar. Ver consola para más detalles.');
-      });
-   } else {
-      console.warn('API bridge no disponible - cambios no persistidos');
-      alert('Cambios guardados localmente (simulado).');
-      setEditMode(false);
+   // Validar datos
+   const validationErrors = validateFallaData(formData);
+   if (validationErrors.length > 0) {
+      showNotificationFalla(validationErrors.join('\n'), 'error');
+      return;
    }
+
+   const id = document.getElementById('fallaId').value;
+   
+   // Mostrar indicador de carga
+   const saveBtn = document.getElementById('saveBtn');
+   const originalText = saveBtn.textContent;
+   if (saveBtn) {
+      saveBtn.textContent = 'Guardando...';
+      saveBtn.disabled = true;
+   }
+
+   // Si tiene id => actualizar (PUT), si no => crear (POST)
+   if (id) {
+      formData.id = id; // Agregar el ID al payload
+      // Obtener token para autenticación
+      const token = localStorage.getItem('fallapp_token');
+      if (token) {
+         formData.token = token;
+      }
+      
+      if (window.api && window.api.saveFalla) {
+         window.api.saveFalla(formData).then(json => {
+            showNotificationFalla('Falla actualizada correctamente', 'success');
+            const side = document.getElementById('sideSummary'); 
+            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
+            setEditMode(false);
+            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
+         }).catch(err => {
+            console.error('Error guardando:', err);
+            showNotificationFalla(`Error al guardar: ${err.message || err}`, 'error');
+         }).finally(() => {
+            if (saveBtn) {
+               saveBtn.textContent = originalText;
+               saveBtn.disabled = false;
+            }
+         });
+      } else {
+         // Intentar con fetch directo
+         actualizar_falla_directo(id, formData, originalText, saveBtn);
+      }
+   } else {
+      // Crear nueva
+      const token = localStorage.getItem('fallapp_token');
+      if (token) {
+         formData.token = token;
+      }
+      
+      if (window.api && window.api.saveFalla) {
+         window.api.saveFalla(formData).then(json => {
+            showNotificationFalla('Falla creada correctamente', 'success');
+            const side = document.getElementById('sideSummary'); 
+            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
+            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
+            setEditMode(false);
+         }).catch(err => {
+            console.error('Error creando:', err);
+            showNotificationFalla(`Error al crear: ${err.message || err}`, 'error');
+         }).finally(() => {
+            if (saveBtn) {
+               saveBtn.textContent = originalText;
+               saveBtn.disabled = false;
+            }
+         });
+      } else {
+         showNotificationFalla('API bridge no disponible - cambios no persistidos', 'warning');
+         setEditMode(false);
+         if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+         }
+      }
+   }
+}
+
+// Actualizar falla directamente llamando a la API
+function actualizar_falla_directo(id, formData, originalText, saveBtn) {
+   const url = `${window._apiBase}/fallas/${id}`;
+   fetch(url, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(formData)
+   })
+   .then(response => {
+      if (!response.ok) {
+         return response.json().then(data => {
+            throw new Error(data.message || `Error HTTP ${response.status}`);
+         }).catch(parseErr => {
+            throw new Error(`Error HTTP ${response.status}: ${parseErr.message}`);
+         });
+      }
+      return response.json();
+   })
+   .then(json => {
+      const result = json.datos || json;
+      showNotificationFalla('Falla actualizada correctamente', 'success');
+      const side = document.getElementById('sideSummary');
+      if(side) side.textContent = (result.nombre||formData.nombre||'').slice(0,140) + ((result.nombre||formData.nombre) && (result.nombre||formData.nombre).length>140? '...':'');
+      setEditMode(false);
+   })
+   .catch(err => {
+      console.error('Error actualizando falla:', err);
+      showNotificationFalla(`Error al guardar: ${err.message}`, 'error');
+   })
+   .finally(() => {
+      if (saveBtn) {
+         saveBtn.textContent = originalText;
+         saveBtn.disabled = false;
+      }
+   });
 }
 
 // Exportar para pruebas (opcional)
@@ -333,7 +616,12 @@ window._falla = { loadFallaById, populateForm, saveFalla };
 
 // ------------------ Edit mode helpers ------------------
 function setEditMode(enabled){
-   const fields = ['fallaFecha','fallaUbicacion','fallaTipo','fallaDescripcion'];
+   const fields = [
+      'fallaNombre', 'fallaSeccion', 'fallaFallera', 'fallaPresidente', 
+      'fallaArtista', 'fallaLema', 'fallaWebOficial', 'fallaTelefonoContacto', 'fallaEmailContacto',
+      'fallaAnyoFundacion', 'fallaDistintivo', 'fallaCategoria', 
+      'fallaTotalEventos', 'fallaTotalHintos', 'fallaTotalMiembros'
+   ];
    fields.forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.disabled = !enabled; });
    const saveBtn = document.getElementById('saveBtn'); const editBtn = document.getElementById('editBtn');
    if(saveBtn) saveBtn.style.display = enabled? 'inline-block':'none';
@@ -344,5 +632,23 @@ function toggleEditMode(){
    const saveBtn = document.getElementById('saveBtn');
    const enabled = !(saveBtn && saveBtn.style.display === 'inline-block');
    setEditMode(enabled);
+}
+
+// Agregar animación de deslizamiento si no existe
+if (!document.querySelector('style:contains(slideIn)')) {
+   const style = document.createElement('style');
+   style.textContent = `
+      @keyframes slideIn {
+         from {
+            transform: translateX(400px);
+            opacity: 0;
+         }
+         to {
+            transform: translateX(0);
+            opacity: 1;
+         }
+      }
+   `;
+   document.head.appendChild(style);
 }
 

@@ -15,3 +15,18 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Markdown files (except specific ones)
+**/*.md
+!README.md
+!GUIA.API.FRONTEND.md
+!**/GUIA.API.FRONTEND.md
+
+# Java compiled files
+*.class
+target/
+# Gradle
+.gradle/
+build/
+*.gradle.kts.backup
+local.properties

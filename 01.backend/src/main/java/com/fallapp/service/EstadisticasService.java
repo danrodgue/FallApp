@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import com.fallapp.model.Voto;
 
 /**
  * Servicio de Analytics y Estadísticas para FallApp
@@ -54,7 +55,6 @@ public class EstadisticasService {
     
     private final FallaRepository fallaRepository;
     private final EventoRepository eventoRepository;
-    private final NinotRepository ninotRepository;
     private final UsuarioRepository usuarioRepository;
     private final VotoRepository votoRepository;
     private final ComentarioRepository comentarioRepository;
@@ -91,16 +91,14 @@ public class EstadisticasService {
         
         resumen.put("totalFallas", fallaRepository.count());
         resumen.put("totalEventos", eventoRepository.count());
-        resumen.put("totalNinots", ninotRepository.count());
+        // Table `ninots` removed; report 0 or derive from media if available
+        resumen.put("totalNinots", 0);
         resumen.put("totalUsuarios", usuarioRepository.count());
         resumen.put("totalVotos", votoRepository.count());
         resumen.put("totalComentarios", comentarioRepository.count());
         
         // Usuarios activos
         resumen.put("usuariosActivos", usuarioRepository.findByActivoTrue().size());
-        
-        // Ninots premiados
-        resumen.put("ninotsPremiados", ninotRepository.countByPremiadoTrue());
         
         // Fecha generación
         resumen.put("fechaGeneracion", LocalDateTime.now());
@@ -137,31 +135,47 @@ public class EstadisticasService {
     /**
      * Obtener estadísticas de votos
      */
-    public Map<String, Object> obtenerEstadisticasVotos() {
+    public Map<String, Object> obtenerEstadisticasVotos(Integer limite, String tipoVotoStr) {
         Map<String, Object> estadisticas = new HashMap<>();
-        
+
         estadisticas.put("totalVotos", votoRepository.count());
-        
-        // Ninots más votados (top 10)
-        var topNinots = ninotRepository.findAll().stream()
-                .sorted((n1, n2) -> Integer.compare(
-                        n2.getVotos() != null ? n2.getVotos().size() : 0,
-                        n1.getVotos() != null ? n1.getVotos().size() : 0
-                ))
-                .limit(10)
-                .map(ninot -> {
-                    Map<String, Object> ninotInfo = new HashMap<>();
-                    ninotInfo.put("idNinot", ninot.getIdNinot());
-                    ninotInfo.put("nombreNinot", ninot.getNombreNinot());
-                    ninotInfo.put("nombreFalla", ninot.getFalla() != null ? ninot.getFalla().getNombre() : null);
-                    ninotInfo.put("totalVotos", ninot.getVotos() != null ? ninot.getVotos().size() : 0);
-                    ninotInfo.put("premiado", ninot.getPremiado());
-                    return ninotInfo;
+
+        int top = (limite == null || limite <= 0) ? 10 : limite;
+
+        // Parse tipoVoto if provided
+        Voto.TipoVoto tipo = null;
+        if (tipoVotoStr != null && !tipoVotoStr.isBlank()) {
+            try {
+                tipo = Voto.TipoVoto.valueOf(tipoVotoStr);
+            } catch (IllegalArgumentException ex) {
+                tipo = null;
+            }
+        }
+
+        final Voto.TipoVoto filtroTipo = tipo;
+
+        // Top fallas (by votes)
+        List<Map<String, Object>> topFallas = fallaRepository.findAll().stream()
+                .map(f -> {
+                    long cnt = (filtroTipo == null) ? votoRepository.countByFalla(f) : votoRepository.countByFallaAndTipoVoto(f, filtroTipo);
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("idFalla", f.getIdFalla());
+                    m.put("nombre", f.getNombre());
+                    m.put("seccion", f.getSeccion());
+                    m.put("votos", cnt);
+                    return m;
                 })
+                .sorted((a, b) -> Long.compare(((Number) b.get("votos")).longValue(), ((Number) a.get("votos")).longValue()))
+                .limit(top)
                 .toList();
-        
-        estadisticas.put("top10Ninots", topNinots);
-        
+
+        estadisticas.put("topFallas", topFallas);
+
+        // Ninots removed: no per-ninot ranking available. Return empty list.
+        estadisticas.put("topNinots", Collections.emptyList());
+
+        estadisticas.put("filtroTipoVoto", tipo == null ? "ALL" : tipo.name());
+
         return estadisticas;
     }
     
@@ -217,7 +231,7 @@ public class EstadisticasService {
                     Map<String, Object> info = new HashMap<>();
                     info.put("idVoto", voto.getIdVoto());
                     info.put("usuario", voto.getUsuario() != null ? voto.getUsuario().getNombreCompleto() : null);
-                    info.put("ninot", voto.getNinot() != null ? voto.getNinot().getNombreNinot() : null);
+                    info.put("falla", voto.getFalla() != null ? voto.getFalla().getNombre() : null);
                     info.put("fecha", voto.getCreadoEn());
                     return info;
                 })

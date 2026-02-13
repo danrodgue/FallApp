@@ -36,8 +36,7 @@ class EstadisticasServiceTest {
     @Mock
     private EventoRepository eventoRepository;
 
-    @Mock
-    private NinotRepository ninotRepository;
+    // ninotRepository removed (tabla ninots eliminada)
 
     @Mock
     private UsuarioRepository usuarioRepository;
@@ -61,12 +60,11 @@ class EstadisticasServiceTest {
         // Arrange
         when(fallaRepository.count()).thenReturn(347L);
         when(eventoRepository.count()).thenReturn(128L);
-        when(ninotRepository.count()).thenReturn(215L);
+        // ninots removed
         when(usuarioRepository.count()).thenReturn(89L);
         when(votoRepository.count()).thenReturn(1024L);
         when(comentarioRepository.count()).thenReturn(156L);
         when(usuarioRepository.findByActivoTrue()).thenReturn(java.util.Collections.emptyList());
-        when(ninotRepository.countByPremiadoTrue()).thenReturn(12L);
 
         // Act
         Map<String, Object> resultado = estadisticasService.obtenerResumenGeneral();
@@ -75,17 +73,17 @@ class EstadisticasServiceTest {
         assertNotNull(resultado);
         assertEquals(347L, resultado.get("totalFallas"));
         assertEquals(128L, resultado.get("totalEventos"));
-        assertEquals(215L, resultado.get("totalNinots"));
+        // totalNinots removed from resumen
         assertEquals(89L, resultado.get("totalUsuarios"));
         assertEquals(1024L, resultado.get("totalVotos"));
         assertEquals(156L, resultado.get("totalComentarios"));
-        assertEquals(12L, resultado.get("ninotsPremiados"));
+        // NOTA v0.5.0: ninotsPremiados eliminado (campo premiado no existe en ninots simplificados)
         assertNotNull(resultado.get("fechaGeneracion"));
 
         // Verificar que se llamaron todos los métodos
         verify(fallaRepository, times(1)).count();
         verify(eventoRepository, times(1)).count();
-        verify(ninotRepository, times(1)).count();
+        // ninotRepository verification removed
         verify(usuarioRepository, times(1)).count();
         verify(votoRepository, times(1)).count();
         verify(comentarioRepository, times(1)).count();
@@ -96,12 +94,11 @@ class EstadisticasServiceTest {
         // Arrange - Sistema vacío
         when(fallaRepository.count()).thenReturn(0L);
         when(eventoRepository.count()).thenReturn(0L);
-        when(ninotRepository.count()).thenReturn(0L);
+        // ninots removed
         when(usuarioRepository.count()).thenReturn(0L);
         when(votoRepository.count()).thenReturn(0L);
         when(comentarioRepository.count()).thenReturn(0L);
         when(usuarioRepository.findByActivoTrue()).thenReturn(java.util.Collections.emptyList());
-        when(ninotRepository.countByPremiadoTrue()).thenReturn(0L);
 
         // Act
         Map<String, Object> resultado = estadisticasService.obtenerResumenGeneral();
@@ -110,10 +107,10 @@ class EstadisticasServiceTest {
         assertNotNull(resultado);
         assertEquals(0L, resultado.get("totalFallas"));
         assertEquals(0L, resultado.get("totalEventos"));
-        assertEquals(0L, resultado.get("totalNinots"));
+        // totalNinots removed
         // usuariosActivos devuelve Integer (size()), no Long
         assertEquals(0, resultado.get("usuariosActivos"));
-        assertEquals(0L, resultado.get("ninotsPremiados"));
+        // NOTA v0.5.0: ninotsPremiados eliminado (ya no existe campo premiado)
     }
 
     @Test
@@ -121,21 +118,21 @@ class EstadisticasServiceTest {
         // Arrange
         when(fallaRepository.count()).thenReturn(100L);
         when(eventoRepository.count()).thenReturn(50L);
-        when(ninotRepository.count()).thenReturn(75L);
+        // ninots removed
         when(usuarioRepository.count()).thenReturn(30L);
         when(votoRepository.count()).thenReturn(200L);
         when(comentarioRepository.count()).thenReturn(80L);
         when(usuarioRepository.findByActivoTrue()).thenReturn(java.util.Collections.emptyList());
-        when(ninotRepository.countByPremiadoTrue()).thenReturn(5L);
 
         // Act
         Map<String, Object> resultado = estadisticasService.obtenerResumenGeneral();
 
         // Assert - Verificar que todas las claves esperadas existen
+        // NOTA v0.5.0: ninotsPremiados eliminado de la lista (campo premiado no existe)
         String[] clavesEsperadas = {
-            "totalFallas", "totalEventos", "totalNinots", 
+            "totalFallas", "totalEventos",
             "totalUsuarios", "totalVotos", "totalComentarios",
-            "usuariosActivos", "ninotsPremiados", "fechaGeneracion"
+            "usuariosActivos", "fechaGeneracion"
         };
 
         for (String clave : clavesEsperadas) {

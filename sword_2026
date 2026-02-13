@@ -1,0 +1,33 @@
+                                                 Table "public.ninots"
+          Column          |           Type           | Collation | Nullable |                 Default                  
+--------------------------+--------------------------+-----------+----------+------------------------------------------
+ id_ninot                 | integer                  |           | not null | nextval('ninots_id_ninot_seq'::regclass)
+ id_falla                 | integer                  |           | not null | 
+ nombre_ninot             | character varying(255)   |           | not null | 
+ titulo_obra              | character varying(255)   |           | not null | 
+ descripcion              | text                     |           |          | 
+ altura_metros            | numeric(6,2)             |           |          | 
+ ancho_metros             | numeric(6,2)             |           |          | 
+ profundidad_metros       | numeric(6,2)             |           |          | 
+ peso_toneladas           | numeric(8,2)             |           |          | 
+ material_principal       | character varying(100)   |           |          | 
+ artista_constructor      | character varying(255)   |           |          | 
+ año_construccion         | integer                  |           |          | 
+ url_imagen_principal     | character varying(500)   |           |          | 
+ url_imagenes_adicionales | text                     |           |          | 
+ premiado                 | boolean                  |           | not null | false
+ categoria_premio         | character varying(100)   |           |          | 
+ año_premio               | integer                  |           |          | 
+ notas_tecnicas           | text                     |           |          | 
+ fecha_creacion           | timestamp with time zone |           | not null | CURRENT_TIMESTAMP
+ actualizado_en           | timestamp with time zone |           | not null | CURRENT_TIMESTAMP
+Indexes:
+    "ninots_pkey" PRIMARY KEY, btree (id_ninot)
+    "idx_ninots_id_falla" btree (id_falla)
+    "idx_ninots_premiado" btree (premiado)
+    "idx_ninots_titulo_obra" btree (titulo_obra)
+Foreign-key constraints:
+    "fk_ninots_id_falla" FOREIGN KEY (id_falla) REFERENCES fallas(id_falla) ON DELETE CASCADE
+Triggers:
+    trig_ninots_actualizar_timestamp BEFORE UPDATE ON ninots FOR EACH ROW EXECUTE FUNCTION actualizar_timestamp()
+

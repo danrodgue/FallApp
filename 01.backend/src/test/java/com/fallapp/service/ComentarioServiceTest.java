@@ -3,11 +3,10 @@ package com.fallapp.service;
 import com.fallapp.dto.ComentarioDTO;
 import com.fallapp.model.Comentario;
 import com.fallapp.model.Falla;
-import com.fallapp.model.Ninot;
 import com.fallapp.model.Usuario;
 import com.fallapp.repository.ComentarioRepository;
 import com.fallapp.repository.FallaRepository;
-import com.fallapp.repository.NinotRepository;
+// Ninots eliminados: tests adaptados a comentarios por falla
 import com.fallapp.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,15 +51,13 @@ class ComentarioServiceTest {
     @Mock
     private FallaRepository fallaRepository;
 
-    @Mock
-    private NinotRepository ninotRepository;
 
     @InjectMocks
     private ComentarioService comentarioService;
 
     private Usuario usuarioMock;
     private Falla fallaMock;
-    private Ninot ninotMock;
+    // ninotMock removed (tabla ninots eliminada)
     private Comentario comentarioMock;
 
     @BeforeEach
@@ -77,11 +74,7 @@ class ComentarioServiceTest {
         fallaMock.setNombre("Falla Plaza del Ayuntamiento");
         fallaMock.setSeccion("Especial");
 
-        // Ninot mock
-        ninotMock = new Ninot();
-        ninotMock.setIdNinot(1L);
-        ninotMock.setNombreNinot("Ninot Test");
-        ninotMock.setFalla(fallaMock);
+        // Ninots removed — no se crea mock de ninot
 
         // Comentario mock
         comentarioMock = new Comentario();
@@ -115,18 +108,17 @@ class ComentarioServiceTest {
     }
 
     @Test
-    void testCrearComentarioEnNinot_Success() {
+    void testCrearComentarioEnFalla_Alternate_Success() {
         // Arrange
         ComentarioDTO dto = new ComentarioDTO();
         dto.setIdUsuario(1L);
-        dto.setIdNinot(1L);
-        dto.setContenido("Comentario de prueba en ninot");
+        dto.setIdFalla(1L);
+        dto.setContenido("Comentario de prueba en falla");
 
-        comentarioMock.setFalla(null);
-        comentarioMock.setNinot(ninotMock);
+        comentarioMock.setFalla(fallaMock);
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuarioMock));
-        when(ninotRepository.findById(1L)).thenReturn(Optional.of(ninotMock));
+        when(fallaRepository.findById(1L)).thenReturn(Optional.of(fallaMock));
         when(comentarioRepository.save(any(Comentario.class))).thenReturn(comentarioMock);
 
         // Act
@@ -195,22 +187,22 @@ class ComentarioServiceTest {
     }
 
     @Test
-    void testObtenerPorNinot_Success() {
+    void testObtenerPorFalla_AsNinotScenario_Success() {
         // Arrange
-        comentarioMock.setFalla(null);
-        comentarioMock.setNinot(ninotMock);
+        comentarioMock.setFalla(fallaMock);
+        // Ninot ya no tiene relación con comentarios
         List<Comentario> comentarios = Arrays.asList(comentarioMock);
         
-        when(ninotRepository.findById(1L)).thenReturn(Optional.of(ninotMock));
-        when(comentarioRepository.findByNinotOrderByCreadoEnDesc(ninotMock)).thenReturn(comentarios);
+        when(fallaRepository.findById(1L)).thenReturn(Optional.of(fallaMock));
+        when(comentarioRepository.findByFallaOrderByCreadoEnDesc(fallaMock)).thenReturn(comentarios);
 
         // Act
-        List<ComentarioDTO> resultado = comentarioService.obtenerPorNinot(1L);
+        List<ComentarioDTO> resultado = comentarioService.obtenerPorFalla(1L);
 
         // Assert
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
-        verify(comentarioRepository, times(1)).findByNinotOrderByCreadoEnDesc(ninotMock);
+        verify(comentarioRepository, times(1)).findByFallaOrderByCreadoEnDesc(fallaMock);
     }
 
     @Test

@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CrearVotoRequest {
-    @NotNull(message = "El ID del ninot es obligatorio")
-    private Long idNinot;
+    @NotNull(message = "El ID de la falla es obligatorio")
+    private Long idFalla;
 
     @NotBlank(message = "El tipo de voto es obligatorio")
-    @Pattern(regexp = "favorito|ingenioso|critico|artistico|rating", 
-             message = "Tipo de voto debe ser: favorito, ingenioso, critico, artistico o rating")
+    @Pattern(regexp = "EXPERIMENTAL|INGENIO_Y_GRACIA|MONUMENTO", 
+             message = "Tipo de voto debe ser: EXPERIMENTAL, INGENIO_Y_GRACIA o MONUMENTO")
     private String tipoVoto;
 }

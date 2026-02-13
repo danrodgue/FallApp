@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FallApp - Dashboard de Testing</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <!-- Pantalla de Login -->
+    <div id="login-screen" class="screen active">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>🔐 Acceso Administrador</h1>
+                <p>Dashboard de Testing - FallApp</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="admin@fallapp.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <div id="login-error" class="error-message" style="display: none;"></div>
+                <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            </form>
+            <div class="login-footer">
+                <small>Solo administradores tienen acceso a este panel</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal -->
+    <div id="dashboard-screen" class="screen">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>🎯 FallApp Testing Dashboard</h1>
+                <span class="header-subtitle">Panel de Monitoreo y Pruebas</span>
+            </div>
+            <div class="header-right">
+                <span id="user-info" class="user-info"></span>
+                <button id="refresh-btn" class="btn-icon" title="Actualizar">🔄</button>
+                <button id="logout-btn" class="btn-secondary">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="dashboard-main">
+            <!-- Panel de Estado del Servidor -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>🖥️ Estado del Servidor</h2>
+                    <span id="server-status-badge" class="badge"></span>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">API Backend</span>
+                            <span id="api-status" class="stat-value">...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Base de Datos</span>
+                            <span id="db-status" class="stat-value">...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Puerto</span>
+                            <span id="api-port" class="stat-value">...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Última Verificación</span>
+                            <span id="last-check" class="stat-value">...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de Endpoints -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>🔌 Endpoints API</h2>
+                    <button id="test-all-endpoints" class="btn-small">Probar Todos</button>
+                </div>
+                <div class="card-body">
+                    <div id="endpoints-list" class="endpoints-list">
+                        <div class="loading">Cargando endpoints...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de Tests -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>🧪 Suite de Tests</h2>
+                    <div class="test-controls">
+                        <button id="run-all-tests" class="btn-small btn-success">Ejecutar Todos</button>
+                        <button id="clear-results" class="btn-small">Limpiar Resultados</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Resumen de Tests -->
+                    <div id="test-summary" class="test-summary" style="display: none;">
+                        <div class="summary-item success">
+                            <span class="summary-label">Exitosos</span>
+                            <span id="tests-passed" class="summary-value">0</span>
+                        </div>
+                        <div class="summary-item error">
+                            <span class="summary-label">Fallidos</span>
+                            <span id="tests-failed" class="summary-value">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total</span>
+                            <span id="tests-total" class="summary-value">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Duración</span>
+                            <span id="tests-duration" class="summary-value">0ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Tests -->
+                    <div id="tests-list" class="tests-list">
+                        <div class="test-group">
+                            <div class="test-group-header">
+                                <h3>📦 Tests de Integración (SQL)</h3>
+                                <button class="btn-tiny" data-category="integration">Ejecutar</button>
+                            </div>
+                            <div id="integration-tests" class="test-items"></div>
+                        </div>
+
+                        <div class="test-group">
+                            <div class="test-group-header">
+                                <h3>🔄 Tests End-to-End (Bash)</h3>
+                                <button class="btn-tiny" data-category="e2e">Ejecutar</button>
+                            </div>
+                            <div id="e2e-tests" class="test-items"></div>
+                        </div>
+
+                        <div class="test-group">
+                            <div class="test-group-header">
+                                <h3>⚡ Tests de Performance</h3>
+                                <button class="btn-tiny" data-category="performance">Ejecutar</button>
+                            </div>
+                            <div id="performance-tests" class="test-items"></div>
+                        </div>
+                    </div>
+
+                    <!-- Resultados de Tests -->
+                    <div id="test-results" class="test-results" style="display: none;">
+                        <h3>📊 Resultados Detallados</h3>
+                        <div id="test-output" class="test-output"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de Logs -->
+            <section class="card">
+                <div class="card-header">
+                    <h2>📋 Registro de Actividad</h2>
+                    <button id="clear-logs" class="btn-small">Limpiar</button>
+                </div>
+                <div class="card-body">
+                    <div id="activity-log" class="activity-log"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>FallApp Testing Dashboard v1.0.0 | © 2026</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.fallapp.service;
 
 import com.fallapp.dto.FallaDTO;
 import com.fallapp.dto.PaginatedResponse;
+import com.fallapp.dto.UbicacionDTO;
 import com.fallapp.model.Falla;
 import com.fallapp.exception.ResourceNotFoundException;
 import com.fallapp.repository.FallaRepository;
@@ -90,22 +91,53 @@ public class FallaService {
     }
 
     /**
-     * Convertir entidad a DTO
+     * Obtener ubicación GPS de una falla por su ID
+     * 
+     * @param id ID de la falla
+     * @return DTO con datos de ubicación (latitud, longitud)
+     * @throws ResourceNotFoundException si la falla no existe
+     */
+    public UbicacionDTO obtenerUbicacion(Long id) {
+        Falla falla = fallaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", id));
+        
+        boolean tieneUbicacion = falla.getUbicacionLat() != null && falla.getUbicacionLon() != null;
+        
+        return UbicacionDTO.builder()
+                .idFalla(falla.getIdFalla())
+                .nombre(falla.getNombre())
+                .latitud(falla.getUbicacionLat() != null ? falla.getUbicacionLat().doubleValue() : null)
+                .longitud(falla.getUbicacionLon() != null ? falla.getUbicacionLon().doubleValue() : null)
+                .tieneUbicacion(tieneUbicacion)
+                .build();
+    }
+
+    /**
+     * Convertir entidad a DTO con TODOS los campos
+     * Actualizado: 2026-02-04 - Incluye todos los campos del JSON original
      */
     private FallaDTO convertirADTO(Falla falla) {
         return FallaDTO.builder()
                 .idFalla(falla.getIdFalla())
                 .nombre(falla.getNombre())
                 .seccion(falla.getSeccion())
+                .fallera(falla.getFallera())
                 .presidente(falla.getPresidente())
                 .artista(falla.getArtista())
                 .lema(falla.getLema())
                 .anyoFundacion(falla.getAnyoFundacion())
+                .distintivo(falla.getDistintivo())
+                .urlBoceto(falla.getUrlBoceto())
+                .experim(falla.getExperim())
                 .latitud(falla.getUbicacionLat() != null ? falla.getUbicacionLat().doubleValue() : null)
                 .longitud(falla.getUbicacionLon() != null ? falla.getUbicacionLon().doubleValue() : null)
+                .descripcion(falla.getDescripcion())
+                .webOficial(falla.getWebOficial())
+                .telefonoContacto(falla.getTelefonoContacto())
+                .emailContacto(falla.getEmailContacto())
                 .categoria(falla.getCategoria() != null ? falla.getCategoria().name() : null)
                 .totalEventos(falla.getEventos() != null ? falla.getEventos().size() : 0)
-                .totalNinots(falla.getNinots() != null ? falla.getNinots().size() : 0)
+                .totalNinots(0)
                 .totalMiembros(falla.getUsuarios() != null ? falla.getUsuarios().size() : 0)
                 .fechaCreacion(falla.getCreadoEn())
                 .fechaActualizacion(falla.getActualizadoEn())

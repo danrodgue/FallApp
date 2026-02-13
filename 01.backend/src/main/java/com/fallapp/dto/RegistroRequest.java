@@ -27,4 +27,24 @@ public class RegistroRequest {
     private String nombreCompleto;
 
     private Long idFalla;  // Opcional: para asociar a una falla
+    
+    /**
+     * Rol del usuario a crear. Valores: "admin", "casal", "usuario"
+     * Por defecto es "usuario" si no se especifica.
+     * Si se especifica "casal", entonces idFalla es obligatorio.
+     */
+    private String rol;
+    
+    // Campos opcionales adicionales
+    @Size(max = 20, message = "El teléfono no puede superar 20 caracteres")
+    private String telefono;
+    
+    @Size(max = 255, message = "La dirección no puede superar 255 caracteres")
+    private String direccion;
+    
+    @Size(max = 100, message = "La ciudad no puede superar 100 caracteres")
+    private String ciudad;
+    
+    @Size(max = 10, message = "El código postal no puede superar 10 caracteres")
+    private String codigoPostal;
 }

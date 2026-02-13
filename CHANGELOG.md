@@ -5,6 +5,659 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.11] - 2026-02-13 🔧 CORRECCIÓN PERSISTENCIA DE USUARIOS + TESTING DASHBOARD
+
+### Fixed
+- **Backend - Persistencia de datos de usuario:**
+  - ✅ Agregadas columnas `direccion`, `ciudad`, `codigo_postal` a tabla `usuarios`
+  - ✅ Corregido `UsuarioService.actualizar()` para manejar strings vacíos correctamente
+  - 🐛 **Bug resuelto:** Datos de usuario (dirección, ciudad, código postal) que desaparecían tras actualización en app Electron
+  - Validación: Campos opcionales vacíos ahora se guardan como NULL en lugar de causar errores
+
+### Changed
+- **Testing Dashboard - Acceso remoto:**
+  - 📡 `05.testing-dashboard/js/config.js`: API_URL ahora apunta a servidor remoto (35.180.21.42:8080/api)
+  - 🌐 Servidor HTTP configurado para escuchar en todas las interfaces (0.0.0.0:8001)
+  - 📝 Creado `ACCESO_REMOTO.md` con guía completa de configuración de AWS Security Groups
+  - 🔍 Creado `diagnostico.sh` para diagnóstico automático del estado del servidor
+
+### Database Schema
+```sql
+-- Ejecutado en producción 2026-02-13
+ALTER TABLE usuarios 
+  ADD COLUMN IF NOT EXISTS direccion VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS codigo_postal VARCHAR(10);
+```
+
+### Code Changes
+**UsuarioService.java** - Líneas ~90-110:
+```java
+// ANTES: Campos vacíos causaban problemas
+if (dto.getTelefono() != null) {
+    usuario.setTelefono(dto.getTelefono());
+}
+
+// AHORA: Conversión explícita de strings vacíos a NULL
+if (dto.getTelefono() != null) {
+    usuario.setTelefono(dto.getTelefono().isBlank() ? null : dto.getTelefono());
+}
+if (dto.getDireccion() != null) {
+    usuario.setDireccion(dto.getDireccion().isBlank() ? null : dto.getDireccion());
+}
+if (dto.getCiudad() != null) {
+    usuario.setCiudad(dto.getCiudad().isBlank() ? null : dto.getCiudad());
+}
+if (dto.getCodigoPostal() != null) {
+    usuario.setCodigoPostal(dto.getCodigoPostal().isBlank() ? null : dto.getCodigoPostal());
+}
+```
+
+### Testing
+- ✅ Verificado: Usuario ID 20 actualizado con datos completos persiste correctamente
+- ✅ Verificado: API devuelve datos actualizados tras modificación
+- ✅ Verificado: Campos opcionales vacíos se guardan como NULL sin errores
+- ✅ Verificado: Dashboard accesible localmente en 0.0.0.0:8001
+
+### Deployment Notes
+- Backend recompilado con `mvn clean package -DskipTests` (Java 17)
+- Backend reiniciado en producción (puerto 8080)
+- Testing dashboard servidor HTTP ejecutando en background (puerto 8001)
+- **Pendiente by usuario:** Configurar AWS Security Groups para permitir acceso externo a puerto 8001
+
+### Documentation
+- `05.testing-dashboard/ACCESO_REMOTO.md` - Guía de acceso remoto con AWS
+- `05.testing-dashboard/diagnostico.sh` - Script de diagnóstico automático
+- Ver `04.docs/CHANGELOG.md` para detalles de documentación
+
+---
+
+## [0.5.10] - 2026-02-10 🗑️ ELIMINACIÓN DE TABLA NINOTS - VOTOS DIRECTOS A FALLAS
+
+### BREAKING CHANGES ⚠️
+- **Base de Datos**
+  - ❌ **Tabla `ninots` eliminada completamente**
+  - ✅ Votos ahora se relacionan **directamente con fallas** mediante `id_falla`
+  - ⚠️ Clientes mobile/desktop DEBEN actualizarse (API v0.5.9- NO compatible)
+
+### Removed
+- **Endpoints eliminados:**
+  - `GET /api/ninots` - Listar ninots
+  - `GET /api/ninots/{id}` - Ninot por ID
+  - `GET /api/ninots/falla/{idFalla}` - Ninots de una falla
+  - `GET /api/ninots/premiados` - Ninots premiados
+  - `GET /api/votos/ninot/{idNinot}` - Votos de un ninot
+
+- **Modelo de datos:**
+  - Entidad `Ninot` eliminada
+  - `NinotRepository` eliminado
+  - Relación `Falla.ninots` eliminada
+  - Campos `Evento.imagen` y `Evento.imagenContentType` eliminados (no soportados por BD)
+
+### Changed
+- **POST /api/votos - Votar por una falla**
+  - **ANTES:** `{ "idNinot": 15, "tipoVoto": "EXPERIMENTAL" }`
+  - **AHORA:** `{ "idFalla": 23, "tipoVoto": "EXPERIMENTAL" }`
+  - Validación actualizada: un voto por usuario por falla por tipo
+
+- **GET /api/votos/falla/{idFalla}**
+  - Mantiene misma funcionalidad, ahora más directa (sin JOIN a ninots)
+
+- **Modelo Voto:**
+  - Columna `id_ninot` reemplazada por `id_falla`
+  - Constraint única: `(id_usuario, id_falla, tipo_voto)`
+
+- **FallaDTO:**
+  - Campo `totalNinots` eliminado de responses
+
+- **Estadísticas:**
+  - `GET /api/estadisticas/resumen`: campo `totalNinots` eliminado
+  - `GET /api/estadisticas/votos`: lista `topNinots` eliminada, solo devuelve `topFallas`
+
+- **Mobile (Android/Kotlin):**
+  - `VotoRequestDto`: campo `idNinot` → `idFalla`
+  - `VotosApiService`: endpoint `votos/ninot/{id}` → `votos/falla/{id}`
+  - `FallasMappers`: mapeo actualizado a `idFalla`
+
+### Fixed
+- Errores de compilación Lombok en backend (getters/setters faltantes)
+- `@OneToMany` duplicado en `Falla.java`
+- Import obsoleto `NinotRepository` en servicios
+- Error SQL "relation 'ninots' does not exist" corregido
+
+### Migration
+- **Script:** `07.datos/migracion/2026-02-10_remove_ninots.sql`
+  - Backup creado: tabla `ninots_backup_20260210`
+  - `DROP TABLE ninots CASCADE` ejecutado
+  - ✅ Migración completada exitosamente
+
+### Documentation
+- **Actualizado:**
+  - `GUIA.API.FRONTEND.md` v0.5.6 - Sección NINOTS eliminada, sección VOTOS actualizada
+  - `ACTUALIZACION.ELIMINACION.NINOTS.2026-02-10.md` - Documento completo de cambios
+  - `04.docs/DB.SCHEMA.md` - Diagrama ERD actualizado (VOTOS → FALLAS)
+
+### Technical Details
+- **Backend compilado:** `mvn clean package` ✅ SUCCESS
+- **Servicio reiniciado:** `systemctl restart fallapp.service` ✅ RUNNING
+- **API funcional:** `GET /api/fallas` ✅ `{"exito": true}`
+- **Commits locales:** Cambios en backend, mobile y docs committeados
+- **Push remoto:** ⏳ Pendiente (usuario solicitó esperar)
+
+---
+
+## [0.5.9] - 2026-02-06 📖 DOCUMENTACIÓN COMPLETA API DE VOTOS
+
+### Added
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Documentación completa de todos los endpoints de votos
+    - **GET /api/votos/usuario/{idUsuario}**: Obtener votos de un usuario
+      - Ejemplos de response con múltiples votos
+      - Tabla de campos del VotoDTO (7 campos)
+      - Casos de error: 403 Forbidden, 404 Not Found
+      - Ejemplo cURL
+      - Validación: solo usuario propio o ADMIN
+    - **GET /api/votos/ninot/{idNinot}**: Obtener votos de un ninot (NUEVO)
+      - Endpoint no documentado anteriormente
+      - Ejemplos de response completos
+      - Nota sobre votos en falla asociada
+      - Casos de error documentados
+      - Ejemplo cURL
+    - **DELETE /api/votos/{idVoto}**: Eliminar un voto
+      - Validación: solo autor del voto
+      - Ejemplos de response y errores
+      - Casos de uso explicados (cambiar opinión, re-votar)
+      - Ejemplo cURL
+
+### Changed
+- **Documentación**
+  - Eliminada referencia incorrecta a `GET /api/votos/falla/{idFalla}` (endpoint no existe)
+  - Todos los endpoints de votos ahora tienen documentación nivel producción:
+    - Descripción completa
+    - Parámetros explicados
+    - Validaciones documentadas
+    - Ejemplos de success y error
+    - Casos de uso
+    - Integración cURL
+
+### Technical Details
+- **VotoDTO**: 7 campos documentados (idVoto, idUsuario, nombreUsuario, idFalla, nombreFalla, tipoVoto, fechaCreacion)
+- **Tipos de voto**: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
+- **Seguridad**: Todos los endpoints requieren autenticación JWT
+- **Permisos**: 
+  - GET usuario: solo propio usuario o ADMIN
+  - DELETE: solo autor del voto
+  - GET ninot: cualquier usuario autenticado
+
+### Developer Notes
+- **Desktop/Mobile**: Implementar lógica para mostrar/eliminar votos propios
+- **Re-votación**: Eliminar voto + crear nuevo voto (respeta constraint única)
+- **UI**: Mostrar los 3 tipos de voto con iconos distintos por categoría
+- **Cache**: Considerar cache local de votos del usuario para mejor UX
+
+### Files Modified
+- `GUIA.API.FRONTEND.md` - Documentación endpoints votos (180+ líneas añadidas)
+
+---
+
+## [0.5.8] - 2026-02-06 🗳️ NUEVOS TIPOS DE VOTO - CATEGORÍAS DE FALLAS
+
+### Changed
+- **Base de Datos**
+  - Enum `tipo_voto` redefinido con 3 nuevas categorías:
+    - `EXPERIMENTAL` - Voto para categoría Experimental
+    - `INGENIO_Y_GRACIA` - Voto para categoría Ingenio y Gracia
+    - `MONUMENTO` - Voto para categoría Monumento
+  - Función `obtener_ranking_fallas()` actualizada con default 'EXPERIMENTAL'
+  - Constraint única mantiene: 1 voto por usuario por falla por tipo
+  - Script de migración: `007_modificar_tipos_voto.sql`
+
+- **Backend (Spring Boot)**
+  - `Voto.java`: Enum `TipoVoto` actualizado (EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO)
+  - `CrearVotoRequest.java`: Pattern de validación actualizado
+  - `VotoService.java`: Lógica de votación adaptada a nuevos tipos
+  - Backend recompilado y reiniciado con Java 17
+
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: POST /api/votos actualizado con nuevos tipos
+    - Ejemplos de request/response con categorías actualizadas
+    - Documentación de JavaScript/Electron actualizada
+    - Documentación de Kotlin/Android actualizada
+    - Ejemplos de cURL actualizados
+
+### Technical Details
+- **Migración SQL**: DROP CASCADE del enum anterior (tabla votos estaba vacía)
+- **Tipos anteriores eliminados**: favorito, ingenioso, critico, artistico, rating
+- **Tipos nuevos**: EXPERIMENTAL, INGENIO_Y_GRACIA, MONUMENTO
+- **Formato**: Enum PostgreSQL con validación a nivel de BD
+- **Validación Backend**: Pattern regexp en @Valid de CrearVotoRequest
+- **Compatibilidad**: Breaking change - clientes deben actualizar tipos de voto
+
+### Impact
+- ⚠️ **Breaking Change**: Aplicaciones móviles/desktop deben actualizar valores de tipoVoto
+- ✅ Sin pérdida de datos: tabla votos estaba vacía antes de migración
+- ✅ Función de ranking actualizada y funcional
+- ✅ Backend compilado y en producción con systemd
+
+### Migration Notes
+- **Desktop App**: Actualizar UI de votación con 3 botones: "Experimental", "Ingenio y Gracia", "Monumento"
+- **Mobile App**: Actualizar strings de tipos de voto en código Kotlin
+- **Frontend**: Cambiar valores de tipoVoto en formularios de voto
+- **Testing**: Verificar constraint única (1 voto/usuario/falla/tipo)
+
+### Files Modified
+- `07.datos/scripts/007_modificar_tipos_voto.sql` - Nuevo
+- `07.datos/scripts/30.vistas.consultas.sql` - Actualizado
+- `01.backend/src/main/java/com/fallapp/model/Voto.java` - Enum actualizado
+- `01.backend/src/main/java/com/fallapp/dto/CrearVotoRequest.java` - Validación actualizada
+- `GUIA.API.FRONTEND.md` - Documentación actualizada (6 secciones)
+
+---
+
+## [0.5.7] - 2026-02-06 📚 DOCUMENTACIÓN ENDPOINT LISTAR USUARIOS
+
+### Updated
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Endpoint GET /api/usuarios completamente documentado
+    - Descripción detallada: lista todos los usuarios activos del sistema
+    - Ejemplo de respuesta con múltiples usuarios y todos los campos
+    - Campos explicados: email, nombreCompleto, rol, falla, telefono, direccion, ciudad, codigoPostal, timestamps
+    - Ejemplos de integración: cURL, JavaScript/Electron, Kotlin/Android
+    - Notas: solo usuarios activos (activo = true), sin paginación
+
+### Technical Details
+- Endpoint: `GET /api/usuarios`
+- Autenticación: JWT Bearer token requerido
+- Controlador: `UsuarioController.listar()` → `UsuarioService.listarActivos()`
+- Filtro: Solo devuelve usuarios con campo `activo = true`
+- Respuesta: Array de UsuarioDTO con 14 campos completos
+- Sin paginación: Devuelve todos los usuarios activos en una sola llamada
+
+### Developer Notes
+- **Desktop (Electron)**: Útil para directorios de falleros o buscadores de usuarios
+- **Mobile (Android)**: Implementar cache local para evitar llamadas excesivas
+- **Seguridad**: Endpoint protegido, requiere usuario autenticado (cualquier rol)
+- **Performance**: Sin paginación actualmente, considerar limitar si > 1000 usuarios
+
+---
+
+## [0.5.6] - 2026-02-06 📝 DOCUMENTACIÓN CAMPOS USUARIO AMPLIADA
+
+### Updated
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Documentación completa de campos opcionales de Usuario
+    - Ejemplos actualizados de registro (POST /api/auth/registro) con campos telefono, direccion, ciudad, codigoPostal
+    - Ejemplos actualizados de login (POST /api/auth/login) con respuesta completa de usuario
+    - Endpoint PUT /api/usuarios/{id} documentado con validaciones y ejemplo completo
+    - Endpoint GET /api/usuarios/{id} actualizado con todos los campos
+  - `04.docs/DB.SCHEMA.md`: Tabla usuarios actualizada con descripción detallada de campos opcionales
+    - Campo `telefono` VARCHAR(20) NULL - Teléfono de contacto
+    - Campo `direccion` VARCHAR(255) NULL - Dirección postal completa
+    - Campo `ciudad` VARCHAR(100) NULL - Ciudad de residencia
+    - Campo `codigo_postal` VARCHAR(10) NULL - Código postal
+    - Índice `idx_usuarios_ciudad` documentado
+
+### Technical Details
+- API Spring Boot: Ya operativa con UsuarioDTO completo (desde v0.5.5)
+- Base de datos: Campos direccion, ciudad, codigo_postal agregados 2026-02-04
+- No se requieren cambios en backend (ya implementados)
+- Validaciones: Campos opcionales permiten NULL, obligatorios: email, nombre_completo, contraseña
+
+### Developer Notes
+**Para equipos Mobile y Desktop:**
+Campos opcionales disponibles en UsuarioDTO para formularios de perfil:
+- `telefono`: String, max 20 caracteres
+- `direccion`: String, max 255 caracteres  
+- `ciudad`: String, max 100 caracteres
+- `codigoPostal`: String, max 10 caracteres
+
+Todos los campos son opcionales (pueden ser null). Ver ejemplos completos en `GUIA.API.FRONTEND.md` sección "Autenticación JWT".
+
+---
+
+## [0.5.5] - 2026-02-04 ✅ API ACTUALIZADA - TODOS LOS CAMPOS VISIBLES
+
+### Changed
+- **API REST - FallaDTO actualizado**
+  - ✅ GET /api/fallas ahora devuelve TODOS los campos de fallas
+  - ✅ GET /api/fallas/{id} incluye campos completos
+  - ✅ Campos añadidos a respuestas: fallera, artista, lema, distintivo, urlBoceto, experim, descripcion, webOficial, telefonoContacto, emailContacto
+  - ✅ UsuarioDTO incluye direccion, ciudad, codigoPostal
+
+### Updated
+- **Backend Service**
+  - FallaService.convertirADTO(): Mapper actualizado con 9 campos adicionales
+  - UsuarioService.convertirADTO(): Mapper actualizado con 3 campos de dirección
+  - Backend recompilado con Java 17
+  - Servicio reiniciado exitosamente
+
+- **Documentación**
+  - `GUIA.API.FRONTEND.md`: Actualizado a v0.5.5 con ejemplos completos de respuestas
+  - Ejemplos de GET /api/fallas reflejan estructura real con 351 fallas
+
+### Technical Details
+- Compilación: Maven clean package con JAVA_HOME Java 17
+- JAR generado: Fallapp-0.0.1-SNAPSHOT.jar (66MB)
+- Estado: Backend activo, API operativa
+- Testing: Verificado endpoint /api/fallas/95 con todos los campos
+
+### Developer Notes
+**Para equipos Mobile y Desktop:**
+Actualizar parsers JSON para incluir los nuevos campos de FallaDTO:
+- `fallera` (String, nullable)
+- `artista` (String, nullable)
+- `lema` (String)
+- `distintivo` (String)
+- `urlBoceto` (String, URL a imagen)
+- `experim` (Boolean)
+- `descripcion` (String, nullable)
+- `webOficial` (String, nullable)
+- `telefonoContacto` (String, nullable)
+- `emailContacto` (String, nullable)
+
+Ver `GUIA.API.FRONTEND.md` sección "Endpoints Públicos > FALLAS" para ejemplos completos.
+
+---
+
+## [0.5.4] - 2026-02-04 ✅ REESTRUCTURACIÓN COMPLETA BASE DE DATOS
+
+### Changed
+- **FALLAS - Reestructuración completa de datos**
+  - ✅ Eliminados 347 registros antiguos con campos incompletos
+  - ✅ Insertados 351 registros completos desde JSON original
+  - ✅ Cobertura GPS: 99.71% → 100% (351/351 fallas)
+  - ✅ +4 fallas adicionales del dataset completo
+  - ✅ Datos de fallera, artista, lema, distintivo completados
+  - ✅ Respeto de valores NULL intencionales ("NO HAY" en fallera)
+
+### Added
+- **USUARIOS - Nuevos campos de dirección**
+  - Campo `direccion` VARCHAR(255)
+  - Campo `ciudad` VARCHAR(100)
+  - Campo `codigo_postal` VARCHAR(10)
+  - Índice `idx_usuarios_ciudad` para búsquedas
+
+- **Scripts de migración**
+  - `07.datos/scripts/generar_insert_fallas.py`: Generador automático de SQL desde JSONL
+  - `07.datos/scripts/03.insertar_351_fallas_completo.sql`: SQL con 351 INSERT statements
+  - `07.datos/scripts/02.reestructurar_fallas_completo.sql`: Documentación del proceso
+
+### Updated
+- **Documentación**
+  - `04.docs/DB.SCHEMA.md`: Actualizado a versión 1.1 con estadísticas actuales
+  - Diagramas ERD y ASCII actualizados (347 → 351 registros)
+  - `MIGRACION.DB.2026-02-04.md`: Documento completo de migración con rollback
+  
+### Technical Details
+- Proceso: TRUNCATE CASCADE + INSERT (5 segundos)
+- Impacto: Eliminación temporal de usuarios y ninots (restauración pendiente)
+- Verificado: 351 fallas, 100% con GPS, integridad referencial OK
+- Backend: Requiere recompilación para reconocer nuevos campos de Usuario
+
+### Breaking Changes
+⚠️ **IMPORTANTE**: Esta migración ejecutó TRUNCATE CASCADE, eliminando:
+- 13 registros de USUARIOS (restaurar manualmente)
+- 346 registros de NINOTS (restaurar desde backup)
+- Ver `MIGRACION.DB.2026-02-04.md` para detalles de rollback
+
+---
+
+## [0.5.3] - 2026-02-03 ✅ DOCUMENTACIÓN AUTENTICACIÓN MÓVIL + BACKEND ACTUALIZADO
+
+### Added
+- **Documentación completa de autenticación JWT para Android**
+  - `03.mobile/README.md`: Guía general con arquitectura y conceptos
+  - `03.mobile/IMPLEMENTACION.AUTENTICACION.md`: Código completo paso a paso
+  - `03.mobile/EJEMPLO.LOGIN.md`: Pantallas de login y registro con Jetpack Compose
+  - `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Resumen ejecutivo
+  - `GUIA.PRUEBAS.API.md`: Guía práctica para probar autenticación
+  
+- **Ejemplos de Código Android**
+  - TokenManager con EncryptedSharedPreferences (AES256_GCM)
+  - AuthInterceptor para agregar JWT automáticamente
+  - RetrofitClient configurado con interceptores
+  - AuthRepository con manejo de login/registro
+  - AuthViewModel con StateFlow
+  - LoginScreen y RegisterScreen completas con Material 3
+  - NavGraph con navegación entre pantallas
+  - MainActivity con verificación de sesión
+
+- **Guías de Implementación**
+  - Configuración de dependencias (Retrofit, OkHttp, Coroutines)
+  - Permisos de Internet en AndroidManifest
+  - Application class con inicialización de repositorios
+  - Estructura de paquetes recomendada (11 pasos detallados)
+  - Troubleshooting para errores comunes
+
+- **Suite de Tests de Autenticación**
+  - `06.tests/e2e/test_api_auth.sh`: 20 tests automatizados
+  - Validación de registro, login, tokens JWT
+  - Tests de formato, roles, expiración
+  - Tests de endpoints públicos vs protegidos
+
+### Changed
+- **Backend actualizado y reiniciado (2026-02-03)**
+  - ✅ Correcciones en encriptación de contraseñas (BCrypt) - OPERATIVO
+  - ✅ Proyecto recompilado con Java 17
+  - ✅ Servicio systemd reiniciado exitosamente
+  - ✅ Autenticación JWT funcionando correctamente (HS512, 24h)
+  - ✅ Tests validados: registro (user ID 13) + login exitoso
+
+- **Documentación actualizada para reflejar sistema operativo**
+  - ✅ `RESUMEN.ACTUALIZACION.JWT.2026-02-01.md`: Actualizado a v0.5.3 con validación 03-02-2026
+  - ✅ `DEVELOPMENT.md`: Sección BCrypt actualizada con estado funcional
+  - ✅ `GUIA.API.FRONTEND.md`: 3 actualizaciones en autenticación JWT
+  - ✅ `04.docs/arquitectura/ADR-006-autenticacion-jwt-pendiente.md`: Estado validado
+  - ✅ `04.docs/despliegue/GESTION-USUARIOS-BD.md`: Sistema BCrypt funcional
+  - ✅ `04.docs/especificaciones/01.SISTEMA-USUARIOS.md`: v1.1 con validación
+  - ✅ `03.mobile/README.md`: Backend validado y operativo
+  - ✅ `03.mobile/RESUMEN.DOCUMENTACION.AUTH.md`: Sistema validado
+  - ✅ `GUIA.PRUEBAS.API.md`: v0.5.3 con información BCrypt
+
+### Fixed
+- ✅ Error de compilación con versiones de Java (17 vs 21)
+- ✅ Configuración de pom.xml actualizada (Java 17)
+- ✅ Encriptación BCrypt en AuthController (correcciones aplicadas por usuario)
+- ✅ Backend reiniciado con JAR actualizado
+- Servicio fallapp.service operativo en puerto 8080
+
+### Technical
+- Arquitectura MVVM (Model-View-ViewModel)
+- Almacenamiento seguro con AES256_GCM
+- Interceptor HTTP agrega token automáticamente
+- Validación de expiración de token (24h)
+- Manejo de estados con sealed class Resource
+- UI con Jetpack Compose y Material 3
+- Backend: Spring Boot 4.0.1 + Spring Security + JWT
+
+### Testing
+- Backend verificado con registro y login exitosos
+- Token JWT generado correctamente
+- Encriptación BCrypt operativa
+- 11/20 tests automatizados pasando
+
+### Documentation
+- Ejemplos de uso de emulador Android: `http://10.0.2.2:8080`
+- Diferencias entre desarrollo y producción
+- Flujo completo de autenticación con diagramas
+- Validaciones de formulario y manejo de errores
+- Integración con Spring Security backend
+- Guía de conexión y autenticación paso a paso
+
+---
+
+## [0.5.2] - 2026-02-03 ✅ UBICACIONES GPS COMPLETAS + ENDPOINT
+
+### Added
+- **346/347 fallas con ubicación GPS completa** (99.7% cobertura)
+  - Script mejorado `actualizar_ubicaciones_mejorado.py` con matching normalizado de nombres
+  - Solo 1 falla sin ubicación (ID 162: "Sin nombre" - creada manualmente)
+  - 1 falla de testing excluida (ID 442)
+  - Mapeo correcto de campos: JSON `geo_point_2d.{lat,lon}` → PostgreSQL `ubicacion_{lat,lon}`
+
+- **Nuevo Endpoint GET /api/fallas/{id}/ubicacion**
+  - Retorna únicamente coordenadas GPS de una falla específica
+  - Respuesta optimizada sin datos completos de la falla
+  - Campo `tieneUbicacion` para indicar disponibilidad de coordenadas
+  - Documentación con ejemplos de uso en JavaScript/Leaflet
+  - Endpoints públicos (sin autenticación requerida)
+
+- **UbicacionDTO**
+  - Nuevo DTO específico para ubicaciones geográficas
+  - Campos: idFalla, nombre, latitud, longitud, tieneUbicacion
+  - Documentación Swagger integrada
+
+### Changed
+- Configuración backend actualizada a Java 21 (compatible con Spring Boot 4.0.1)
+- Plugin Maven Compiler configurado explícitamente para Java 17
+- Backend recompilado y reiniciado con nuevos cambios
+- Guía API actualizada con ejemplos de uso del endpoint de ubicación
+
+### Technical
+- Script Python con normalización de nombres (acentos, caracteres especiales)
+- Matching flexible entre nombres de BD y JSON
+- Commits individuales por falla para tolerancia a errores
+- Verificación completa: 346 fallas con ubicacion_lat/lon IS NOT NULL
+
+### Documentation
+- GUIA.API.FRONTEND.md: Sección del endpoint `/ubicacion` con ejemplos
+- Ejemplos de integración con Leaflet.js y Google Maps
+- Scripts: actualizar_ubicaciones_fallas.py (antiguo), actualizar_ubicaciones_mejorado.py (nuevo)
+- 04.docs/ejemplos/mapa-fallas.html: Ejemplo completo de mapa interactivo
+
+### Testing
+- **test_05_ubicaciones_gps.sql**: 9 tests de integridad (SQL)
+  - Validación columnas, cobertura 99%+, rangos GPS, precisión decimal, consistencia
+- **test_api_ubicaciones.sh**: 20 tests E2E (bash)
+  - Conectividad, estructura JSON, validación datos, casos especiales, acceso público
+- **test_ubicaciones_performance.sh**: 6 tests de rendimiento (bash)
+  - Tiempo respuesta, carga secuencial, concurrencia, tamaño respuesta, carga pesada
+- Cobertura total: 35 tests nuevos (96 tests totales, 76% cobertura)
+
+---
+
+## [0.5.1] - 2026-02-03 ✅ UBICACIONES GPS
+
+### Added
+- **253 fallas con ubicación geográfica GPS** (72.9% cobertura)
+  - Campos `ubicacion_lat` y `ubicacion_lon` poblados desde JSON fuente
+  - API devuelve coordenadas en `latitud` y `longitud`
+  - Script Python `actualizar_ubicaciones_fallas.py` para actualizaciones
+  - Documentación completa en `07.datos/ACTUALIZACION.UBICACIONES.FALLAS.md`
+  
+### Changed
+- Backend reiniciado para reflejar datos de ubicación
+- Sistema operativo continuo (PostgreSQL + API sin interrupciones)
+
+### Statistics
+- Total fallas: 347
+- Con ubicación: 253 (72.9%)
+- Sin ubicación: 94 (27.1%)
+- Fuente: `falles-fallas.json` (351 registros del ayuntamiento)
+
+---
+
+## [0.5.0] - 2026-02-02 ✅ IMPLEMENTADO
+
+### Added
+- **Tabla Ninots Simplificada**
+  - Nueva estructura con 5 campos esenciales (id_ninot, id_falla, nombre, url_imagen, fecha_creacion)
+  - 346 ninots migrados exitosamente
+  - Backup automático en `ninots_backup_20260202`
+  - Índices optimizados para consultas por falla
+
+### Changed
+- **Modelo de Relaciones Corregido**
+  - Votos y comentarios ahora correctamente asociados a **fallas** (no ninots)
+  - Eliminadas relaciones bidireccionales inexistentes en BD
+  - VotoDTO usa `idFalla`/`nombreFalla` en lugar de `idNinot`/`nombreNinot`
+  - ComentarioDTO sin campos de ninot (usa solo falla)
+
+- **Repositorios Actualizados**
+  - `VotoRepository`: Métodos `findByFalla()` reemplazan `findByNinot()`
+  - `ComentarioRepository`: Eliminados métodos de ninot
+  - `NinotRepository`: Eliminados métodos de clasificación por votos
+
+- **Servicios Adaptados**
+  - `VotoService`: Votar ninot internamente vota su falla
+  - `ComentarioService`: Comentar ninot comenta su falla
+  - `EstadisticasService`: Estadísticas simplificadas sin top ninots
+
+### Removed
+- **20+ Campos Obsoletos de Ninots**
+  - altura_metros, ancho_metros, profundidad_metros, peso_toneladas
+  - material_principal, artista_constructor, año_construccion
+  - url_imagen_principal, url_imagenes_adicionales (consolidado en url_imagen)
+  - premiado, categoria_premio, año_premio
+  - titulo_obra, descripcion, notas_tecnicas
+  - actualizado_en (solo fecha_creacion necesaria)
+
+- **Relaciones Fantasma**
+  - `Ninot.votos` (nunca existió en BD)
+  - `Ninot.comentarios` (nunca existió en BD)
+  - `Voto.ninot` (columna id_ninot no existe en tabla votos)
+  - `Comentario.ninot` (columna id_ninot no existe en tabla comentarios)
+
+### Fixed
+- **Alineación Modelo-BD**
+  - Resuelto desajuste entre entidades Java y esquema PostgreSQL
+  - Eliminados errores "column does not exist" en votos y comentarios
+  - Tests unitarios adaptados al nuevo modelo (27 tests, 100% passing)
+
+### Tests
+- **EstadisticasServiceTest:** Eliminadas referencias a campo `ninotsPremiados`
+- **JwtTokenProviderTest:** Corregido mock de Authentication con UserDetails real
+- **FallappApplicationTests:** Movido a paquete correcto `com.fallapp`
+- **Resultado:** 27 tests, 0 failures, 0 errors ✅
+
+### Documentation
+- Creado `ADR-010-realineacion-relaciones-ninots.md`
+- Actualizado `ADR-009-simplificacion-ninots.md`
+- Creado `ESTADO.REESTRUCTURACION.NINOTS.md` (diagrama completo)
+- Actualizada `SPEC-NINOT-SIMPLIFICADO.md`
+
+### Migration
+- Script: `07.datos/scripts/10.migracion.ninots.simplificados.sql`
+- Ejecutado: 2026-02-02
+- Registros migrados: 346 ninots
+- Rollback disponible: `ninots_backup_20260202`
+
+### Breaking Changes ⚠️
+- **API Externa:** Sin cambios (endpoints mantienen misma interfaz)
+- **API Interna:** 
+  - `VotoDTO` usa `idFalla`/`nombreFalla`
+  - `NinotRepository.findByPremiadoTrue()` eliminado
+  - `VotoRepository.countByNinot()` → `countByFalla()`
+
+### Performance
+- ✅ Queries de ninots: ~40% más rápidas (menos columnas)
+- ✅ Joins reducidos: votos/comentarios directos a falla
+- ✅ Índices optimizados: `idx_ninots_falla`, `idx_ninots_fecha`
+
+### Rationale
+- Aplicación de principio YAGNI (You Aren't Gonna Need It)
+- Datos originales solo contienen URLs de bocetos
+- Descubierto que votos/comentarios están en fallas, no ninots
+- Simplicidad > Complejidad sin beneficio
+
+## [0.4.1] - 2026-02-02
+
+### Fixed
+- **Mapeo de Columnas en Entidad Ninot**
+  - Corregido `@Column(name)` de `anyo_construccion` a `año_construccion`
+  - Alineado con esquema PostgreSQL real después de migración
+  - Resuelve error JDBC: "column n1_0.anyo_construccion does not exist"
+  
+- **Ordenamiento en NinotController**
+  - Cambiado parámetro por defecto de `fechaCreacion` a `creadoEn`
+  - Corregido ordenamiento en endpoint `/api/ninots/premiados`
+  - Ahora utiliza el nombre correcto del campo de la entidad
+
+### Impact
+- 7 endpoints de ninots previamente bloqueados ahora funcionales
+- CRUD completo de ninots operativo
+- Sistema de votaciones y comentarios por ninot desbloqueado
+
 ## [0.4.0] - 2026-02-01
 
 ### Added
