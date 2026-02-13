@@ -2,9 +2,11 @@ package com.fallapp.service;
 
 import com.fallapp.dto.*;
 import com.fallapp.model.Usuario;
+import com.fallapp.model.Falla;
 import com.fallapp.exception.BadRequestException;
 import com.fallapp.exception.ResourceNotFoundException;
 import com.fallapp.repository.UsuarioRepository;
+import com.fallapp.repository.FallaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final FallaRepository fallaRepository;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -39,10 +42,38 @@ public class UsuarioService {
         usuario.setEmail(request.getEmail());
         usuario.setContrasenaHash(passwordEncoder.encode(request.getContrasena()));
         usuario.setNombreCompleto(request.getNombreCompleto());
-        usuario.setRol(Usuario.RolUsuario.usuario);
+        
+        // Determinar el rol: usar el proporcionado por la solicitud, o "usuario" por defecto
+        Usuario.RolUsuario rolFinal = Usuario.RolUsuario.usuario;
+        if (request.getRol() != null && !request.getRol().isBlank()) {
+            try {
+                rolFinal = Usuario.RolUsuario.valueOf(request.getRol().toLowerCase());
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Rol inválido. Valores permitidos: admin, casal, usuario");
+            }
+        }
+        usuario.setRol(rolFinal);
+        
+        // Si es casal, debe tener una falla asociada
+        if (rolFinal == Usuario.RolUsuario.casal) {
+            if (request.getIdFalla() == null || request.getIdFalla() <= 0) {
+                throw new BadRequestException("Los casales deben tener una falla asociada (idFalla requerido)");
+            }
+            
+            // Obtener y asociar la falla
+            Falla falla = fallaRepository.findById(request.getIdFalla())
+                    .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", request.getIdFalla()));
+            usuario.setFalla(falla);
+        } else {
+            // Para usuarios regulares, opcionalmente asociar falla si se proporciona
+            if (request.getIdFalla() != null && request.getIdFalla() > 0) {
+                Falla falla = fallaRepository.findById(request.getIdFalla())
+                        .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", request.getIdFalla()));
+                usuario.setFalla(falla);
+            }
+        }
+        
         usuario.setActivo(true);
-
-        // TODO: Asociar falla si se proporciona idFalla
 
         Usuario guardado = usuarioRepository.save(usuario);
         return convertirADTO(guardado);

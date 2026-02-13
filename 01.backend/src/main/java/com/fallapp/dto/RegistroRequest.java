@@ -27,4 +27,11 @@ public class RegistroRequest {
     private String nombreCompleto;
 
     private Long idFalla;  // Opcional: para asociar a una falla
+    
+    /**
+     * Rol del usuario a crear. Valores: "admin", "casal", "usuario"
+     * Por defecto es "usuario" si no se especifica.
+     * Si se especifica "casal", entonces idFalla es obligatorio.
+     */
+    private String rol;
 }
