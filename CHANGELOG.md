@@ -5,6 +5,73 @@ Todos los cambios notables de FallApp serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.11] - 2026-02-13 🔧 CORRECCIÓN PERSISTENCIA DE USUARIOS + TESTING DASHBOARD
+
+### Fixed
+- **Backend - Persistencia de datos de usuario:**
+  - ✅ Agregadas columnas `direccion`, `ciudad`, `codigo_postal` a tabla `usuarios`
+  - ✅ Corregido `UsuarioService.actualizar()` para manejar strings vacíos correctamente
+  - 🐛 **Bug resuelto:** Datos de usuario (dirección, ciudad, código postal) que desaparecían tras actualización en app Electron
+  - Validación: Campos opcionales vacíos ahora se guardan como NULL en lugar de causar errores
+
+### Changed
+- **Testing Dashboard - Acceso remoto:**
+  - 📡 `05.testing-dashboard/js/config.js`: API_URL ahora apunta a servidor remoto (35.180.21.42:8080/api)
+  - 🌐 Servidor HTTP configurado para escuchar en todas las interfaces (0.0.0.0:8001)
+  - 📝 Creado `ACCESO_REMOTO.md` con guía completa de configuración de AWS Security Groups
+  - 🔍 Creado `diagnostico.sh` para diagnóstico automático del estado del servidor
+
+### Database Schema
+```sql
+-- Ejecutado en producción 2026-02-13
+ALTER TABLE usuarios 
+  ADD COLUMN IF NOT EXISTS direccion VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100),
+  ADD COLUMN IF NOT EXISTS codigo_postal VARCHAR(10);
+```
+
+### Code Changes
+**UsuarioService.java** - Líneas ~90-110:
+```java
+// ANTES: Campos vacíos causaban problemas
+if (dto.getTelefono() != null) {
+    usuario.setTelefono(dto.getTelefono());
+}
+
+// AHORA: Conversión explícita de strings vacíos a NULL
+if (dto.getTelefono() != null) {
+    usuario.setTelefono(dto.getTelefono().isBlank() ? null : dto.getTelefono());
+}
+if (dto.getDireccion() != null) {
+    usuario.setDireccion(dto.getDireccion().isBlank() ? null : dto.getDireccion());
+}
+if (dto.getCiudad() != null) {
+    usuario.setCiudad(dto.getCiudad().isBlank() ? null : dto.getCiudad());
+}
+if (dto.getCodigoPostal() != null) {
+    usuario.setCodigoPostal(dto.getCodigoPostal().isBlank() ? null : dto.getCodigoPostal());
+}
+```
+
+### Testing
+- ✅ Verificado: Usuario ID 20 actualizado con datos completos persiste correctamente
+- ✅ Verificado: API devuelve datos actualizados tras modificación
+- ✅ Verificado: Campos opcionales vacíos se guardan como NULL sin errores
+- ✅ Verificado: Dashboard accesible localmente en 0.0.0.0:8001
+
+### Deployment Notes
+- Backend recompilado con `mvn clean package -DskipTests` (Java 17)
+- Backend reiniciado en producción (puerto 8080)
+- Testing dashboard servidor HTTP ejecutando en background (puerto 8001)
+- **Pendiente by usuario:** Configurar AWS Security Groups para permitir acceso externo a puerto 8001
+
+### Documentation
+- `05.testing-dashboard/ACCESO_REMOTO.md` - Guía de acceso remoto con AWS
+- `05.testing-dashboard/diagnostico.sh` - Script de diagnóstico automático
+- Ver `04.docs/CHANGELOG.md` para detalles de documentación
+
+---
+
 ## [0.5.10] - 2026-02-10 🗑️ ELIMINACIÓN DE TABLA NINOTS - VOTOS DIRECTOS A FALLAS
 
 ### BREAKING CHANGES ⚠️

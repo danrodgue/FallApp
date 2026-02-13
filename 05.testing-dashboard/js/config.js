@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // URL de la API Backend
-    API_URL: 'http://localhost:8080/api',
+    API_URL: 'http://35.180.21.42:8080/api',
     
     // Endpoints principales
     ENDPOINTS: {

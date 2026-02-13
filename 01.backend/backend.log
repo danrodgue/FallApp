@@ -301,3 +301,3287 @@ Hibernate:
 2026-02-13T07:37:19.722Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
 2026-02-13T07:37:19.726Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=20, email=final_test_7570@test.com, (truncated)...]
 2026-02-13T07:37:19.731Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:51:34.282Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:51:34.288Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:51:34.317Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=gautier@gmail.com, contrasena=gautier)]
+2026-02-13T07:51:34.584Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:51:34.847Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:51:34.870Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+Hibernate: 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+2026-02-13T07:51:34.888Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:51:34.891Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=Login exitoso, datos=LoginResponse(token=eyJhbGciOiJIUzUxMiJ9.eyJzdW (truncated)...]
+2026-02-13T07:51:34.906Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:52:06.215Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:06.215Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:06.223Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=a@a, contrasena=123456)]
+2026-02-13T07:52:06.231Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:06.423Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:06.424Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:06.431Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:07.762Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:07.762Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:07.767Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=a@a, contrasena=123456)]
+2026-02-13T07:52:07.774Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:07.977Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:07.979Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:07.982Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:16.737Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:16.738Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:16.741Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:16.744Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:16.844Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:16.845Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:16.849Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:20.781Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:20.781Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:20.787Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:20.797Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:20.974Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:20.974Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:20.980Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:21.607Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:21.609Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:21.616Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:21.626Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:21.823Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:21.825Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:21.829Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:21.856Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:21.857Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:21.861Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:21.862Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.005Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.005Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.016Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.025Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.081Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:22.082Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:22.089Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:22.146Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.153Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.157Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.173Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.308Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.317Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.322Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.335Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.471Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:22.475Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:22.483Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:22.541Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.551Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.561Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.574Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.691Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:22.691Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:22.696Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:22.703Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.718Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.729Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.738Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:22.934Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:22.934Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:22.940Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:22.955Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:22.963Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:22.969Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:22.977Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:23.182Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:23.182Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:23.201Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:23.204Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:23.220Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:23.226Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:23.238Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:23.312Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:23.314Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:23.320Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:23.470Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:23.470Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:23.479Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=123456)]
+2026-02-13T07:52:23.489Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:23.511Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:23.512Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:23.512Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:23.709Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:23.712Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:23.720Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:23.810Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:23.810Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=false, mensaje=Credenciales inválidas, datos=null)]
+2026-02-13T07:52:23.817Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 401 UNAUTHORIZED
+2026-02-13T07:52:53.912Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:52:53.916Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:52:53.919Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=b@b, contrasena=casale)]
+2026-02-13T07:52:53.930Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:54.127Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:52:54.134Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] org.hibernate.SQL                        : 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+Hibernate: 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+2026-02-13T07:52:54.142Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:52:54.146Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=Login exitoso, datos=LoginResponse(token=eyJhbGciOiJIUzUxMiJ9.eyJzdW (truncated)...]
+2026-02-13T07:52:54.150Z DEBUG 516043 --- [FallApp] [.0-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:00.501Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : POST "/api/auth/login", parameters={}
+2026-02-13T07:53:00.505Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.AuthController#login(LoginRequest)
+2026-02-13T07:53:00.507Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [LoginRequest(email=a@a, contrasena=casale)]
+2026-02-13T07:53:00.513Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:00.704Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:00.716Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+Hibernate: 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+2026-02-13T07:53:00.724Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:00.724Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=Login exitoso, datos=LoginResponse(token=eyJhbGciOiJIUzUxMiJ9.eyJzdW (truncated)...]
+2026-02-13T07:53:00.728Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:00.919Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:00.928Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:00.936Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:00.941Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:00.957Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:00.965Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:00.975Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:03.852Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:03.857Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:03.863Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:03.867Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:03.876Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:03.876Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:03.880Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:07.636Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:07.643Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:07.644Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:07.646Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:07.652Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:07.654Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:07.656Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:21.275Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:21.291Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : PUT "/api/usuarios/8", parameters={}
+2026-02-13T07:53:21.294Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#actualizar(Long, UsuarioDTO)
+2026-02-13T07:53:21.300Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [UsuarioDTO(idUsuario=null, email=a@a, nombreCompleto=Admin, rol=null, idFalla=null, nombreFalla=null (truncated)...]
+2026-02-13T07:53:21.303Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:21.317Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] org.hibernate.SQL                        : 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+Hibernate: 
+    update
+        usuarios 
+    set
+        activo=?,
+        ciudad=?,
+        codigo_postal=?,
+        contraseña_hash=?,
+        direccion=?,
+        email=?,
+        id_falla=?,
+        nombre_completo=?,
+        rol=?,
+        telefono=?,
+        ultimo_acceso=? 
+    where
+        id_usuario=?
+2026-02-13T07:53:21.351Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:21.352Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=Usuario actualizado, datos=UsuarioDTO(idUsuario=8, email=a@a, nombre (truncated)...]
+2026-02-13T07:53:21.356Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:21.466Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:21.482Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:21.485Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:21.486Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:21.505Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:21.509Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:21.510Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:23.403Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:23.412Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:23.415Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:23.419Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:23.429Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:23.430Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:23.437Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:24.771Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:24.778Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:24.785Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:24.788Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:24.795Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:24.798Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:24.801Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T07:53:26.011Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.email=?
+2026-02-13T07:53:26.022Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/usuarios/8", parameters={}
+2026-02-13T07:53:26.030Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.UsuarioController#obtenerPorId(Long)
+2026-02-13T07:53:26.034Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.id_falla,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_usuario=?
+2026-02-13T07:53:26.046Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T07:53:26.046Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=UsuarioDTO(idUsuario=8, email=a@a, nombreCompleto=Admin, (truncated)...]
+2026-02-13T07:53:26.050Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2026-02-13T08:02:55.729Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/fallas?pagina=0", parameters={masked}
+2026-02-13T08:02:55.932Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.fallapp.controller.FallaController#listar(int, int)
+2026-02-13T08:02:59.194Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        f1_0.id_falla,
+        f1_0.actualizado_en,
+        f1_0.anyo_fundacion,
+        f1_0.artista,
+        f1_0.categoria,
+        f1_0.fecha_creacion,
+        f1_0.datos_json,
+        f1_0.descripcion,
+        f1_0.distintivo,
+        f1_0.email_contacto,
+        f1_0.experim,
+        f1_0.fallera,
+        f1_0.lema,
+        f1_0.nombre,
+        f1_0.presidente,
+        f1_0.seccion,
+        f1_0.telefono_contacto,
+        f1_0.ubicacion_lat,
+        f1_0.ubicacion_lon,
+        f1_0.url_boceto,
+        f1_0.web_oficial 
+    from
+        fallas f1_0 
+    order by
+        f1_0.nombre 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+Hibernate: 
+    select
+        f1_0.id_falla,
+        f1_0.actualizado_en,
+        f1_0.anyo_fundacion,
+        f1_0.artista,
+        f1_0.categoria,
+        f1_0.fecha_creacion,
+        f1_0.datos_json,
+        f1_0.descripcion,
+        f1_0.distintivo,
+        f1_0.email_contacto,
+        f1_0.experim,
+        f1_0.fallera,
+        f1_0.lema,
+        f1_0.nombre,
+        f1_0.presidente,
+        f1_0.seccion,
+        f1_0.telefono_contacto,
+        f1_0.ubicacion_lat,
+        f1_0.ubicacion_lon,
+        f1_0.url_boceto,
+        f1_0.web_oficial 
+    from
+        fallas f1_0 
+    order by
+        f1_0.nombre 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2026-02-13T08:03:00.054Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        count(f1_0.id_falla) 
+    from
+        fallas f1_0
+Hibernate: 
+    select
+        count(f1_0.id_falla) 
+    from
+        fallas f1_0
+2026-02-13T08:03:00.181Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.218Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.225Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.227Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.229Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.255Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.262Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.266Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.270Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.273Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.275Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.277Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.278Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.281Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.282Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.284Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.286Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.290Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.293Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.295Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.296Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.298Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.299Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.300Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.302Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.304Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.308Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.311Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.315Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.316Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.326Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.329Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.343Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.347Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.349Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.353Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.355Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.356Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.360Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+Hibernate: 
+    select
+        e1_0.id_falla,
+        e1_0.id_evento,
+        e1_0.actualizado_en,
+        e1_0.actualizado_por,
+        e1_0.fecha_creacion,
+        e1_0.creado_por,
+        e1_0.descripcion,
+        e1_0.direccion,
+        e1_0.fecha_evento,
+        e1_0.nombre,
+        e1_0.participantes_estimado,
+        e1_0.tipo,
+        e1_0.ubicacion,
+        e1_0.url_imagen 
+    from
+        eventos e1_0 
+    where
+        e1_0.id_falla=?
+2026-02-13T08:03:00.362Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] org.hibernate.SQL                        : 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+Hibernate: 
+    select
+        u1_0.id_falla,
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.ciudad,
+        u1_0.codigo_postal,
+        u1_0.contraseña_hash,
+        u1_0.direccion,
+        u1_0.email,
+        u1_0.fecha_registro,
+        u1_0.nombre_completo,
+        u1_0.rol,
+        u1_0.telefono,
+        u1_0.ultimo_acceso 
+    from
+        usuarios u1_0 
+    where
+        u1_0.id_falla=?
+2026-02-13T08:03:00.533Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [*/*] and supported [application/json, application/*+json, application/yaml]
+2026-02-13T08:03:00.726Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ApiResponse(exito=true, mensaje=null, datos=PaginatedResponse(contenido=[FallaDTO(idFalla=101, nombr (truncated)...]
+2026-02-13T08:03:01.088Z DEBUG 516043 --- [FallApp] [0.0-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
