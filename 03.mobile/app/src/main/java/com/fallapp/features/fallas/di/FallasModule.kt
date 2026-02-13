@@ -3,6 +3,8 @@ package com.fallapp.features.fallas.di
 import com.fallapp.features.fallas.data.remote.FallasApiService
 import com.fallapp.features.fallas.data.remote.NinotsApiService
 import com.fallapp.features.fallas.data.remote.VotosApiService
+import com.fallapp.features.fallas.data.remote.EstadisticasApiService
+import com.fallapp.features.auth.domain.usecase.GetCurrentUserUseCase
 import com.fallapp.features.fallas.data.repository.FallasRepositoryImpl
 import com.fallapp.features.fallas.data.repository.VotosRepositoryImpl
 import com.fallapp.features.fallas.domain.repository.FallasRepository
@@ -24,6 +26,7 @@ val fallasModule = module {
     single { FallasApiService(httpClient = get()) }
     single { VotosApiService(client = get(), tokenManager = get()) }
     single { NinotsApiService(client = get()) }
+    single { EstadisticasApiService(client = get()) }
     
     // Data Layer - Repository
     single<FallasRepository> {
@@ -52,6 +55,7 @@ val fallasModule = module {
     factory { GetVotosUsuarioUseCase(repository = get()) }
     factory { EliminarVotoUseCase(repository = get()) }
     factory { GetVotosFallaUseCase(repository = get()) }
+    factory { GetRankingUseCase(apiService = get()) }
     
     // Presentation Layer - ViewModels
     viewModel {
@@ -77,7 +81,9 @@ val fallasModule = module {
             votarFallaUseCase = get(),
             getVotosUsuarioUseCase = get(),
             eliminarVotoUseCase = get(),
-            getVotosFallaUseCase = get()
+            getVotosFallaUseCase = get(),
+            getCurrentUserUseCase = get(),
+            getRankingUseCase = get()
         )
     }
 }

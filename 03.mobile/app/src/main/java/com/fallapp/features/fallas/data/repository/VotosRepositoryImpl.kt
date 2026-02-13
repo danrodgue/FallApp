@@ -61,9 +61,8 @@ class VotosRepositoryImpl(
     
     override suspend fun getVotosUsuario(idUsuario: Long): Result<List<Voto>> {
         return try {
-            // El backend obtiene el usuario a partir del token,
-            // por lo que el idUsuario se ignora y se usa /votos/mis-votos
-            val response = apiService.getMisVotos()
+            // Usamos endpoint GET /api/votos/usuario/{idUsuario}
+            val response = apiService.getVotosUsuario(idUsuario)
 
             if (response.exito && response.datos != null) {
                 val votosDto = response.datos

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fallapp.core.util.Result
 import com.fallapp.features.fallas.domain.model.Falla
+import com.fallapp.features.fallas.domain.model.FallaRanking
 import com.fallapp.features.fallas.domain.model.TipoVoto
 import com.fallapp.features.fallas.domain.model.Voto
 import com.fallapp.features.fallas.domain.model.VotoRequest
@@ -12,6 +13,8 @@ import com.fallapp.features.fallas.domain.usecase.GetVotosFallaUseCase
 import com.fallapp.features.fallas.domain.usecase.GetVotosUsuarioUseCase
 import com.fallapp.features.fallas.domain.usecase.VotarFallaUseCase
 import com.fallapp.features.fallas.domain.usecase.EliminarVotoUseCase
+import com.fallapp.features.auth.domain.usecase.GetCurrentUserUseCase
+import com.fallapp.features.fallas.domain.usecase.GetRankingUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +29,9 @@ class VotosViewModel(
     private val votarFallaUseCase: VotarFallaUseCase,
     private val getVotosUsuarioUseCase: GetVotosUsuarioUseCase,
     private val eliminarVotoUseCase: EliminarVotoUseCase,
-    private val getVotosFallaUseCase: GetVotosFallaUseCase
+    private val getVotosFallaUseCase: GetVotosFallaUseCase,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getRankingUseCase: GetRankingUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VotosUiState())
@@ -82,14 +87,17 @@ class VotosViewModel(
 
     /**
      * Carga los votos del usuario actual.
-     * TODO: Obtener ID del usuario desde TokenManager
      */
     private fun loadMisVotos() {
         viewModelScope.launch {
-            // El backend obtiene el usuario a partir del token, por lo que el idUsuario es irrelevante.
-            val idUsuarioDummy = 0L
+            val currentUser = getCurrentUserUseCase()
+            if (currentUser == null) {
+                // No hay usuario en sesión: no hay votos que cargar
+                _uiState.update { it.copy(misVotos = emptyList()) }
+                return@launch
+            }
 
-            when (val result = getVotosUsuarioUseCase(idUsuarioDummy)) {
+            when (val result = getVotosUsuarioUseCase(currentUser.idUsuario)) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(misVotos = result.data)
@@ -122,55 +130,33 @@ class VotosViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            // Para el ranking también queremos todas las fallas actualizadas
-            getFallasUseCase(forceRefresh = true).collect { fallasResult ->
-                when (fallasResult) {
-                    is Result.Success -> {
-                        // Obtener votos para cada falla
-                        val fallasConVotos = mutableListOf<Pair<Falla, Int>>()
+            // Mapear filtro actual a valor de API
+            val tipoApi: String? = when (_uiState.value.rankingFilter) {
+                null -> null
+                TipoVoto.INGENIOSO -> "MONUMENTO"          // Mejor falla
+                TipoVoto.CRITICO -> "INGENIO_Y_GRACIA"
+                TipoVoto.ARTISTICO -> "EXPERIMENTAL"
+            }
 
-                        for (falla in fallasResult.data) {
-                            when (val votosResult = getVotosFallaUseCase(falla.idFalla)) {
-                                is Result.Success -> {
-                                    val votos = votosResult.data
-                                    val count = if (_uiState.value.rankingFilter != null) {
-                                        votos.count { it.tipoVoto == _uiState.value.rankingFilter }
-                                    } else {
-                                        votos.size
-                                    }
-                                    if (count > 0) {
-                                        fallasConVotos.add(falla to count)
-                                    }
-                                }
-                                else -> {}
-                            }
-                        }
-
-                        // Ordenar por votos descendente
-                        val ranking = fallasConVotos.sortedByDescending { it.second }
-
-                        _uiState.update {
-                            it.copy(
-                                ranking = ranking,
-                                isLoading = false
-                            )
-                        }
+            when (val result = getRankingUseCase(tipoVotoApi = tipoApi, limite = 10)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            ranking = result.data,
+                            isLoading = false
+                        )
                     }
-                    is Result.Error -> {
-                        // Silenciar errores técnicos del backend en ranking que no aportan al usuario final
-                        val msg = fallasResult.message ?: ""
-                        if (!msg.contains("Request method 'GET' is not supported", ignoreCase = true)) {
-                            _uiState.update {
-                                it.copy(
-                                    errorMessage = msg.ifBlank { "Error al cargar ranking" },
-                                    isLoading = false
-                                )
-                            }
-                        } else {
-                            _uiState.update { it.copy(isLoading = false) }
-                        }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = result.message ?: "Error al cargar ranking",
+                            isLoading = false
+                        )
                     }
-                    is Result.Loading -> {}
+                }
+                is Result.Loading -> {
+                    // No-op; ya hemos marcado isLoading arriba
                 }
             }
         }
@@ -293,7 +279,7 @@ data class VotosUiState(
     val fallas: List<Falla> = emptyList(),
     val fallasParaVotar: List<Falla> = emptyList(),
     val misVotos: List<Voto> = emptyList(),
-    val ranking: List<Pair<Falla, Int>> = emptyList(),
+    val ranking: List<FallaRanking> = emptyList(),
     val rankingFilter: TipoVoto? = null,
     val isLoading: Boolean = false,
     val successMessage: String? = null,

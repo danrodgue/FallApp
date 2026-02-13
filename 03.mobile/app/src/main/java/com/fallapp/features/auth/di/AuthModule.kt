@@ -6,6 +6,7 @@ import com.fallapp.features.auth.domain.repository.AuthRepository
 import com.fallapp.features.auth.domain.usecase.LoginUseCase
 import com.fallapp.features.auth.domain.usecase.LogoutUseCase
 import com.fallapp.features.auth.domain.usecase.RegisterUseCase
+import com.fallapp.features.auth.domain.usecase.GetCurrentUserUseCase
 import com.fallapp.features.auth.presentation.login.LoginViewModel
 import com.fallapp.features.auth.presentation.register.RegisterViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -50,6 +51,10 @@ val authModule = module {
     
     factory<LogoutUseCase> {
         LogoutUseCase(authRepository = get())
+    }
+
+    factory<GetCurrentUserUseCase> {
+        GetCurrentUserUseCase(authRepository = get())
     }
     
     // ViewModels

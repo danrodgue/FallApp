@@ -25,6 +25,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import coil.compose.AsyncImage
 import com.fallapp.features.fallas.domain.model.Falla
+import com.fallapp.features.fallas.domain.model.FallaRanking
 import com.fallapp.features.fallas.domain.model.TipoVoto
 import com.fallapp.features.fallas.domain.model.Voto
 import kotlinx.coroutines.launch
@@ -100,7 +101,8 @@ fun VotosScreen(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
                         text = { Text("Votar") },
-                        icon = { Icon(Icons.Default.Star, null) }
+                        // Icono de fuego en lugar de estrella
+                        icon = { Icon(Icons.Default.Whatshot, contentDescription = null) }
                     )
                     Tab(
                         selected = selectedTab == 1,
@@ -726,7 +728,7 @@ private fun MiVotoCard(
  */
 @Composable
 private fun RankingTab(
-    ranking: List<Pair<Falla, Int>>,
+    ranking: List<FallaRanking>,
     isLoading: Boolean,
     selectedTipoVoto: TipoVoto?,
     onFilterChange: (TipoVoto?) -> Unit,
@@ -770,7 +772,8 @@ private fun RankingTab(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        // Icono de fuego cuando no hay ranking
+                        imageVector = Icons.Default.Whatshot,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -787,12 +790,14 @@ private fun RankingTab(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(ranking.take(20)) { (falla, votos) ->
+                    items(ranking.take(20).withIndex().toList()) { indexed ->
+                        val position = indexed.index + 1
+                        val item = indexed.value
                         RankingCard(
-                            position = ranking.indexOf(falla to votos) + 1,
-                            falla = falla,
-                            votos = votos,
-                            onFallaClick = { onFallaClick(falla.idFalla) }
+                            position = position,
+                            item = item,
+                            selectedTipoVoto = selectedTipoVoto,
+                            onFallaClick = { onFallaClick(item.idFalla) }
                         )
                     }
                 }
@@ -807,10 +812,20 @@ private fun RankingTab(
 @Composable
 private fun RankingCard(
     position: Int,
-    falla: Falla,
-    votos: Int,
+    item: FallaRanking,
+    selectedTipoVoto: TipoVoto?,
     onFallaClick: () -> Unit
 ) {
+    // Color del badge de votos según la categoría seleccionada en el filtro
+    val chipColor = when (selectedTipoVoto) {
+        null -> MaterialTheme.colorScheme.primaryContainer
+        TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary      // Mejor Falla
+        TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary      // Ingenio y Gracia
+        TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.tertiary     // Experimental
+    }
+    val chipContentColor =
+        if (selectedTipoVoto == null) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onPrimary
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(
@@ -852,14 +867,14 @@ private fun RankingCard(
             // Información de la falla
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = falla.nombre,
+                    text = item.nombre,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = falla.seccion,
+                    text = item.seccion ?: "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -868,7 +883,7 @@ private fun RankingCard(
             // Número de votos
             Surface(
                 shape = MaterialTheme.shapes.small,
-                color = MaterialTheme.colorScheme.primaryContainer
+                color = chipColor
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -876,16 +891,17 @@ private fun RankingCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        // Icono de fuego en el badge de votos
+                        imageVector = Icons.Default.Whatshot,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        tint = chipContentColor
                     )
                     Text(
-                        text = votos.toString(),
+                        text = item.votos.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = chipContentColor
                     )
                 }
             }

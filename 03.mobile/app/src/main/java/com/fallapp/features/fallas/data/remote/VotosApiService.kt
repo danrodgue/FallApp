@@ -54,8 +54,14 @@ class VotosApiService(
      * El backend devuelve ApiResponse<List<VotoDTO>> (no paginado),
      * así que aquí modelamos `datos` como una lista plana.
      */
-    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> =
-        client.get(ApiConfig.Endpoints.MIS_VOTOS) {
+    /**
+     * Obtiene los votos del usuario indicado.
+     *
+     * Se usa el endpoint de la guía:
+     *   GET /api/votos/usuario/{idUsuario}
+     */
+    suspend fun getVotosUsuario(idUsuario: Long): ApiResponse<List<VotoDto>> =
+        client.get("${ApiConfig.API_PATH}/votos/usuario/$idUsuario") {
             attachAuthHeader()
         }.body()
 
