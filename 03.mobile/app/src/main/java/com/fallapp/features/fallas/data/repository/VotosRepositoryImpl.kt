@@ -66,7 +66,7 @@ class VotosRepositoryImpl(
             val response = apiService.getMisVotos()
 
             if (response.exito && response.datos != null) {
-                val votosDto = response.datos.content
+                val votosDto = response.datos
                 Result.Success(votosDto.map { it.toDomain() })
             } else {
                 Result.Error(
@@ -105,14 +105,12 @@ class VotosRepositoryImpl(
     override suspend fun getVotosFalla(idFalla: Long): Result<List<Voto>> {
         return try {
             // Resolver el idNinot real asociado a esta falla
-            val ninots = ninotsApiService.getNinotsByFalla(idFalla)
-            val realIdNinot = ninots.firstOrNull()?.idNinot
-                ?: return Result.Success(emptyList())
-
-            val response = apiService.getVotosFalla(realIdNinot)
+            // A partir de v2, los votos están asociados directamente a la falla,
+            // por lo que podemos llamar a /api/votos/falla/{idFalla} sin resolver ninots.
+            val response = apiService.getVotosFalla(idFalla)
 
             if (response.exito && response.datos != null) {
-                val votosDto = response.datos.content
+                val votosDto = response.datos
                 Result.Success(votosDto.map { it.toDomain() })
             } else {
                 Result.Error(

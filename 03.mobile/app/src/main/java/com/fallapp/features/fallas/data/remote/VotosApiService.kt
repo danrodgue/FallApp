@@ -50,12 +50,11 @@ class VotosApiService(
 
     /**
      * Obtiene los votos del usuario actual a partir del token JWT.
-     * No necesita idUsuario porque el backend lo infiere del token.
      *
-     * En producción, el backend está devolviendo `datos` como un objeto
-     * paginado estilo Spring (`content`, `empty`, ...), no como array plano.
+     * El backend devuelve ApiResponse<List<VotoDTO>> (no paginado),
+     * así que aquí modelamos `datos` como una lista plana.
      */
-    suspend fun getMisVotos(): ApiResponse<PageResponse<VotoDto>> =
+    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> =
         client.get(ApiConfig.Endpoints.MIS_VOTOS) {
             attachAuthHeader()
         }.body()
@@ -67,8 +66,10 @@ class VotosApiService(
 
     /**
      * Obtiene los votos asociados a una falla concreta.
+     *
+     * El backend devuelve ApiResponse<List<VotoDTO>> (no paginado).
      */
-    suspend fun getVotosFalla(idFalla: Long): ApiResponse<PageResponse<VotoDto>> =
+    suspend fun getVotosFalla(idFalla: Long): ApiResponse<List<VotoDto>> =
         client.get("${ApiConfig.API_PATH}/votos/falla/$idFalla") {
             attachAuthHeader()
         }.body()
