@@ -60,6 +60,7 @@ class AuthRepositoryImpl(
                     email = user.email,
                     nombreCompleto = loginData.usuario.nombreCompleto,
                     rol = Rol.valueOf(user.rol.name.uppercase()),
+                    verificado = user.verificado,
                     idFalla = user.idFalla,
                     nombreFalla = loginData.usuario.nombreFalla,
                     ultimoAcceso = LocalDateTime.now()
@@ -142,6 +143,7 @@ class AuthRepositoryImpl(
             nombre = nombre,
             apellidos = apellidos,
             rol = UserRole.fromString(usuarioEntity.rol.name),
+            verificado = usuarioEntity.verificado,
             idFalla = usuarioEntity.idFalla
         )
     }

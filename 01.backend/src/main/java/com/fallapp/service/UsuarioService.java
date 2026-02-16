@@ -237,6 +237,7 @@ public class UsuarioService {
                 .idFalla(usuario.getFalla() != null ? usuario.getFalla().getIdFalla() : null)
                 .nombreFalla(usuario.getFalla() != null ? usuario.getFalla().getNombre() : null)
                 .activo(usuario.getActivo())
+                .verificado(usuario.getVerificado())
                 .telefono(usuario.getTelefono())
                 .direccion(usuario.getDireccion())
                 .ciudad(usuario.getCiudad())

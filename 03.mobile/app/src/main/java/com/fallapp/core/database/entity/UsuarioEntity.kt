@@ -35,6 +35,7 @@ data class UsuarioEntity(
     val email: String,
     val nombreCompleto: String,
     val rol: Rol,
+    val verificado: Boolean = false,  // Estado de verificación de email
     
     val idFalla: Long?,
     val nombreFalla: String?,

@@ -42,6 +42,8 @@ public class EventoDTO {
     
     private String ubicacion;
     
+    private Integer participantesEstimado;
+    
     @JsonProperty("creado_por")
     private Long creadoPor;
     
@@ -49,4 +51,4 @@ public class EventoDTO {
     private LocalDateTime fechaCreacion;
     
     private String imagenNombre;
-    
+}    

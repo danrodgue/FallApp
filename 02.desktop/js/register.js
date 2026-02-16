@@ -303,6 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('fallapp_user_rol', result.user.rol);
         localStorage.setItem('fallapp_user_idFalla', result.user.idFalla || '');
         localStorage.setItem('fallapp_user', result.user.email);
+        localStorage.setItem('fallapp_user_verificado', result.user.verificado || 'false');
       } catch (eStorage) {
         console.error('Error guardando datos de sesión:', eStorage);
       }
@@ -339,6 +340,14 @@ document.addEventListener('DOMContentLoaded', () => {
         registerBtn.disabled = false;
         registerBtn.textContent = originalText;
         return;
+      }
+
+      // Mostrar mensaje de verificación de email si el usuario no está verificado
+      if (!result.user.verificado) {
+        alert('¡Registro exitoso! 📧\n\n' +
+              'Se ha enviado un email de verificación a: ' + result.user.email + '\n\n' +
+              'Por favor, revisa tu bandeja de entrada (y spam) y haz clic en el enlace de verificación para activar tu cuenta.\n\n' +
+              'Nota: Podrás acceder a la aplicación, pero algunas funcionalidades podrían estar limitadas hasta que verifiques tu email.');
       }
 
       window.location.href = '../screens/home.html';

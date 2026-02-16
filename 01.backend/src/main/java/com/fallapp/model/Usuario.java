@@ -51,6 +51,15 @@ public class Usuario {
     @Column(name = "activo", nullable = false)
     private Boolean activo = true;
 
+    @Column(name = "verificado", nullable = false)
+    private Boolean verificado = false;
+
+    @Column(name = "token_verificacion", length = 64)
+    private String tokenVerificacion;
+
+    @Column(name = "token_verificacion_expira")
+    private LocalDateTime tokenVerificacionExpira;
+
     @CreationTimestamp
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro;

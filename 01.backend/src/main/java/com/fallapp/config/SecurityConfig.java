@@ -69,6 +69,7 @@ public class SecurityConfig {
                 // Endpoints públicos (sin autenticación)
                 .requestMatchers(
                     "/api/auth/**",
+                    "/api/test-email/**",  // Endpoints de prueba de email
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html"

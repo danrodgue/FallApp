@@ -5,6 +5,7 @@ import com.fallapp.model.Usuario;
 import com.fallapp.repository.UsuarioRepository;
 import com.fallapp.security.JwtTokenProvider;
 import com.fallapp.service.UsuarioService;
+import com.fallapp.service.EmailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Controlador para autenticación y registro
@@ -36,14 +38,32 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final UsuarioRepository usuarioRepository;
+    private final EmailService emailService;
 
     @PostMapping("/registro")
     @Operation(summary = "Registrar nuevo usuario")
     public ResponseEntity<ApiResponse<LoginResponse>> registrar(@Valid @RequestBody RegistroRequest request) {
-        // La contraseña se encripta dentro de UsuarioService.registrar.
-        // Aquí pasamos la contraseña en texto plano para evitar doble encriptado.
         // Crear usuario (se encargará de encriptar la contraseña)
         UsuarioDTO usuario = usuarioService.registrar(request);
+        
+        // Obtener usuario de BD para generar token de verificación
+        Usuario usuarioEntidad = usuarioRepository.findByEmail(usuario.getEmail())
+                .orElseThrow(() -> new RuntimeException("Error al obtener usuario registrado"));
+        
+        // Generar token de verificación (UUID sin guiones)
+        String tokenVerificacion = UUID.randomUUID().toString().replace("-", "");
+        usuarioEntidad.setTokenVerificacion(tokenVerificacion);
+        usuarioEntidad.setTokenVerificacionExpira(LocalDateTime.now().plusHours(24));
+        usuarioEntidad.setVerificado(false);
+        usuarioRepository.save(usuarioEntidad);
+        
+        // Enviar email de verificación
+        try {
+            emailService.sendVerificationEmail(usuario.getEmail(), tokenVerificacion);
+        } catch (Exception e) {
+            // Log error pero no falla el registro
+            System.err.println("Error al enviar email de verificación: " + e.getMessage());
+        }
         
         // Generar token JWT (usando email como username)
         String token = jwtTokenProvider.generateTokenFromUsername(usuario.getEmail());
@@ -58,7 +78,10 @@ public class AuthController {
         
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Usuario registrado exitosamente", response));
+                .body(ApiResponse.success(
+                    "Usuario registrado. Por favor verifica tu email para activar tu cuenta.", 
+                    response
+                ));
     }
 
     @PostMapping("/login")
@@ -103,6 +126,72 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("Credenciales inválidas"));
+        }
+    }
+
+    @GetMapping("/verificar")
+    @Operation(summary = "Verificar email con token")
+    public ResponseEntity<ApiResponse<String>> verificarEmail(@RequestParam String token) {
+        // Buscar usuario por token
+        Usuario usuario = usuarioRepository.findAll().stream()
+                .filter(u -> token.equals(u.getTokenVerificacion()))
+                .findFirst()
+                .orElse(null);
+        
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Token de verificación inválido"));
+        }
+        
+        // Verificar si el token ha expirado
+        if (usuario.getTokenVerificacionExpira() != null 
+            && usuario.getTokenVerificacionExpira().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Token de verificación expirado"));
+        }
+        
+        // Marcar como verificado
+        usuario.setVerificado(true);
+        usuario.setTokenVerificacion(null);
+        usuario.setTokenVerificacionExpira(null);
+        usuarioRepository.save(usuario);
+        
+        return ResponseEntity.ok(
+            ApiResponse.success("Email verificado correctamente. Ya puedes usar tu cuenta.", null)
+        );
+    }
+
+    @PostMapping("/reenviar-verificacion")
+    @Operation(summary = "Reenviar email de verificación")
+    public ResponseEntity<ApiResponse<String>> reenviarVerificacion(@RequestParam String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElse(null);
+        
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Usuario no encontrado"));
+        }
+        
+        if (usuario.getVerificado()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("La cuenta ya está verificada"));
+        }
+        
+        // Generar nuevo token
+        String tokenVerificacion = UUID.randomUUID().toString().replace("-", "");
+        usuario.setTokenVerificacion(tokenVerificacion);
+        usuario.setTokenVerificacionExpira(LocalDateTime.now().plusHours(24));
+        usuarioRepository.save(usuario);
+        
+        // Reenviar email
+        try {
+            emailService.sendVerificationEmail(email, tokenVerificacion);
+            return ResponseEntity.ok(
+                ApiResponse.success("Email de verificación reenviado correctamente", null)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Error al enviar email: " + e.getMessage()));
         }
     }
 }

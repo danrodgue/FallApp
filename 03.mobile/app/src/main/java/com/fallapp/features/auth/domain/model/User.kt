@@ -15,6 +15,7 @@ data class User(
     val nombre: String,
     val apellidos: String,
     val rol: UserRole,
+    val verificado: Boolean = false,  // Si el email del usuario ha sido verificado
     val idFalla: Long? = null  // null si es usuario regular sin falla asignada
 )
 
