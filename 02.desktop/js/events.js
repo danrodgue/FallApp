@@ -319,8 +319,8 @@ async function saveFromForm(){
     return;
   }
 
-  // Crear fecha_evento combinando fecha y hora
-  const fecha_evento = new Date(`${eventData.date}T${eventData.time || '00:00'}`).toISOString();
+  // Crear fecha_evento combinando fecha y hora (sin zona horaria)
+  const fecha_evento = `${eventData.date}T${eventData.time || '00:00'}:00`;
 
   // Preparar payload para el backend - mapear a los campos exactos de la tabla
   const payload = { 
@@ -332,6 +332,8 @@ async function saveFromForm(){
     tipo: eventData.tipo,
     creado_por: parseInt(creadoPor)
   };
+  
+  console.log('📤 Enviando evento al backend:', payload);
 
   if(id){
     // Update
@@ -469,21 +471,6 @@ async function init(){
   renderList();
 }
 
-// Configurar botones del header
-document.addEventListener('DOMContentLoaded', () => {
-  const logoutBtn = document.getElementById('logout');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      try {
-        localStorage.removeItem('fallapp_user');
-      } catch (e) {
-        console.error('Error removing user:', e);
-      }
-      window.location.href = '../js/index.html';
-    });
-  }
-});
-
 // Agregar animación de deslizamiento
 const style = document.createElement('style');
 style.textContent = `
@@ -500,4 +487,19 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-init();
+// Configurar botones del header y inicializar eventos
+document.addEventListener('DOMContentLoaded', () => {
+  init();
+  
+  const logoutBtn = document.getElementById('logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      try {
+        localStorage.removeItem('fallapp_user');
+      } catch (e) {
+        console.error('Error removing user:', e);
+      }
+      window.location.href = '../js/index.html';
+    });
+  }
+});

@@ -239,17 +239,25 @@ async function obtenerEvento(id) {
 // Crear un evento
 async function crearEvento(datos) {
     try {
+        console.log('📤 [API] Enviando evento:', datos);
         const respuesta = await fetch(API_EVENTOS_URL, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify(datos)
         });
+        
+        console.log('📥 [API] Respuesta status:', respuesta.status);
+        
         if (!respuesta.ok) {
             const error = await parseErrorResponse(respuesta);
+            console.error('❌ [API] Error al crear evento:', error);
             throw new Error(error);
         }
-        return await respuesta.json();
+        const resultado = await respuesta.json();
+        console.log('✅ [API] Evento creado:', resultado);
+        return resultado;
     } catch (error) {
+        console.error('❌ [API] Error en crearEvento:', error.message);
         throw new Error(`No se pudo crear el evento: ${error.message}`);
     }
 }
