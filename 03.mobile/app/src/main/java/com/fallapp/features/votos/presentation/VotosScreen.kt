@@ -246,6 +246,7 @@ fun VotosScreen(
             )
             2 -> MisVotosTab(
                 votos = uiState.misVotos,
+                fallas = uiState.fallasParaVotar,
                 isLoading = uiState.isLoading,
                 onDeleteVote = { idVoto ->
                     viewModel.eliminarVoto(idVoto)
@@ -660,6 +661,7 @@ private fun SwipeFallaCard(
 @Composable
 private fun MisVotosTab(
     votos: List<Voto>,
+    fallas: List<Falla>,
     isLoading: Boolean,
     onDeleteVote: (Long) -> Unit,
     onFallaClick: (Long) -> Unit,
@@ -694,8 +696,10 @@ private fun MisVotosTab(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(votos) { voto ->
+                    val falla = fallas.firstOrNull { it.idFalla == voto.idFalla }
                     MiVotoCard(
                         voto = voto,
+                        falla = falla,
                         onDeleteClick = { onDeleteVote(voto.idVoto) },
                         onFallaClick = { onFallaClick(voto.idFalla) }
                     )
@@ -711,10 +715,13 @@ private fun MisVotosTab(
 @Composable
 private fun MiVotoCard(
     voto: Voto,
+    falla: Falla?,
     onDeleteClick: () -> Unit,
     onFallaClick: () -> Unit
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showFullScreenImage by remember { mutableStateOf(false) }
+    val imageUrl = falla?.imagenes?.firstOrNull()
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -742,6 +749,50 @@ private fun MiVotoCard(
         )
     }
 
+    // Dialog de imagen en pantalla completa
+    if (showFullScreenImage && imageUrl != null) {
+        Dialog(
+            onDismissRequest = { showFullScreenImage = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { showFullScreenImage = false }
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Imagen de ${voto.nombreFalla}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Botón X con fondo circular semitransparente
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                ) {
+                    IconButton(
+                        onClick = { showFullScreenImage = false }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cerrar",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(
@@ -750,7 +801,11 @@ private fun MiVotoCard(
     ) {
         Row(
             modifier = Modifier
-                .clickable(onClick = onFallaClick)
+                .clickable(onClick = {
+                    if (imageUrl != null) {
+                        showFullScreenImage = true
+                    }
+                })
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically

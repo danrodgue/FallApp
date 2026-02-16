@@ -27,6 +27,11 @@ fun EventosScreen(
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
 
+    // Recargar eventos cada vez que se entra a la pantalla
+    LaunchedEffect(Unit) {
+        viewModel.refreshEventos()
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -108,7 +113,7 @@ fun EventosScreen(
                 }
             }
 
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Listado general de eventos (equivalente al listado general de fallas, pero de eventos)
             Text(
@@ -208,33 +213,118 @@ private fun EventoRow(
     ) {
         Column(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(16.dp)
         ) {
-            Text(
-                text = evento.nombre,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = evento.nombreFalla,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = evento.fechaEvento.toString(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            // Tipo y nombre del evento
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = when (evento.tipo.name) {
+                        "OFICIAL" -> "🎭"
+                        "CULTURAL" -> "🎨"
+                        "INFANTIL" -> "👶"
+                        "DEPORTIVO" -> "⚽"
+                        "MUSICAL" -> "🎵"
+                        else -> "📅"
+                    },
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = evento.nombre,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = evento.nombreFalla,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Fecha del evento formateada
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "📅",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = formatEventDate(evento.fechaEvento),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            // Ubicación si existe
+            evento.ubicacion?.let { ubicacion ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "📍",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = ubicacion,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Descripción si existe
             evento.descripcion?.let {
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            }
+
+            // Participantes estimados
+            evento.participantesEstimado?.let { participantes ->
+                if (participantes > 0) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "👥",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "$participantes participantes estimados",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+/**
+ * Formatea la fecha del evento de manera legible.
+ */
+private fun formatEventDate(dateTime: java.time.LocalDateTime): String {
+    val formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+    return dateTime.format(formatter)
 }
 

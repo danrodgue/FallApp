@@ -37,6 +37,20 @@ class EventosViewModel(
         loadProximosEventos()
     }
 
+    /**
+     * Recarga las fallas desde el servidor.
+     */
+    fun refreshFallas() {
+        loadFallas()
+    }
+
+    /**
+     * Recarga los eventos próximos desde el servidor.
+     */
+    fun refreshEventos() {
+        loadProximosEventos()
+    }
+
     private fun loadFallas() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
