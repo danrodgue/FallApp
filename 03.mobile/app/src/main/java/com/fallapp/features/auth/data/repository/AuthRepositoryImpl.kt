@@ -47,9 +47,9 @@ class AuthRepositoryImpl(
             
             val loginData = apiResponse.datos
             
-            // Guardar token
-            tokenManager.saveToken(loginData.token, loginData.usuario.email)
-            
+            // Guardar token con email e ID del usuario
+            tokenManager.saveToken(loginData.token, loginData.usuario.email, loginData.usuario.idUsuario)
+
             // Mapear a dominio
             val user = loginData.usuario.toDomain()
             

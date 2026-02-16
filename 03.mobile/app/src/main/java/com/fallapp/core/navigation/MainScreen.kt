@@ -48,6 +48,7 @@ import com.fallapp.features.fallas.presentation.list.FallasListScreen
 import com.fallapp.features.map.presentation.MapScreen
 import com.fallapp.features.votos.presentation.VotosScreen
 import com.fallapp.features.eventos.presentation.EventosScreen
+import com.fallapp.features.profile.presentation.ProfileScreen
 
 /**
  * Pantalla principal con Bottom Navigation Bar.
@@ -122,7 +123,7 @@ fun MainScreen(
                     },
                     modifier = Modifier.fillMaxSize()
                 )
-                3 -> ProfileTab(
+                3 -> ProfileScreen(
                     onLogout = {
                         navController.navigate(Screen.Login.route) {
                             popUpTo(0) { inclusive = true }
@@ -143,80 +144,3 @@ private data class BottomNavItem(
     val icon: ImageVector
 )
 
-/**
- * Tab de Perfil (placeholder).
- */
-@Composable
-private fun ProfileTab(
-    onLogout: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Card(
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxSize(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Avatar circular
-                Box(
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Placeholder de imagen de perfil
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Avatar",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
-
-                Text(
-                    text = "Perfil de usuario",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Datos básicos (placeholders por ahora)
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Nombre: (pendiente de perfil API)",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = "Email: (pendiente de perfil API)",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Button(
-                    onClick = onLogout,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Cerrar sesión")
-                }
-            }
-        }
-    }
-}

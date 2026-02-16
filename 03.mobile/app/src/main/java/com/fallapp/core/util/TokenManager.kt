@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,7 @@ class TokenManager(private val context: Context) {
         )
         private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
         private val USER_EMAIL_KEY = stringPreferencesKey("user_email")
+        private val USER_ID_KEY = longPreferencesKey("user_id")
     }
     
     /**
@@ -49,16 +51,25 @@ class TokenManager(private val context: Context) {
     val userEmail: Flow<String?> = context.dataStore.data.map { preferences ->
         preferences[USER_EMAIL_KEY]
     }
-    
+
+    /**
+     * Flow reactivo del ID del usuario logueado.
+     */
+    val userId: Flow<Long?> = context.dataStore.data.map { preferences ->
+        preferences[USER_ID_KEY]
+    }
+
     /**
      * Guarda el token JWT después de un login exitoso.
      * @param token Token JWT recibido del servidor
      * @param email Email del usuario (opcional, para mostrar en UI)
+     * @param userId ID del usuario (opcional, para llamadas futuras a API)
      */
-    suspend fun saveToken(token: String, email: String? = null) {
+    suspend fun saveToken(token: String, email: String? = null, userId: Long? = null) {
         context.dataStore.edit { preferences ->
             preferences[AUTH_TOKEN_KEY] = token
             email?.let { preferences[USER_EMAIL_KEY] = it }
+            userId?.let { preferences[USER_ID_KEY] = it }
         }
     }
     
@@ -70,7 +81,15 @@ class TokenManager(private val context: Context) {
     suspend fun getToken(): String? {
         return context.dataStore.data.first()[AUTH_TOKEN_KEY]
     }
-    
+
+    /**
+     * Recupera el ID del usuario actual de forma síncrona.
+     * @return ID del usuario o null si no está disponible
+     */
+    suspend fun getUserId(): Long? {
+        return context.dataStore.data.first()[USER_ID_KEY]
+    }
+
     /**
      * Elimina el token (logout).
      * Borra toda la información de sesión.

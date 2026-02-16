@@ -1,8 +1,10 @@
 package com.fallapp.features.auth.presentation.login
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
@@ -13,13 +15,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import com.fallapp.user.R
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -52,12 +58,31 @@ fun LoginScreen(
     }
     
     Scaffold { padding ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(padding),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
         ) {
+            // Espaciador superior
+            Spacer(modifier = Modifier.height(64.dp))
+
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.fallap_logo),
+                contentDescription = "FallApp Logo",
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(bottom = 16.dp),
+                contentScale = ContentScale.Fit
+            )
+
+            // Espaciador
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Contenedor del formulario
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,6 +213,9 @@ fun LoginScreen(
                 ) {
                     Text("¿No tienes cuenta? Regístrate")
                 }
+
+                // Espaciador final
+                Spacer(modifier = Modifier.height(40.dp))
             }
         }
     }

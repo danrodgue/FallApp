@@ -46,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
 
 /**
  * Esquema de colores oscuro de FallApp.
- * Invertido para modo oscuro pero manteniendo los acentos rojos.
+ * Usa tonos beige oscuro cálidos en lugar de grises fríos.
  */
 private val DarkColorScheme = darkColorScheme(
     primary = FallaPrimaryLight,
@@ -67,17 +67,17 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer = FallaError,
     onErrorContainer = Color.White,
     
-    background = Color(0xFF1a0a0a),
-    onBackground = Color(0xFFfef7f7),
-    
-    surface = Color(0xFF2a1a1a),
-    onSurface = Color(0xFFfef7f7),
-    surfaceVariant = Color(0xFF3a2a2a),
-    onSurfaceVariant = Color(0xFFe5d5d5),
-    
-    outline = Color(0xFF5a4a4a),
-    outlineVariant = Color(0xFF4a3a3a),
-    
+    background = Color(0xFF2a1f1a),      // Beige oscuro cálido
+    onBackground = Color(0xFFf5e6d3),    // Beige muy claro
+
+    surface = Color(0xFF3a2f2a),         // Beige oscuro para tarjetas
+    onSurface = Color(0xFFf5e6d3),       // Beige muy claro
+    surfaceVariant = Color(0xFF4a3f3a),  // Beige medio oscuro
+    onSurfaceVariant = Color(0xFFd4c4b0), // Beige medio
+
+    outline = Color(0xFF5a4a4a),         // Marrón medio para bordes
+    outlineVariant = Color(0xFF4a3a3a),  // Marrón oscuro
+
     scrim = Color.Black
 )
 

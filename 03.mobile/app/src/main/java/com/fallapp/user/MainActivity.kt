@@ -23,6 +23,7 @@ import com.fallapp.core.ui.theme.FallAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             FallAppTheme {
                 Surface(

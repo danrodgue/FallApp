@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================================
+         ESTILOS DE TEXTO (Tipografía)
+         ============================================================ -->
+
+    <!-- Títulos principales (H1) -->
+    <style name="TextHeadline">
+        <item name="android:textSize">@dimen/text_headline</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <!-- Títulos de sección (H2) -->
+    <style name="TextTitleLarge">
+        <item name="android:textSize">@dimen/text_title_large</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <!-- Títulos de tarjeta -->
+    <style name="TextTitleMedium">
+        <item name="android:textSize">@dimen/text_title_medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <!-- Subtítulos -->
+    <style name="TextSubtitle">
+        <item name="android:textSize">@dimen/text_subtitle</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
+    <!-- Body text (texto normal) -->
+    <style name="TextBody">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
+    <!-- Body text secundario -->
+    <style name="TextBodySecondary">
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+    </style>
+
+    <!-- Caption / Labels pequeños -->
+    <style name="TextCaption">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_muted</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
+    </style>
+
+    <!-- Label (más resaltado que caption) -->
+    <style name="TextLabel">
+        <item name="android:textSize">@dimen/text_caption</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+
+    <!-- ============================================================
+         ESTILOS DE BOTONES
+         ============================================================ -->
+
+    <!-- Botón primario (rojo) -->
+    <style name="ButtonPrimary">
+        <item name="android:background">@drawable/button_primary_background</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingStart">@dimen/space_lg</item>
+        <item name="android:paddingEnd">@dimen/space_lg</item>
+        <item name="android:paddingTop">@dimen/space_md</item>
+        <item name="android:paddingBottom">@dimen/space_md</item>
+        <item name="android:minHeight">@dimen/touch_min_height</item>
+        <item name="android:elevation">@dimen/elevation_small</item>
+    </style>
+
+    <!-- Botón secundario (outlineado) -->
+    <style name="ButtonSecondary">
+        <item name="android:background">@drawable/button_secondary_background</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingStart">@dimen/space_lg</item>
+        <item name="android:paddingEnd">@dimen/space_lg</item>
+        <item name="android:paddingTop">@dimen/space_md</item>
+        <item name="android:paddingBottom">@dimen/space_md</item>
+        <item name="android:minHeight">@dimen/touch_min_height</item>
+    </style>
+
+    <!-- Botón de error (rojo oscuro) -->
+    <style name="ButtonDanger" parent="ButtonPrimary">
+        <item name="android:background">@drawable/button_danger_background</item>
+    </style>
+
+
+    <!-- ============================================================
+         ESTILOS DE CAMPOS DE TEXTO (EditText)
+         ============================================================ -->
+
+    <!-- Campo de texto estándar -->
+    <style name="EditTextDefault">
+        <item name="android:background">@drawable/input_background</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_muted</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:paddingStart">@dimen/space_md</item>
+        <item name="android:paddingEnd">@dimen/space_md</item>
+        <item name="android:paddingTop">@dimen/space_sm</item>
+        <item name="android:paddingBottom">@dimen/space_sm</item>
+        <item name="android:minHeight">@dimen/touch_min_height</item>
+        <item name="android:cursorVisible">true</item>
+    </style>
+
+
+    <!-- ============================================================
+         ESTILOS DE CONTENEDORES
+         ============================================================ -->
+
+    <!-- Contenedor con padding estándar -->
+    <style name="ContainerStandard">
+        <item name="android:paddingStart">@dimen/space_lg</item>
+        <item name="android:paddingEnd">@dimen/space_lg</item>
+        <item name="android:paddingTop">@dimen/space_md</item>
+        <item name="android:paddingBottom">@dimen/space_md</item>
+    </style>
+
+    <!-- Contenedor con padding generoso -->
+    <style name="ContainerGenerous">
+        <item name="android:paddingStart">@dimen/space_lg</item>
+        <item name="android:paddingEnd">@dimen/space_lg</item>
+        <item name="android:paddingTop">@dimen/space_lg</item>
+        <item name="android:paddingBottom">@dimen/space_lg</item>
+    </style>
+
+
+    <!-- ============================================================
+         ESTILOS DE DIVIDERS / SEPARADORES
+         ============================================================ -->
+
+    <!-- Separador horizontal estándar -->
+    <style name="DividerHorizontal">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/border_light</item>
+    </style>
+
+    <!-- Separador vertical -->
+    <style name="DividerVertical">
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@color/border_light</item>
+    </style>
+</resources>
+
+

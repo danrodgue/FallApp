@@ -23,6 +23,18 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
+    <!-- Feedback colors -->
+    <color name="success">#2e7d32</color>
+    <color name="warning">#f57c00</color>
+    <color name="error">#b00020</color>
+    <color name="info">#0277bd</color>
+
     <!-- Marcador del mapa (punto rojo) -->
     <color name="map_marker">#c62828</color>
+
+    <!-- Dark theme colors - Beige oscuro -->
+    <color name="background_dark">#2a1f1a</color>          <!-- Beige oscuro cálido -->
+    <color name="surface_dark">#3a2f2a</color>             <!-- Beige oscuro más claro para tarjetas -->
+    <color name="text_primary_dark">#f5e6d3</color>        <!-- Beige muy claro para texto -->
+    <color name="text_secondary_dark">#d4c4b0</color>      <!-- Beige medio para texto secundario -->
 </resources>

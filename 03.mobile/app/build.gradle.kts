@@ -105,6 +105,9 @@ dependencies {
     // OSMDroid (OpenStreetMap - sin API key)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     
+    // Google Play Services - Location
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
     // Coil (Image Loading)
     implementation(libs.coil.compose)
     

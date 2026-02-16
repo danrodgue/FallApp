@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ============================================================
+         ESPACIADO: Sistema basado en múltiplos de 8dp
+         ============================================================ -->
+
+    <!-- Pequeños gaps -->
+    <dimen name="space_xs">4dp</dimen>
+
+    <!-- Pequeño padding/margin -->
+    <dimen name="space_sm">8dp</dimen>
+
+    <!-- Espaciado normal -->
+    <dimen name="space_md">16dp</dimen>
+
+    <!-- Espaciado generoso -->
+    <dimen name="space_lg">24dp</dimen>
+
+    <!-- Espaciado muy grande -->
+    <dimen name="space_xl">32dp</dimen>
+
+    <!-- Separación entre secciones -->
+    <dimen name="space_xxl">48dp</dimen>
+
+
+    <!-- ============================================================
+         TOUCH TARGETS (Android guidelines: mínimo 48dp)
+         ============================================================ -->
+
+    <!-- Altura mínima para elementos táctiles -->
+    <dimen name="touch_min_height">48dp</dimen>
+
+    <!-- Ancho mínimo para elementos táctiles -->
+    <dimen name="touch_min_width">48dp</dimen>
+
+
+    <!-- ============================================================
+         ELEVACIÓN Y SOMBRAS (Material Design 3)
+         ============================================================ -->
+
+    <!-- Sin elevación -->
+    <dimen name="elevation_none">0dp</dimen>
+
+    <!-- Sombra muy sutil (hover, small elements) -->
+    <dimen name="elevation_small">2dp</dimen>
+
+    <!-- Sombra estándar (tarjetas, botones) -->
+    <dimen name="elevation_medium">4dp</dimen>
+
+    <!-- Sombra media (elementos destacados) -->
+    <dimen name="elevation_large">8dp</dimen>
+
+    <!-- Sombra fuerte (overlays, modales) -->
+    <dimen name="elevation_xlarge">16dp</dimen>
+
+
+    <!-- ============================================================
+         RADIO DE BORDES
+         ============================================================ -->
+
+    <!-- Chips, badges, pequeños elementos -->
+    <dimen name="radius_xs">4dp</dimen>
+
+    <!-- Inputs, botones pequeños -->
+    <dimen name="radius_sm">8dp</dimen>
+
+    <!-- Elementos medianos -->
+    <dimen name="radius_md">12dp</dimen>
+
+    <!-- Tarjetas, diálogos -->
+    <dimen name="radius_lg">16dp</dimen>
+
+    <!-- Superficies grandes -->
+    <dimen name="radius_xl">20dp</dimen>
+
+
+    <!-- ============================================================
+         TIPOGRAFÍA (Text sizes)
+         ============================================================ -->
+
+    <!-- Títulos principales (H1) -->
+    <dimen name="text_headline">32sp</dimen>
+
+    <!-- Títulos de sección (H2) -->
+    <dimen name="text_title_large">26sp</dimen>
+
+    <!-- Títulos de tarjeta -->
+    <dimen name="text_title_medium">24sp</dimen>
+
+    <!-- Subtítulos -->
+    <dimen name="text_subtitle">16sp</dimen>
+
+    <!-- Body text -->
+    <dimen name="text_body">14sp</dimen>
+
+    <!-- Caption/Labels pequeños -->
+    <dimen name="text_caption">12sp</dimen>
+
+
+    <!-- ============================================================
+         ALTURA DE LÍNEA (Line height ratios)
+         ============================================================ -->
+
+    <!-- Títulos: 1.2 -->
+    <dimen name="line_height_titles">1.2</dimen>
+
+    <!-- Body: 1.5 -->
+    <dimen name="line_height_body">1.5</dimen>
+
+    <!-- Captions: 1.4 -->
+    <dimen name="line_height_caption">1.4</dimen>
+
+
+    <!-- ============================================================
+         COMPONENTES ESPECÍFICOS
+         ============================================================ -->
+
+    <!-- Altura de AppBar/Toolbar -->
+    <dimen name="app_bar_height">56dp</dimen>
+
+    <!-- Altura de BottomBar -->
+    <dimen name="bottom_bar_height">56dp</dimen>
+
+    <!-- Altura de tarjeta de acción -->
+    <dimen name="action_card_height">320dp</dimen>
+
+    <!-- Ancho de tarjeta (para layouts horizontales) -->
+    <dimen name="card_width">300dp</dimen>
+
+    <!-- Tamaño de avatar circular -->
+    <dimen name="avatar_size_large">96dp</dimen>
+    <dimen name="avatar_size_medium">64dp</dimen>
+    <dimen name="avatar_size_small">48dp</dimen>
+
+    <!-- Tamaño de iconos -->
+    <dimen name="icon_size_large">32dp</dimen>
+    <dimen name="icon_size_medium">24dp</dimen>
+    <dimen name="icon_size_small">18dp</dimen>
+</resources>
+

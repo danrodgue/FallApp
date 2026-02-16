@@ -38,12 +38,28 @@ import com.fallapp.features.map.presentation.MapScreen
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    startDestination: String = Screen.Login.route
+    startDestination: String = Screen.Splash.route
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
+        // Splash Screen - Verificación de sesión
+        composable(Screen.Splash.route) {
+            SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToMain = {
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // Auth Flow
         composable(Screen.Login.route) {
             LoginScreen(

@@ -8,11 +8,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -23,6 +23,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.model.FallaRanking
@@ -45,9 +47,12 @@ fun VotosScreen(
     viewModel: VotosViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(1) } // Iniciar en tab 1 (Votar)
     val snackbarHostState = remember { SnackbarHostState() }
     var showInfo by remember { mutableStateOf(false) }
+    var selectedFalla by remember { mutableStateOf<Falla?>(null) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearchField by remember { mutableStateOf(false) }
 
     // Mostrar mensajes
     LaunchedEffect(uiState.successMessage) {
@@ -73,11 +78,25 @@ fun VotosScreen(
             Column {
                 TopAppBar(
                     title = {
-                        Text(
-                            "Votos",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            if (selectedTab == 1) { // Solo mostrar lupa en tab Votar
+                                IconButton(onClick = { showSearchField = !showSearchField }) {
+                                    Icon(
+                                        imageVector = if (showSearchField) Icons.Default.Close else Icons.Default.Search,
+                                        contentDescription = if (showSearchField) "Cerrar búsqueda" else "Buscar falla",
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                            }
+                            Text(
+                                "Votos",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     },
                     actions = {
                         IconButton(onClick = { showInfo = true }) {
@@ -89,10 +108,63 @@ fun VotosScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
-                
+
+                // Campo de búsqueda debajo del título (solo en tab Votar)
+                if (selectedTab == 1 && showSearchField) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.primary,
+                        shadowElevation = 4.dp
+                    ) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { query ->
+                                searchQuery = query
+                                // Buscar falla que coincida
+                                selectedFalla = if (query.isBlank()) {
+                                    null
+                                } else {
+                                    uiState.fallasParaVotar.firstOrNull { falla ->
+                                        falla.nombre.contains(query, ignoreCase = true) ||
+                                        falla.seccion.contains(query, ignoreCase = true)
+                                    }
+                                }
+                            },
+                            placeholder = { Text("Buscar falla...") },
+                            singleLine = true,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = {
+                                        searchQuery = ""
+                                        selectedFalla = null
+                                    }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Limpiar"
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -100,21 +172,20 @@ fun VotosScreen(
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Votar") },
-                        // Icono de fuego en lugar de estrella
-                        icon = { Icon(Icons.Default.Whatshot, contentDescription = null) }
+                        text = { Text("Ranking") },
+                        icon = { Icon(Icons.Default.DateRange, null) }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Mis Votos") },
-                        icon = { Icon(Icons.Default.Favorite, null) }
+                        text = { Text("Votar") },
+                        icon = { Icon(Icons.Default.Whatshot, contentDescription = null) }
                     )
                     Tab(
                         selected = selectedTab == 2,
                         onClick = { selectedTab = 2 },
-                        text = { Text("Ranking") },
-                        icon = { Icon(Icons.Default.DateRange, null) }
+                        text = { Text("Mis Votos") },
+                        icon = { Icon(Icons.Default.Favorite, null) }
                     )
                 }
             }
@@ -153,8 +224,19 @@ fun VotosScreen(
         }
 
         when (selectedTab) {
-            0 -> VotarTab(
+            0 -> RankingTab(
+                ranking = uiState.ranking,
+                isLoading = uiState.isLoading,
+                selectedTipoVoto = uiState.rankingFilter,
+                onFilterChange = { tipoVoto ->
+                    viewModel.setRankingFilter(tipoVoto)
+                },
+                onFallaClick = onFallaClick,
+                modifier = Modifier.padding(padding)
+            )
+            1 -> VotarTab(
                 fallas = uiState.fallasParaVotar,
+                selectedFalla = selectedFalla,
                 isLoading = uiState.isLoading,
                 onVoteClick = { falla, tipoVoto ->
                     viewModel.votar(falla, tipoVoto)
@@ -162,21 +244,11 @@ fun VotosScreen(
                 onFallaClick = onFallaClick,
                 modifier = Modifier.padding(padding)
             )
-            1 -> MisVotosTab(
+            2 -> MisVotosTab(
                 votos = uiState.misVotos,
                 isLoading = uiState.isLoading,
                 onDeleteVote = { idVoto ->
                     viewModel.eliminarVoto(idVoto)
-                },
-                onFallaClick = onFallaClick,
-                modifier = Modifier.padding(padding)
-            )
-            2 -> RankingTab(
-                ranking = uiState.ranking,
-                isLoading = uiState.isLoading,
-                selectedTipoVoto = uiState.rankingFilter,
-                onFilterChange = { tipoVoto ->
-                    viewModel.setRankingFilter(tipoVoto)
                 },
                 onFallaClick = onFallaClick,
                 modifier = Modifier.padding(padding)
@@ -191,71 +263,42 @@ fun VotosScreen(
 @Composable
 private fun VotarTab(
     fallas: List<Falla>,
+    selectedFalla: Falla?,
     isLoading: Boolean,
     onVoteClick: (Falla, TipoVoto) -> Unit,
     onFallaClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-
-    Column(modifier = modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            label = { Text("Buscar tu falla") },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 4.dp)
-        ) {
-            if (isLoading && fallas.isEmpty()) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else if (fallas.isEmpty()) {
-                Text(
-                    text = "No hay fallas disponibles",
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyLarge
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        if (isLoading && fallas.isEmpty()) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else if (fallas.isEmpty()) {
+            Text(
+                text = "No hay fallas disponibles",
+                modifier = Modifier.align(Alignment.Center),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        } else {
+            if (selectedFalla != null) {
+                // Mostrar falla específica seleccionada del dropdown
+                SwipeFallaCard(
+                    falla = selectedFalla,
+                    onVoteClick = { tipoVoto -> onVoteClick(selectedFalla, tipoVoto) },
+                    onFallaClick = { onFallaClick(selectedFalla.idFalla) }
                 )
             } else {
-                val trimmedQuery = searchQuery.trim()
-                if (trimmedQuery.isEmpty()) {
-                    // Modo mazo aleatorio normal
-                    StackedCardDeck(
-                        fallas = fallas,
-                        onVoteClick = onVoteClick,
-                        onFallaClick = onFallaClick
-                    )
-                } else {
-                    // Modo búsqueda directa de falla
-                    val resultados = fallas.filter { falla ->
-                        falla.nombre.contains(trimmedQuery, ignoreCase = true) ||
-                                falla.seccion.contains(trimmedQuery, ignoreCase = true)
-                    }
-
-                    if (resultados.isEmpty()) {
-                        Text(
-                            text = "No se han encontrado fallas para \"$trimmedQuery\"",
-                            modifier = Modifier.align(Alignment.Center),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    } else {
-                        // Mostramos una única carta con el mismo formato
-                        val falla = resultados.first()
-                        SwipeFallaCard(
-                            falla = falla,
-                            onVoteClick = { tipoVoto -> onVoteClick(falla, tipoVoto) },
-                            onFallaClick = { onFallaClick(falla.idFalla) }
-                        )
-                    }
-                }
+                // Modo mazo aleatorio normal
+                StackedCardDeck(
+                    fallas = fallas,
+                    onVoteClick = onVoteClick,
+                    onFallaClick = onFallaClick
+                )
             }
         }
     }
@@ -409,6 +452,8 @@ private fun SwipeFallaCard(
 ) {
     var showVoteDialog by remember { mutableStateOf(false) }
     var selectedTipoVoto by remember { mutableStateOf<TipoVoto?>(null) }
+    var showFullScreenImage by remember { mutableStateOf(false) }
+    val imageUrl = falla.imagenes.firstOrNull()
 
     if (showVoteDialog && selectedTipoVoto != null) {
         AlertDialog(
@@ -435,9 +480,52 @@ private fun SwipeFallaCard(
         )
     }
 
+    // Dialog de imagen en pantalla completa
+    if (showFullScreenImage && imageUrl != null) {
+        Dialog(
+            onDismissRequest = { showFullScreenImage = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false
+            )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { showFullScreenImage = false }
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = "Imagen de ${falla.nombre}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+
+                // Botón X con fondo circular semitransparente
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+                ) {
+                    IconButton(
+                        onClick = { showFullScreenImage = false }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cerrar",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
@@ -446,13 +534,9 @@ private fun SwipeFallaCard(
         )
     ) {
         Column(
-            modifier = Modifier
-                .clickable(onClick = onFallaClick)
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Imagen principal de la falla
-            val imageUrl = falla.imagenes.firstOrNull()
-
+            // Imagen principal de la falla (clickeable para pantalla completa)
             if (imageUrl != null) {
                 AsyncImage(
                     model = imageUrl,
@@ -460,7 +544,8 @@ private fun SwipeFallaCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable { showFullScreenImage = true },
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -486,7 +571,8 @@ private fun SwipeFallaCard(
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.clickable(onClick = onFallaClick)
             )
 
             Text(

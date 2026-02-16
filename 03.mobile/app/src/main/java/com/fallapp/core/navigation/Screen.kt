@@ -10,6 +10,9 @@ package com.fallapp.core.navigation
  */
 sealed class Screen(val route: String) {
     
+    // Splash (verificación de sesión)
+    data object Splash : Screen("splash")
+
     // Auth
     data object Login : Screen("login")
     data object Register : Screen("register")
