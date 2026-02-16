@@ -96,8 +96,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
                 
-                // Gestión de usuarios (ACCESO PÚBLICO - SIN AUTENTICACIÓN)
-                .requestMatchers("/api/usuarios/**").permitAll()
+                // Gestión de usuarios (requiere autenticación)
+                .requestMatchers("/api/usuarios/**").authenticated()
                 
                 // Por defecto, requiere autenticación
                 .anyRequest().authenticated()

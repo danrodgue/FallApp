@@ -28,6 +28,7 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final FallaRepository fallaRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FileUploadService fileUploadService;
 
     /**
      * Registrar un nuevo usuario
@@ -240,8 +241,87 @@ public class UsuarioService {
                 .direccion(usuario.getDireccion())
                 .ciudad(usuario.getCiudad())
                 .codigoPostal(usuario.getCodigoPostal())
+                .imagenNombre(usuario.getImagenNombre())
                 .fechaCreacion(usuario.getFechaRegistro())
                 .fechaActualizacion(usuario.getUltimoAcceso())
                 .build();
+    }
+
+    /**
+     * Guardar imagen de perfil del usuario
+     * 
+     * @param id ID del usuario
+     * @param imagen Archivo de imagen a guardar
+     * @return DTO del usuario actualizado
+     */
+    public UsuarioDTO guardarImagen(Long id, MultipartFile imagen) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+
+        // Eliminar imagen anterior si existe
+        if (usuario.getImagenNombre() != null && !usuario.getImagenNombre().isBlank()) {
+            try {
+                fileUploadService.eliminarArchivo(usuario.getImagenNombre(), "usuarios");
+            } catch (Exception e) {
+                // Continuar aunque falle la eliminación anterior
+            }
+        }
+
+        // Guardar nueva imagen
+        String nombreArchivo = fileUploadService.guardarArchivo(imagen, "usuarios");
+        usuario.setImagenNombre(nombreArchivo);
+        
+        usuarioRepository.save(usuario);
+        return convertirADTO(usuario);
+    }
+
+    /**
+     * Obtener imagen de perfil del usuario
+     * 
+     * @param id ID del usuario
+     * @return Bytes de la imagen
+     */
+    public byte[] obtenerImagen(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+
+        if (usuario.getImagenNombre() == null || usuario.getImagenNombre().isBlank()) {
+            throw new ResourceNotFoundException("El usuario no tiene imagen de perfil");
+        }
+
+        return fileUploadService.obtenerArchivo(usuario.getImagenNombre(), "usuarios");
+    }
+
+    /**
+     * Obtener nombre de la imagen del usuario
+     * 
+     * @param id ID del usuario
+     * @return Nombre del archivo de imagen
+     */
+    public String obtenerNombreImagen(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+
+        if (usuario.getImagenNombre() == null || usuario.getImagenNombre().isBlank()) {
+            throw new ResourceNotFoundException("El usuario no tiene imagen de perfil");
+        }
+
+        return usuario.getImagenNombre();
+    }
+
+    /**
+     * Eliminar imagen de perfil del usuario
+     * 
+     * @param id ID del usuario
+     */
+    public void eliminarImagen(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
+
+        if (usuario.getImagenNombre() != null && !usuario.getImagenNombre().isBlank()) {
+            fileUploadService.eliminarArchivo(usuario.getImagenNombre(), "usuarios");
+            usuario.setImagenNombre(null);
+            usuarioRepository.save(usuario);
+        }
     }
 }

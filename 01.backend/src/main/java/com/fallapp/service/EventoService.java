@@ -3,8 +3,10 @@ package com.fallapp.service;
 import com.fallapp.dto.EventoDTO;
 import com.fallapp.model.Evento;
 import com.fallapp.model.Falla;
+import com.fallapp.model.Usuario;
 import com.fallapp.repository.EventoRepository;
 import com.fallapp.repository.FallaRepository;
+import com.fallapp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,8 @@ public class EventoService {
     
     private final EventoRepository eventoRepository;
     private final FallaRepository fallaRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final FileUploadService fileUploadService;
     
     /**
      * Obtener eventos futuros
@@ -85,21 +88,10 @@ public class EventoService {
         dto.setDescripcion(evento.getDescripcion());
         dto.setFechaEvento(evento.getFechaEvento());
         dto.setUbicacion(evento.getUbicacion());
-        dto.setDireccion(evento.getDireccion());
-        dto.setUrlImagen(evento.getUrlImagen());
         dto.setParticipantesEstimado(evento.getParticipantesEstimado());
-        
-        // Campos de auditoría
-        if (evento.getCreadoPor() != null) {
-            EventoDTO.UsuarioSimpleDTO creador = new EventoDTO.UsuarioSimpleDTO();
-            creador.setId(evento.getCreadoPor().getIdUsuario());
-            creador.setNombreCompleto(evento.getCreadoPor().getNombreCompleto());
-            creador.setEmail(evento.getCreadoPor().getEmail());
-            dto.setCreadoPor(creador);
-        }
+        dto.setCreadoPor(evento.getCreadoPor() != null ? evento.getCreadoPor().getIdUsuario() : null);
         dto.setFechaCreacion(evento.getCreadoEn());
-        dto.setActualizadoEn(evento.getActualizadoEn());
-        
+        dto.setImagenNombre(evento.getImagenNombre());
         return dto;
     }
 
@@ -127,6 +119,13 @@ public class EventoService {
 
         Evento evento = new Evento();
         mapearDTOAEntidad(eventoDTO, evento, falla);
+        
+        // Asignar usuario creador si se proporciona
+        if (eventoDTO.getCreadoPor() != null) {
+            Usuario usuario = usuarioRepository.findById(eventoDTO.getCreadoPor())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + eventoDTO.getCreadoPor()));
+            evento.setCreadoPor(usuario);
+        }
         
         Evento eventoSaved = eventoRepository.save(evento);
         return convertirADTO(eventoSaved);
@@ -159,6 +158,8 @@ public class EventoService {
                 .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + eventoDTO.getIdFalla()));
 
         mapearDTOAEntidad(eventoDTO, evento, falla);
+        
+        // No cambiar el creadoPor en actualizaciones (solo se asigna en creación)
         
         Evento eventoActualizado = eventoRepository.save(evento);
         return convertirADTO(eventoActualizado);
@@ -232,50 +233,6 @@ public class EventoService {
     }
     */
     /**
-     * Listar eventos con filtros opcionales (paginado)
-     */
-    public Page<EventoDTO> listarConFiltros(Long idFalla, String tipo, LocalDateTime desdeFecha, 
-                                              LocalDateTime hastaFecha, Pageable pageable) {
-        Page<Evento> eventos;
-        
-        // Aplicar filtros según parámetros
-        if (idFalla != null && tipo != null) {
-            Falla falla = fallaRepository.findById(idFalla)
-                    .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
-            Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
-            eventos = eventoRepository.findByFallaAndTipo(falla, tipoEvento, pageable);
-        } else if (idFalla != null) {
-            Falla falla = fallaRepository.findById(idFalla)
-                    .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
-            eventos = eventoRepository.findByFalla(falla, pageable);
-        } else if (tipo != null) {
-            Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
-            eventos = eventoRepository.findByTipo(tipoEvento, pageable);
-        } else if (desdeFecha != null && hastaFecha != null) {
-            eventos = eventoRepository.findByFechaEventoBetween(desdeFecha, hastaFecha, pageable);
-        } else {
-            eventos = eventoRepository.findAll(pageable);
-        }
-        
-        List<EventoDTO> dtos = eventos.getContent().stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-        return new PageImpl<>(dtos, pageable, eventos.getTotalElements());
-    }
-    
-    /**
-     * Obtener eventos por tipo
-     */
-    public List<EventoDTO> obtenerPorTipo(String tipo) {
-        Evento.TipoEvento tipoEvento = Evento.TipoEvento.valueOf(tipo.toLowerCase());
-        Pageable pageable = Pageable.ofSize(100); // Límite razonable
-        Page<Evento> eventos = eventoRepository.findByTipo(tipoEvento, pageable);
-        return eventos.getContent().stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
-    
-    /**
      * Mapear DTO a entidad
      */
     private void mapearDTOAEntidad(EventoDTO dto, Evento entidad, Falla falla) {
@@ -284,11 +241,90 @@ public class EventoService {
         entidad.setDescripcion(dto.getDescripcion());
         entidad.setFechaEvento(dto.getFechaEvento());
         entidad.setUbicacion(dto.getUbicacion());
-        entidad.setDireccion(dto.getDireccion());
-        entidad.setUrlImagen(dto.getUrlImagen());
         entidad.setParticipantesEstimado(dto.getParticipantesEstimado());
         
         if (dto.getTipo() != null) {
             entidad.setTipo(Evento.TipoEvento.valueOf(dto.getTipo().toLowerCase()));
         }
-    }}
+    }
+
+    /**
+     * Guardar imagen del evento
+     * 
+     * @param id ID del evento
+     * @param imagen Archivo de imagen a guardar
+     * @return DTO del evento actualizado
+     */
+    @Transactional
+    public EventoDTO guardarImagen(Long id, MultipartFile imagen) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        // Eliminar imagen anterior si existe
+        if (evento.getImagenNombre() != null && !evento.getImagenNombre().isBlank()) {
+            try {
+                fileUploadService.eliminarArchivo(evento.getImagenNombre(), "eventos");
+            } catch (Exception e) {
+                // Continuar aunque falle la eliminación anterior
+            }
+        }
+
+        // Guardar nueva imagen
+        String nombreArchivo = fileUploadService.guardarArchivo(imagen, "eventos");
+        evento.setImagenNombre(nombreArchivo);
+        
+        eventoRepository.save(evento);
+        return convertirADTO(evento);
+    }
+
+    /**
+     * Obtener imagen del evento
+     * 
+     * @param id ID del evento
+     * @return Bytes de la imagen
+     */
+    public byte[] obtenerImagen(Long id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        if (evento.getImagenNombre() == null || evento.getImagenNombre().isBlank()) {
+            throw new RuntimeException("El evento no tiene imagen");
+        }
+
+        return fileUploadService.obtenerArchivo(evento.getImagenNombre(), "eventos");
+    }
+
+    /**
+     * Obtener nombre de la imagen del evento
+     * 
+     * @param id ID del evento
+     * @return Nombre del archivo de imagen
+     */
+    public String obtenerNombreImagen(Long id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        if (evento.getImagenNombre() == null || evento.getImagenNombre().isBlank()) {
+            throw new RuntimeException("El evento no tiene imagen");
+        }
+
+        return evento.getImagenNombre();
+    }
+
+    /**
+     * Eliminar imagen del evento
+     * 
+     * @param id ID del evento
+     */
+    @Transactional
+    public void eliminarImagen(Long id) {
+        Evento evento = eventoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Evento no encontrado con ID: " + id));
+
+        if (evento.getImagenNombre() != null && !evento.getImagenNombre().isBlank()) {
+            fileUploadService.eliminarArchivo(evento.getImagenNombre(), "eventos");
+            evento.setImagenNombre(null);
+            eventoRepository.save(evento);
+        }
+    }
+}

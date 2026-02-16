@@ -70,6 +70,9 @@ public class Usuario {
     @Column(name = "codigo_postal", length = 10)
     private String codigoPostal;
 
+    @Column(name = "imagen_nombre", length = 255)
+    private String imagenNombre;
+
     @Transient
     private byte[] fotoPerfil;
 

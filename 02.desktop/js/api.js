@@ -203,6 +203,23 @@ async function actualizarUsuario(id, datos) {
 // FUNCIONES DE EVENTO
 // ============================================
 
+// Obtener eventos por falla
+async function obtenerEventosPorFalla(idFalla, page = 0, size = 100) {
+    try {
+        const url = `${API_EVENTOS_URL}/falla/${idFalla}?page=${page}&size=${size}`;
+        const respuesta = await fetch(url, {
+            headers: getAuthHeaders()
+        });
+        if (!respuesta.ok) {
+            const error = await parseErrorResponse(respuesta);
+            throw new Error(error);
+        }
+        return await respuesta.json();
+    } catch (error) {
+        throw new Error(`No se pudieron obtener los eventos de la falla: ${error.message}`);
+    }
+}
+
 // Obtener un evento por ID
 async function obtenerEvento(id) {
     try {
@@ -269,5 +286,129 @@ async function eliminarEvento(id) {
         return await respuesta.json();
     } catch (error) {
         throw new Error(`No se pudo eliminar el evento: ${error.message}`);
+    }
+}
+
+// ============================================
+// FUNCIONES DE IMAGEN
+// ============================================
+
+// Subir imagen de evento
+async function subirImagenEvento(idEvento, archivo) {
+    try {
+        const formData = new FormData();
+        formData.append('imagen', archivo);
+        
+        const headers = {};
+        const token = localStorage.getItem('fallapp_token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const respuesta = await fetch(`${API_EVENTOS_URL}/${idEvento}/imagen`, {
+            method: 'POST',
+            headers: headers,
+            body: formData
+        });
+        
+        if (!respuesta.ok) {
+            const error = await parseErrorResponse(respuesta);
+            throw new Error(error);
+        }
+        return await respuesta.json();
+    } catch (error) {
+        throw new Error(`No se pudo subir la imagen del evento: ${error.message}`);
+    }
+}
+
+// Descargar imagen de evento
+async function descargarImagenEvento(idEvento) {
+    try {
+        const respuesta = await fetch(`${API_EVENTOS_URL}/${idEvento}/imagen`, {
+            headers: getAuthHeaders()
+        });
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP ${respuesta.status}`);
+        }
+        return await respuesta.blob();
+    } catch (error) {
+        throw new Error(`No se pudo descargar la imagen del evento: ${error.message}`);
+    }
+}
+
+// Eliminar imagen de evento
+async function eliminarImagenEvento(idEvento) {
+    try {
+        const respuesta = await fetch(`${API_EVENTOS_URL}/${idEvento}/imagen`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        if (!respuesta.ok) {
+            const error = await parseErrorResponse(respuesta);
+            throw new Error(error);
+        }
+        return await respuesta.json();
+    } catch (error) {
+        throw new Error(`No se pudo eliminar la imagen del evento: ${error.message}`);
+    }
+}
+
+// Subir imagen de usuario
+async function subirImagenUsuario(idUsuario, archivo) {
+    try {
+        const formData = new FormData();
+        formData.append('imagen', archivo);
+        
+        const headers = {};
+        const token = localStorage.getItem('fallapp_token');
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const respuesta = await fetch(`${API_USUARIOS_URL}/${idUsuario}/imagen`, {
+            method: 'POST',
+            headers: headers,
+            body: formData
+        });
+        
+        if (!respuesta.ok) {
+            const error = await parseErrorResponse(respuesta);
+            throw new Error(error);
+        }
+        return await respuesta.json();
+    } catch (error) {
+        throw new Error(`No se pudo subir la imagen del usuario: ${error.message}`);
+    }
+}
+
+// Descargar imagen de usuario
+async function descargarImagenUsuario(idUsuario) {
+    try {
+        const respuesta = await fetch(`${API_USUARIOS_URL}/${idUsuario}/imagen`, {
+            headers: getAuthHeaders()
+        });
+        if (!respuesta.ok) {
+            throw new Error(`Error HTTP ${respuesta.status}`);
+        }
+        return await respuesta.blob();
+    } catch (error) {
+        throw new Error(`No se pudo descargar la imagen del usuario: ${error.message}`);
+    }
+}
+
+// Eliminar imagen de usuario
+async function eliminarImagenUsuario(idUsuario) {
+    try {
+        const respuesta = await fetch(`${API_USUARIOS_URL}/${idUsuario}/imagen`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+        });
+        if (!respuesta.ok) {
+            const error = await parseErrorResponse(respuesta);
+            throw new Error(error);
+        }
+        return await respuesta.json();
+    } catch (error) {
+        throw new Error(`No se pudo eliminar la imagen del usuario: ${error.message}`);
     }
 }

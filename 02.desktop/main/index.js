@@ -35,20 +35,108 @@ function createWindow() {
 
 // IPC handlers: main -> backend HTTP
 ipcMain.handle('get-events', async () => {
-  const res = await fetch(`${API_BASE}/api/events`);
-  return await res.json();
+  try {
+    const res = await fetch(`${API_BASE}/api/eventos/proximos?limite=100`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.datos || data;
+  } catch (error) {
+    console.error('Error fetching events:', error);
+    throw error;
+  }
 });
+
 ipcMain.handle('create-event', async (evt, payload) => {
-  const res = await fetch(`${API_BASE}/api/events`, { method: 'POST', body: JSON.stringify(payload), headers: {'Content-Type':'application/json'} });
-  return await res.json();
+  try {
+    const token = payload.token;
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Mapear los datos del formulario a los campos exactos de la tabla
+    const eventData = {
+      nombre: payload.nombre || payload.name,
+      descripcion: payload.descripcion || payload.description,
+      fecha_evento: payload.fecha_evento || new Date(payload.date + 'T' + (payload.time || '00:00')).toISOString(),
+      ubicacion: payload.ubicacion || payload.place,
+      id_falla: payload.id_falla || payload.idFalla,
+      tipo: payload.tipo || 'otro',
+      creado_por: payload.creado_por
+    };
+    
+    const res = await fetch(`${API_BASE}/api/eventos`, { 
+      method: 'POST', 
+      body: JSON.stringify(eventData), 
+      headers: headers 
+    });
+    
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: `Error HTTP ${res.status}` }));
+      throw new Error(error.message || error.error || `Error HTTP ${res.status}`);
+    }
+    
+    const data = await res.json();
+    return data.datos || data;
+  } catch (error) {
+    console.error('Error creating event:', error);
+    throw error;
+  }
 });
+
 ipcMain.handle('update-event', async (evt, payload) => {
-  const res = await fetch(`${API_BASE}/api/events/${payload.id}`, { method: 'PUT', body: JSON.stringify(payload), headers: {'Content-Type':'application/json'} });
-  return await res.json();
+  try {
+    const token = payload.token;
+    const id = payload.id_evento || payload.idEvento || payload.id;
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    // Mapear los datos del formulario a los campos exactos de la tabla
+    const eventData = {
+      nombre: payload.nombre || payload.name,
+      descripcion: payload.descripcion || payload.description,
+      fecha_evento: payload.fecha_evento || new Date(payload.date + 'T' + (payload.time || '00:00')).toISOString(),
+      ubicacion: payload.ubicacion || payload.place,
+      id_falla: payload.id_falla || payload.idFalla,
+      tipo: payload.tipo || 'otro',
+      creado_por: payload.creado_por
+    };
+    
+    const res = await fetch(`${API_BASE}/api/eventos/${id}`, { 
+      method: 'PUT', 
+      body: JSON.stringify(eventData), 
+      headers: headers 
+    });
+    
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: `Error HTTP ${res.status}` }));
+      throw new Error(error.message || error.error || `Error HTTP ${res.status}`);
+    }
+    
+    const data = await res.json();
+    return data.datos || data;
+  } catch (error) {
+    console.error('Error updating event:', error);
+    throw error;
+  }
 });
+
 ipcMain.handle('delete-event', async (evt, id) => {
-  const res = await fetch(`${API_BASE}/api/events/${id}`, { method: 'DELETE' });
-  return res.status === 204 || res.ok;
+  try {
+    const res = await fetch(`${API_BASE}/api/eventos/${id}`, { 
+      method: 'DELETE' 
+    });
+    return res.status === 204 || res.ok;
+  } catch (error) {
+    console.error('Error deleting event:', error);
+    throw error;
+  }
 });
 
 // Falla endpoints

@@ -488,10 +488,8 @@ function saveFalla() {
       emailContacto: document.getElementById('fallaEmailContacto').value.trim(),
       anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || null,
       distintivo: document.getElementById('fallaDistintivo').value.trim(),
-      categoria: document.getElementById('fallaCategoria').value.trim(),
-      totalEventos: parseInt(document.getElementById('fallaTotalEventos').value) || 0,
-      totalNinots: parseInt(document.getElementById('fallaTotalHintos').value) || 0,
-      totalMiembros: parseInt(document.getElementById('fallaTotalMiembros').value) || 0,
+      categoria: document.getElementById('fallaCategoria').value.trim()
+      // Nota: totalEventos, totalNinots, totalMiembros son read-only (calculados por backend)
    };
 
    // Validar datos
@@ -513,85 +511,21 @@ function saveFalla() {
 
    // Si tiene id => actualizar (PUT), si no => crear (POST)
    if (id) {
-      formData.id = id; // Agregar el ID al payload
-      // Obtener token para autenticación
-      const token = localStorage.getItem('fallapp_token');
-      if (token) {
-         formData.token = token;
-      }
-      
-      if (window.api && window.api.saveFalla) {
-         window.api.saveFalla(formData).then(json => {
-            showNotificationFalla('Falla actualizada correctamente', 'success');
-            const side = document.getElementById('sideSummary'); 
-            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
-            setEditMode(false);
-            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
-         }).catch(err => {
-            console.error('Error guardando:', err);
-            showNotificationFalla(`Error al guardar: ${err.message || err}`, 'error');
-         }).finally(() => {
-            if (saveBtn) {
-               saveBtn.textContent = originalText;
-               saveBtn.disabled = false;
-            }
-         });
-      } else {
-         // Intentar con fetch directo
-         actualizar_falla_directo(id, formData, originalText, saveBtn);
-      }
+      // Actualizar falla existente
+      actualizar_falla_directo(id, formData, originalText, saveBtn);
    } else {
-      // Crear nueva
-      const token = localStorage.getItem('fallapp_token');
-      if (token) {
-         formData.token = token;
-      }
-      
-      if (window.api && window.api.saveFalla) {
-         window.api.saveFalla(formData).then(json => {
-            showNotificationFalla('Falla creada correctamente', 'success');
-            const side = document.getElementById('sideSummary'); 
-            if(side) side.textContent = (json.datos?.nombre || json.nombre || formData.nombre||'').slice(0,140) + ((json.datos?.nombre || json.nombre || formData.nombre) && (json.datos?.nombre || json.nombre || formData.nombre).length>140? '...':'');
-            if (json.datos?.id || json.id) document.getElementById('fallaId').value = json.datos?.id || json.id;
-            setEditMode(false);
-         }).catch(err => {
-            console.error('Error creando:', err);
-            showNotificationFalla(`Error al crear: ${err.message || err}`, 'error');
-         }).finally(() => {
-            if (saveBtn) {
-               saveBtn.textContent = originalText;
-               saveBtn.disabled = false;
-            }
-         });
-      } else {
-         showNotificationFalla('API bridge no disponible - cambios no persistidos', 'warning');
-         setEditMode(false);
-         if (saveBtn) {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-         }
+      showNotificationFalla('Error: No se puede crear una nueva falla desde aquí. Por favor, usando el formulario correcto.', 'error');
+      if (saveBtn) {
+         saveBtn.textContent = originalText;
+         saveBtn.disabled = false;
       }
    }
 }
 
 // Actualizar falla directamente llamando a la API
 function actualizar_falla_directo(id, formData, originalText, saveBtn) {
-   const url = `${window._apiBase}/fallas/${id}`;
-   fetch(url, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(formData)
-   })
-   .then(response => {
-      if (!response.ok) {
-         return response.json().then(data => {
-            throw new Error(data.message || `Error HTTP ${response.status}`);
-         }).catch(parseErr => {
-            throw new Error(`Error HTTP ${response.status}: ${parseErr.message}`);
-         });
-      }
-      return response.json();
-   })
+   // Usar la función actualizarFalla de api.js
+   actualizarFalla(id, formData)
    .then(json => {
       const result = json.datos || json;
       showNotificationFalla('Falla actualizada correctamente', 'success');

@@ -12,15 +12,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Cargar información del usuario
   await loadUserData();
 
+  // Cargar imagen del usuario si existe
+  await loadUserImage();
+
   // Configurar botones
   const editBtn = document.getElementById('editBtn');
   const saveBtn = document.getElementById('saveBtn');
   const cancelBtn = document.getElementById('cancelBtn');
   const logoutBtn = document.getElementById('logout');
+  const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
+  const userPhotoInput = document.getElementById('userPhotoInput');
 
   if (editBtn) {
     editBtn.addEventListener('click', toggleEditMode);
-    console.log('✓ Event listener agreg ado a editBtn');
+    console.log('✓ Event listener agregado a editBtn');
   } else {
     console.error('❌ No se encontró el elemento editBtn');
   }
@@ -44,6 +49,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('✓ Event listener agregado a logoutBtn');
   } else {
     console.error('❌ No se encontró el elemento logoutBtn');
+  }
+
+  // Configurar botón de cambiar foto
+  if (uploadPhotoBtn && userPhotoInput) {
+    uploadPhotoBtn.addEventListener('click', () => {
+      userPhotoInput.click();
+    });
+    
+    userPhotoInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        try {
+          await subirImagenUsuarioLocal();
+        } catch (error) {
+          showErrorMessage('Error al subir la foto: ' + error.message);
+        }
+      }
+    });
+    
+    console.log('✓ Event listeners agregados al botón de cambiar foto');
+  } else {
+    console.error('❌ No se encontró uploadPhotoBtn o userPhotoInput');
   }
   
   console.log('✓ Página de usuario inicializada correctamente');
@@ -137,6 +164,7 @@ function toggleEditMode() {
   const editBtn = document.getElementById('editBtn');
   const saveBtn = document.getElementById('saveBtn');
   const cancelBtn = document.getElementById('cancelBtn');
+  const uploadPhotoBtn = document.getElementById('uploadPhotoBtn');
   const fields = document.querySelectorAll('.field input');
 
   if (isEditing) {
@@ -156,6 +184,9 @@ function toggleEditMode() {
     editBtn.style.display = 'none';
     saveBtn.style.display = 'inline-flex';
     cancelBtn.style.display = 'inline-flex';
+    if (uploadPhotoBtn) {
+      uploadPhotoBtn.style.display = 'inline-flex';
+    }
     
     console.log('✓ Modo edición activado');
   } else {
@@ -168,6 +199,9 @@ function toggleEditMode() {
     editBtn.style.display = 'inline-flex';
     saveBtn.style.display = 'none';
     cancelBtn.style.display = 'none';
+    if (uploadPhotoBtn) {
+      uploadPhotoBtn.style.display = 'none';
+    }
 
     // Recargar datos para descartar cambios (sin hacer petición si tenemos datos originales)
     if (originalUserData) {
@@ -359,6 +393,84 @@ function handleLogout() {
 function redirectToLogin() {
   console.warn('⚠️ Redirigiendo a login...');
   window.location.href = '../js/index.html';
+}
+
+// Cargar imagen del usuario
+async function loadUserImage() {
+  try {
+    const idUsuario = localStorage.getItem('fallapp_user_id');
+    if (!idUsuario) return;
+    
+    const urlImagen = `http://35.180.21.42:8080/api/usuarios/${idUsuario}/imagen`;
+    const token = localStorage.getItem('fallapp_token');
+    
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const response = await fetch(urlImagen, { headers });
+    
+    if (response.ok) {
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const avatarImg = document.getElementById('avatarImg');
+      if (avatarImg) {
+        avatarImg.src = objectUrl;
+        avatarImg.style.display = 'block';
+        const initials = document.getElementById('avatarInitials');
+        if (initials) initials.style.display = 'none';
+        console.log('✓ Imagen de usuario cargada');
+      }
+    }
+  } catch (e) {
+    console.debug('No hay imagen de usuario o error cargándola:', e);
+  }
+}
+
+// Subir imagen de usuario
+// Wrapper para subir imagen de usuario - obtiene el archivo del input
+async function subirImagenUsuarioLocal() {
+  try {
+    const idUsuario = localStorage.getItem('fallapp_user_id');
+    if (!idUsuario) {
+      showErrorMessage('No hay usuario cargado');
+      return;
+    }
+    
+    const inputImagen = document.getElementById('userPhotoInput');
+    if (!inputImagen || !inputImagen.files.length) {
+      showErrorMessage('Selecciona una imagen');
+      return;
+    }
+    
+    const archivo = inputImagen.files[0];
+    
+    // Llamar a la función de api.js
+    await subirImagenUsuario(idUsuario, archivo);
+    
+    showSuccessMessage('Imagen de perfil actualizada');
+    
+    // Recargar imagen - mostrar iniciales de nuevo y luego cargar la imagen
+    const avatarImg = document.getElementById('avatarImg');
+    const avatarInitials = document.getElementById('avatarInitials');
+    if (avatarImg) {
+      avatarImg.style.display = 'none';
+      avatarImg.src = '';
+    }
+    if (avatarInitials) {
+      avatarInitials.style.display = 'block';
+    }
+    
+    // Esperar un poco y recargar la nueva imagen
+    setTimeout(() => {
+      loadUserImage();
+    }, 500);
+    
+  } catch (e) {
+    console.error('❌ Error al subir imagen:', e);
+    showErrorMessage(`Error al subir imagen: ${e.message}`);
+  }
 }
 
 // Agregar animación de deslizamiento

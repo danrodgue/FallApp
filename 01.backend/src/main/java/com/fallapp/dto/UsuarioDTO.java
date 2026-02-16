@@ -28,6 +28,7 @@ public class UsuarioDTO {
     private String direccion;
     private String ciudad;
     private String codigoPostal;
+    private String imagenNombre;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaActualizacion;
 }

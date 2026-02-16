@@ -2,6 +2,7 @@ package com.fallapp.controller;
 
 import com.fallapp.dto.ApiResponse;
 import com.fallapp.dto.UsuarioDTO;
+import com.fallapp.service.FileUploadService;
 import com.fallapp.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +26,7 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final FileUploadService fileUploadService;
 
     @GetMapping
     @Operation(summary = "Listar usuarios activos")
@@ -54,6 +56,65 @@ public class UsuarioController {
     public ResponseEntity<ApiResponse<Void>> desactivar(@PathVariable Long id) {
         usuarioService.desactivar(id);
         return ResponseEntity.ok(ApiResponse.success("Usuario desactivado", null));
+    }
+
+    /**
+     * POST /api/usuarios/{id}/imagen - Subir imagen de perfil del usuario
+     * 
+     * Guarda la imagen en el servidor y asocia el nombre del archivo al usuario
+     */
+    @PostMapping(path = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Subir imagen de perfil del usuario")
+    public ResponseEntity<ApiResponse<UsuarioDTO>> subirImagen(
+            @PathVariable Long id,
+            @RequestPart("imagen") MultipartFile imagen) {
+        
+        try {
+            UsuarioDTO usuarioActualizado = usuarioService.guardarImagen(id, imagen);
+            return ResponseEntity.ok(ApiResponse.success("Imagen de perfil subida correctamente", usuarioActualizado));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/usuarios/{id}/imagen - Descargar imagen de perfil del usuario
+     * 
+     * Retorna la imagen en su formato original
+     */
+    @GetMapping("/{id}/imagen")
+    @Operation(summary = "Obtener imagen de perfil del usuario")
+    public ResponseEntity<byte[]> descargarImagen(@PathVariable Long id) {
+        try {
+            byte[] imagenBytes = usuarioService.obtenerImagen(id);
+            String imagenNombre = usuarioService.obtenerNombreImagen(id);
+            
+            String mimeType = fileUploadService.obtenerMimeType(imagenNombre);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(mimeType));
+            headers.setContentDisposition(org.springframework.http.ContentDisposition.builder("inline")
+                    .filename(imagenNombre)
+                    .build());
+            
+            return new ResponseEntity<>(imagenBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * DELETE /api/usuarios/{id}/imagen - Eliminar imagen de perfil del usuario
+     */
+    @DeleteMapping("/{id}/imagen")
+    @Operation(summary = "Eliminar imagen de perfil del usuario")
+    public ResponseEntity<ApiResponse<Void>> eliminarImagen(@PathVariable Long id) {
+        try {
+            usuarioService.eliminarImagen(id);
+            return ResponseEntity.ok(ApiResponse.success("Imagen de perfil eliminada", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     /**

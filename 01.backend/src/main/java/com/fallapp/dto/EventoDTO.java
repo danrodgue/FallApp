@@ -1,5 +1,6 @@
 package com.fallapp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +17,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventoDTO {
+    
+    @JsonProperty("id_evento")
     private Long idEvento;
     
     @NotNull(message = "El ID de la falla es obligatorio")
+    @JsonProperty("id_falla")
     private Long idFalla;
     
     private String nombreFalla;
@@ -33,34 +37,16 @@ public class EventoDTO {
     private String descripcion;
     
     @NotNull(message = "La fecha del evento es obligatoria")
+    @JsonProperty("fecha_evento")
     private LocalDateTime fechaEvento;
     
     private String ubicacion;
     
-    @Size(max = 255, message = "La dirección no puede exceder 255 caracteres")
-    private String direccion;
+    @JsonProperty("creado_por")
+    private Long creadoPor;
     
-    @Size(max = 500, message = "La URL de la imagen no puede exceder 500 caracteres")
-    private String urlImagen;
-    
-    @Min(value = 0, message = "Los participantes estimados no pueden ser negativos")
-    private Integer participantesEstimado;
-    
-    // Campos de auditoría (solo lectura)
-    private UsuarioSimpleDTO creadoPor;
+    @JsonProperty("fecha_creacion")
     private LocalDateTime fechaCreacion;
-    private LocalDateTime actualizadoEn;
     
-    /**
-     * DTO simplificado para usuario (para campos de auditoría)
-     */
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class UsuarioSimpleDTO {
-        private Long id;
-        private String nombreCompleto;
-        private String email;
-    }
-}
+    private String imagenNombre;
+    

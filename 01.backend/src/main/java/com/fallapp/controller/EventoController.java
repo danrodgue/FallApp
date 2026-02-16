@@ -3,12 +3,12 @@ package com.fallapp.controller;
 import com.fallapp.dto.ApiResponse;
 import com.fallapp.dto.EventoDTO;
 import com.fallapp.service.EventoService;
+import com.fallapp.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,42 +28,7 @@ import java.util.List;
 public class EventoController {
     
     private final EventoService eventoService;
-    
-    /**
-     * GET /api/eventos - Listar eventos con filtros opcionales
-     * 
-     * Parámetros:
-     * - pagina (int): Número de página (default: 0)
-     * - tamano (int): Tamaño de página (default: 20, max: 100)
-     * - id_falla (Long): Filtrar por ID de falla
-     * - tipo (String): Filtrar por tipo de evento
-     * - desde_fecha (LocalDateTime): Filtrar desde fecha
-     * - hasta_fecha (LocalDateTime): Filtrar hasta fecha
-     * - ordenar_por (String): Campo para ordenar (default: fecha_evento)
-     */
-    @GetMapping
-    public ResponseEntity<ApiResponse<Page<EventoDTO>>> listar(
-            @RequestParam(defaultValue = "0") int pagina,
-            @RequestParam(defaultValue = "20") int tamano,
-            @RequestParam(required = false) Long id_falla,
-            @RequestParam(required = false) String tipo,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde_fecha,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta_fecha,
-            @RequestParam(defaultValue = "fecha_evento") String ordenar_por) {
-        
-        tamano = Math.min(tamano, 100); // Máximo 100
-        
-        // Construir Sort
-        Sort sort = Sort.by(Sort.Direction.ASC, "fechaEvento");
-        if ("nombre".equalsIgnoreCase(ordenar_por)) {
-            sort = Sort.by(Sort.Direction.ASC, "nombre");
-        }
-        
-        Pageable pageable = PageRequest.of(pagina, tamano, sort);
-        Page<EventoDTO> eventos = eventoService.listarConFiltros(id_falla, tipo, desde_fecha, hasta_fecha, pageable);
-        
-        return ResponseEntity.ok(ApiResponse.success(eventos));
-    }
+    private final FileUploadService fileUploadService;
     
     /**
      * GET /api/eventos/futuros - Obtener eventos futuros
@@ -77,9 +41,6 @@ public class EventoController {
     
     /**
      * GET /api/eventos/proximos - Obtener próximos N eventos
-     * 
-     * Parámetros:
-     * - limite (int): Número máximo de eventos (default: 10, max: 50)
      */
     @GetMapping("/proximos")
     public ResponseEntity<ApiResponse<List<EventoDTO>>> obtenerProximos(
@@ -91,14 +52,12 @@ public class EventoController {
     }
     
     /**
-     * GET /api/eventos/tipo/{tipo} - Obtener eventos por tipo
-     * 
-     * Tipos válidos: planta, crema, ofrenda, infantil, concierto, exposicion, encuentro, cena, teatro, otro
+     * GET /api/eventos/{id} - Obtener evento por ID
      */
-    @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<ApiResponse<List<EventoDTO>>> obtenerPorTipo(@PathVariable String tipo) {
-        List<EventoDTO> eventos = eventoService.obtenerPorTipo(tipo);
-        return ResponseEntity.ok(ApiResponse.success(eventos));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<EventoDTO>> obtenerPorId(@PathVariable Long id) {
+        EventoDTO evento = eventoService.obtenerPorId(id);
+        return ResponseEntity.ok(ApiResponse.success(evento));
     }
     
     /**
@@ -116,19 +75,10 @@ public class EventoController {
         Page<EventoDTO> eventos = eventoService.obtenerPorFalla(idFalla, pageable);
         return ResponseEntity.ok(ApiResponse.success(eventos));
     }
-    
-    /**
-     * GET /api/eventos/{id} - Obtener evento por ID
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EventoDTO>> obtenerPorId(@PathVariable Long id) {
-        EventoDTO evento = eventoService.obtenerPorId(id);
-        return ResponseEntity.ok(ApiResponse.success(evento));
-    }
 
     /**
      * POST /api/eventos - Crear nuevo evento
-     * Requiere autenticación (admin o casal de la falla)
+     * Requiere autenticación (admin o usuario de la falla)
      */
     @PostMapping
     public ResponseEntity<ApiResponse<EventoDTO>> crear(
@@ -139,7 +89,7 @@ public class EventoController {
 
     /**
      * PUT /api/eventos/{id} - Actualizar evento existente
-     * Requiere autenticación (admin o casal de la falla)
+     * Requiere autenticación (admin o usuario de la falla)
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<EventoDTO>> actualizar(
@@ -151,12 +101,68 @@ public class EventoController {
 
     /**
      * DELETE /api/eventos/{id} - Eliminar evento
-     * Requiere rol ADMIN
+     * Requiere autenticación (admin o usuario de la falla)
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         eventoService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.success("Evento eliminado exitosamente", null));
+    }
+
+    /**
+     * POST /api/eventos/{id}/imagen - Subir imagen del evento
+     * 
+     * Guarda la imagen en el servidor y asocia el nombre del archivo al evento
+     */
+    @PostMapping(path = "/{id}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<EventoDTO>> subirImagen(
+            @PathVariable Long id,
+            @RequestPart("imagen") MultipartFile imagen) {
+        
+        try {
+            EventoDTO eventoActualizado = eventoService.guardarImagen(id, imagen);
+            return ResponseEntity.ok(ApiResponse.success("Imagen del evento subida correctamente", eventoActualizado));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/eventos/{id}/imagen - Descargar imagen del evento
+     * 
+     * Retorna la imagen en su formato original
+     */
+    @GetMapping("/{id}/imagen")
+    public ResponseEntity<byte[]> descargarImagen(@PathVariable Long id) {
+        try {
+            byte[] imagenBytes = eventoService.obtenerImagen(id);
+            String imagenNombre = eventoService.obtenerNombreImagen(id);
+            
+            String mimeType = fileUploadService.obtenerMimeType(imagenNombre);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(mimeType));
+            headers.setContentDisposition(org.springframework.http.ContentDisposition.builder("inline")
+                    .filename(imagenNombre)
+                    .build());
+            
+            return new ResponseEntity<>(imagenBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    /**
+     * DELETE /api/eventos/{id}/imagen - Eliminar imagen del evento
+     */
+    @DeleteMapping("/{id}/imagen")
+    public ResponseEntity<ApiResponse<Void>> eliminarImagen(@PathVariable Long id) {
+        try {
+            eventoService.eliminarImagen(id);
+            return ResponseEntity.ok(ApiResponse.success("Imagen del evento eliminada", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
     }
 
     /**
