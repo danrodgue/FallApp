@@ -8,6 +8,22 @@
 # Application class must not be stripped or renamed (ClassNotFoundException on startup)
 -keep class com.example.fallapp.FallAppApplication { *; }
 
+# Keep SLF4J classes
+-dontwarn org.slf4j.**
+-keep class org.slf4j.** { *; }
+
+# Keep Kotlinx Serialization
+-keepattributes *Annotation*
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+# Keep classes that are referenced from JSON
+-keep @kotlinx.serialization.Serializable class * { *; }
+
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:

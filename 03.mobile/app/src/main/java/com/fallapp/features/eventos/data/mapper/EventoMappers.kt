@@ -1,6 +1,5 @@
 package com.fallapp.features.eventos.data.mapper
 
-import com.fallapp.core.database.TipoEvento
 import com.fallapp.features.eventos.data.remote.dto.EventoDto
 import com.fallapp.features.eventos.domain.model.Evento
 import java.time.LocalDateTime
@@ -15,22 +14,16 @@ fun EventoDto.toDomain(): Evento {
         idEvento = idEvento,
         idFalla = idFalla,
         nombreFalla = nombreFalla,
-        tipo = mapTipoEvento(tipo),
+        tipo = tipo,
         nombre = nombre,
         descripcion = descripcion,
-        fechaEvento = parseDateTime(fechaEvento),
+        fechaEventoString = fechaEvento,
         ubicacion = ubicacion,
-        participantesEstimado = participantesEstimado
+        participantesEstimado = participantesEstimado,
+        imagen = imagen
     )
 }
 
-private fun mapTipoEvento(tipo: String): TipoEvento {
-    return try {
-        TipoEvento.valueOf(tipo.uppercase())
-    } catch (e: IllegalArgumentException) {
-        TipoEvento.OTRO
-    }
-}
 
 private fun parseDateTime(dateString: String): LocalDateTime {
     return try {
