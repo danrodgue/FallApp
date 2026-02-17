@@ -55,6 +55,7 @@ public class ComentarioService {
     private final ComentarioRepository comentarioRepository;
     private final UsuarioRepository usuarioRepository;
     private final FallaRepository fallaRepository;
+    private final SentimentAnalysisService sentimentAnalysisService;
     /**
      * Obtener todos los comentarios del sistema
      * 
@@ -131,6 +132,13 @@ public class ComentarioService {
         }
         
         Comentario comentarioSaved = comentarioRepository.save(comentario);
+
+        // Lanzar análisis de sentimiento en segundo plano (no bloquea la respuesta al usuario)
+        sentimentAnalysisService.analizarComentarioAsync(
+                comentarioSaved.getIdComentario(),
+                comentarioSaved.getContenido()
+        );
+
         return convertirADTO(comentarioSaved);
     }
     
@@ -173,6 +181,7 @@ public class ComentarioService {
                 .contenido(comentario.getContenido())
                 .fechaCreacion(comentario.getCreadoEn())
                 .fechaActualizacion(comentario.getActualizadoEn())
+                .sentimiento(comentario.getSentimiento())
                 .build();
     }
 }

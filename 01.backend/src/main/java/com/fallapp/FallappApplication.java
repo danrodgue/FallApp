@@ -2,6 +2,7 @@ package com.fallapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Aplicación principal de FallApp
@@ -13,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * - OpenAPI/Swagger documentation
  */
 @SpringBootApplication
+@EnableAsync
 public class FallappApplication {
 
 	public static void main(String[] args) {
