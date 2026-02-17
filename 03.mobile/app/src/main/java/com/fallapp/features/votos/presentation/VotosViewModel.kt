@@ -14,6 +14,7 @@ import com.fallapp.features.fallas.domain.usecase.GetVotosUsuarioUseCase
 import com.fallapp.features.fallas.domain.usecase.VotarFallaUseCase
 import com.fallapp.features.fallas.domain.usecase.EliminarVotoUseCase
 import com.fallapp.features.auth.domain.usecase.GetCurrentUserUseCase
+import com.fallapp.features.fallas.domain.usecase.CrearComentarioUseCase
 import com.fallapp.features.fallas.domain.usecase.GetRankingUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +32,8 @@ class VotosViewModel(
     private val eliminarVotoUseCase: EliminarVotoUseCase,
     private val getVotosFallaUseCase: GetVotosFallaUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val getRankingUseCase: GetRankingUseCase
+    private val getRankingUseCase: GetRankingUseCase,
+    private val crearComentarioUseCase: CrearComentarioUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VotosUiState())
@@ -232,6 +234,28 @@ class VotosViewModel(
                             errorMessage = result.message ?: "Error al eliminar voto",
                             isLoading = false
                         )
+                    }
+                }
+                is Result.Loading -> {}
+            }
+        }
+    }
+
+    /**
+     * Envía un comentario para una falla.
+     * El backend analiza el sentimiento con IA automáticamente.
+     */
+    fun enviarComentario(falla: Falla, contenido: String) {
+        viewModelScope.launch {
+            when (val result = crearComentarioUseCase(falla.idFalla, contenido)) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(successMessage = "¡Comentario enviado! Se analizará con IA.")
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(errorMessage = result.message ?: "Error al enviar comentario")
                     }
                 }
                 is Result.Loading -> {}

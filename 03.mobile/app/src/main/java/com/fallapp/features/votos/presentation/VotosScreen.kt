@@ -242,6 +242,9 @@ fun VotosScreen(
                     viewModel.votar(falla, tipoVoto)
                 },
                 onFallaClick = onFallaClick,
+                onCommentSubmit = { falla, contenido ->
+                    viewModel.enviarComentario(falla, contenido)
+                },
                 modifier = Modifier.padding(padding)
             )
             2 -> MisVotosTab(
@@ -268,6 +271,7 @@ private fun VotarTab(
     isLoading: Boolean,
     onVoteClick: (Falla, TipoVoto) -> Unit,
     onFallaClick: (Long) -> Unit,
+    onCommentSubmit: (Falla, String) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -291,14 +295,16 @@ private fun VotarTab(
                 SwipeFallaCard(
                     falla = selectedFalla,
                     onVoteClick = { tipoVoto -> onVoteClick(selectedFalla, tipoVoto) },
-                    onFallaClick = { onFallaClick(selectedFalla.idFalla) }
+                    onFallaClick = { onFallaClick(selectedFalla.idFalla) },
+                    onCommentSubmit = { contenido -> onCommentSubmit(selectedFalla, contenido) }
                 )
             } else {
                 // Modo mazo aleatorio normal
                 StackedCardDeck(
                     fallas = fallas,
                     onVoteClick = onVoteClick,
-                    onFallaClick = onFallaClick
+                    onFallaClick = onFallaClick,
+                    onCommentSubmit = onCommentSubmit
                 )
             }
         }
@@ -316,7 +322,8 @@ private fun VotarTab(
 private fun StackedCardDeck(
     fallas: List<Falla>,
     onVoteClick: (Falla, TipoVoto) -> Unit,
-    onFallaClick: (Long) -> Unit
+    onFallaClick: (Long) -> Unit,
+    onCommentSubmit: (Falla, String) -> Unit = { _, _ -> }
 ) {
     if (fallas.isEmpty()) return
 
@@ -426,7 +433,8 @@ private fun StackedCardDeck(
             SwipeFallaCard(
                 falla = activeFalla,
                 onVoteClick = { tipoVoto -> onVoteClick(activeFalla, tipoVoto) },
-                onFallaClick = { onFallaClick(activeFalla.idFalla) }
+                onFallaClick = { onFallaClick(activeFalla.idFalla) },
+                onCommentSubmit = { contenido -> onCommentSubmit(activeFalla, contenido) }
             )
         }
 
@@ -449,11 +457,14 @@ private fun StackedCardDeck(
 private fun SwipeFallaCard(
     falla: Falla,
     onVoteClick: (TipoVoto) -> Unit,
-    onFallaClick: () -> Unit
+    onFallaClick: () -> Unit,
+    onCommentSubmit: (String) -> Unit = {}
 ) {
     var showVoteDialog by remember { mutableStateOf(false) }
     var selectedTipoVoto by remember { mutableStateOf<TipoVoto?>(null) }
     var showFullScreenImage by remember { mutableStateOf(false) }
+    var showCommentBox by remember { mutableStateOf(false) }
+    var comentarioTexto by remember { mutableStateOf("") }
     val imageUrl = falla.imagenes.firstOrNull()
 
     if (showVoteDialog && selectedTipoVoto != null) {
@@ -594,19 +605,92 @@ private fun SwipeFallaCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Enlace al mapa
-            TextButton(
-                onClick = onFallaClick
+            // Fila: Ver mapa + botón para desplegar comentarios
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Ver en el mapa")
+                TextButton(onClick = onFallaClick) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Ver en el mapa")
+                }
+
+                FilledTonalButton(
+                    onClick = { showCommentBox = !showCommentBox }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChatBubbleOutline,
+                        contentDescription = "Comentar"
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Comentar")
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Desplegable de comentario
+            if (showCommentBox) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = comentarioTexto,
+                            onValueChange = { comentarioTexto = it },
+                            placeholder = {
+                                Text(
+                                    text = "Escribe tu comentario...",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = false,
+                            maxLines = 4
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = {
+                                showCommentBox = false
+                                comentarioTexto = ""
+                            }) {
+                                Text("Cancelar")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    val texto = comentarioTexto.trim()
+                                    if (texto.length >= 3) {
+                                        onCommentSubmit(texto)
+                                        comentarioTexto = ""
+                                        showCommentBox = false
+                                    }
+                                },
+                                enabled = comentarioTexto.trim().length >= 3
+                            ) {
+                                Text("Enviar")
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             // Botones de votación
             Row(

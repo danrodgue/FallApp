@@ -1,5 +1,6 @@
 package com.fallapp.features.fallas.di
 
+import com.fallapp.features.fallas.data.remote.ComentariosApiService
 import com.fallapp.features.fallas.data.remote.FallasApiService
 import com.fallapp.features.fallas.data.remote.NinotsApiService
 import com.fallapp.features.fallas.data.remote.VotosApiService
@@ -25,6 +26,7 @@ val fallasModule = module {
     // Data Layer - API
     single { FallasApiService(httpClient = get()) }
     single { VotosApiService(client = get(), tokenManager = get()) }
+    single { ComentariosApiService(client = get(), tokenManager = get()) }
     single { NinotsApiService(client = get()) }
     single { EstadisticasApiService(client = get()) }
     
@@ -56,6 +58,7 @@ val fallasModule = module {
     factory { EliminarVotoUseCase(repository = get()) }
     factory { GetVotosFallaUseCase(repository = get()) }
     factory { GetRankingUseCase(apiService = get()) }
+    factory { CrearComentarioUseCase(comentariosApiService = get(), getCurrentUserUseCase = get()) }
     
     // Presentation Layer - ViewModels
     viewModel {
@@ -83,7 +86,8 @@ val fallasModule = module {
             eliminarVotoUseCase = get(),
             getVotosFallaUseCase = get(),
             getCurrentUserUseCase = get(),
-            getRankingUseCase = get()
+            getRankingUseCase = get(),
+            crearComentarioUseCase = get()
         )
     }
 }
