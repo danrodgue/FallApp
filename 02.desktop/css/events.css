@@ -285,6 +285,53 @@ input, textarea {
   width: 100%;
 }
 
+/* Estilo consistente para selects y file inputs en el modal de eventos */
+select,
+input[type="file"] {
+  padding: 10px 14px;
+  border-radius: var(--input-radius);
+  border: 1px solid var(--color-border);
+  font-size: 14px;
+  font-family: var(--font-family);
+  background: #fff;
+  color: var(--color-text);
+  transition: var(--transition);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+select:hover,
+input[type="file"]:hover {
+  border-color: #d1d5db;
+}
+
+select:focus,
+input[type="file"]:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(198,40,40,0.1);
+  background: #fff;
+}
+
+/* Botón de selección de archivo más integrado visualmente */
+input[type="file"]::-webkit-file-upload-button {
+  margin-right: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  color: var(--color-text);
+  font-weight: 500;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
 input::placeholder, textarea::placeholder {
   color: var(--color-text-muted);
   opacity: 0.6;
