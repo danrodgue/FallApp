@@ -28,6 +28,7 @@ fun UsuarioDto.toDomain(): User {
         nombre = nombre,
         apellidos = apellidos,
         rol = UserRole.fromString(rol),
+        verificado = verificado,
         idFalla = idFalla
     )
 }

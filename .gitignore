@@ -30,3 +30,5 @@ target/
 build/
 *.gradle.kts.backup
 local.properties
+.gradle/
+**/.gradle/
