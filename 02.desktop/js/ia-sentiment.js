@@ -19,33 +19,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Obtener la falla asociada al usuario logueado (casal)
   const storedFallaId = localStorage.getItem('fallapp_user_idFalla');
-  if (inputFallaId) {
-    if (storedFallaId && storedFallaId.trim() !== '') {
-      // Prefijar y bloquear el campo: el casal solo ve su propia falla
-      inputFallaId.value = storedFallaId;
-      inputFallaId.disabled = true;
-
-      const label = document.querySelector('label[for=\"sentiment-falla-id\"]');
-      if (label) {
-        label.textContent = `ID de tu falla (asociada a esta cuenta): ${storedFallaId}`;
-      }
+  if (storedFallaId && storedFallaId.trim() !== '') {
+    // Ocultar por completo el campo y botón de búsqueda por ID (no se usa ya)
+    if (inputFallaId) {
+      inputFallaId.style.display = 'none';
     }
-  }
+    if (btnLoad) {
+      btnLoad.style.display = 'none';
+    }
+    const label = document.querySelector('label[for=\"sentiment-falla-id\"]');
+    if (label) {
+      label.style.display = 'none';
+    }
 
-  if (btnLoad) {
-    btnLoad.addEventListener('click', () => {
-      // Si hay idFalla asociado en sesión, úsalo siempre
-      const fallaId = storedFallaId && storedFallaId.trim() !== ''
-        ? storedFallaId.trim()
-        : (inputFallaId ? inputFallaId.value.trim() : '');
-
-      if (!fallaId) {
-        showSentimentMessage('No se ha podido determinar tu falla. Inicia sesión de nuevo.', 'warning');
-        return;
-      }
-
-      loadSentimentForFalla(fallaId);
-    });
+    // Cargar automáticamente el sentimiento de la falla del casal
+    loadSentimentForFalla(storedFallaId.trim());
+  } else {
+    // Si no hay falla asociada, mostrar mensaje claro
+    showSentimentMessage(
+      'No se ha podido determinar tu falla (idFalla vacío). Inicia sesión de nuevo con un usuario de casal.',
+      'warning'
+    );
   }
 });
 
@@ -65,18 +59,43 @@ async function loadSentimentForFalla(fallaId) {
 
   const url = `${getApiBase()}/admin/fallas/${encodeURIComponent(fallaId)}/sentimiento`;
 
+  // Añadir JWT del usuario (casal) para acceder al endpoint /api/admin/**
+  const token = localStorage.getItem('fallapp_token');
+  if (!token) {
+    showSentimentMessage('No hay token de sesión. Inicia sesión de nuevo en el panel.', 'warning');
+    return;
+  }
+
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
     if (!response.ok) {
-      throw new Error(`Error ${response.status}`);
+      // Intentar extraer mensaje del backend
+      let backendMessage = `Error ${response.status}`;
+      try {
+        const errorJson = await response.json();
+        if (errorJson && errorJson.mensaje) {
+          backendMessage = errorJson.mensaje;
+        }
+      } catch (_) {
+        // ignore parse error
+      }
+      console.error('Error HTTP al cargar sentimiento:', backendMessage);
+      showSentimentMessage(backendMessage, 'error');
+      return;
     }
+
     const json = await response.json();
     const datos = json.datos || json;
 
     renderSentiment(datos);
   } catch (err) {
     console.error('Error cargando sentimiento:', err);
-    showSentimentMessage('No se pudo cargar el sentimiento para esta falla.', 'error');
+    showSentimentMessage(`No se pudo cargar el sentimiento para esta falla: ${err.message || err}`, 'error');
   }
 }
 

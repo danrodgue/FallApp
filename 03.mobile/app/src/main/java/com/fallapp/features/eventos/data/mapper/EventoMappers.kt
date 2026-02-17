@@ -1,5 +1,6 @@
 package com.fallapp.features.eventos.data.mapper
 
+import com.fallapp.core.config.ApiConfig
 import com.fallapp.features.eventos.data.remote.dto.EventoDto
 import com.fallapp.features.eventos.domain.model.Evento
 import java.time.LocalDateTime
@@ -10,6 +11,11 @@ import java.time.format.DateTimeFormatter
  */
 
 fun EventoDto.toDomain(): Evento {
+    // Construir URL completa de la imagen si tenemos nombre de archivo
+    val imagenUrl = imagen?.let {
+        "${ApiConfig.BASE_URL}${ApiConfig.Endpoints.EVENTOS}/$idEvento/imagen"
+    }
+
     return Evento(
         idEvento = idEvento,
         idFalla = idFalla,
@@ -20,7 +26,7 @@ fun EventoDto.toDomain(): Evento {
         fechaEventoString = fechaEvento,
         ubicacion = ubicacion,
         participantesEstimado = participantesEstimado,
-        imagen = imagen
+        imagen = imagenUrl
     )
 }
 
