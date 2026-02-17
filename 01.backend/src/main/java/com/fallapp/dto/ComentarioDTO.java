@@ -33,4 +33,11 @@ public class ComentarioDTO {
     private String contenido;
     
     private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaActualizacion;}
+    private LocalDateTime fechaActualizacion;
+
+    /**
+     * Sentimiento analizado por IA.
+     * Valores: positive, neutral, negative (o null si no procesado).
+     */
+    private String sentimiento;
+}

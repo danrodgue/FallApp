@@ -70,14 +70,30 @@ class EventosViewModel(
 
     private fun loadProximosEventos(limit: Int = 50) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             when (val result = getProximosEventosUseCase(limit)) {
-                is Result.Success -> _uiState.update {
-                    it.copy(eventosProximos = result.data)
+                is Result.Success -> {
+                    println("✅ Eventos cargados: ${result.data.size} eventos")
+                    _uiState.update {
+                        it.copy(
+                            eventosProximos = result.data,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
                 }
-                is Result.Error -> _uiState.update {
-                    it.copy(errorMessage = result.message)
+                is Result.Error -> {
+                    println("❌ Error al cargar eventos: ${result.message}")
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Error: ${result.message ?: "Error desconocido"}",
+                            isLoading = false
+                        )
+                    }
                 }
-                is Result.Loading -> {}
+                is Result.Loading -> {
+                    _uiState.update { it.copy(isLoading = true) }
+                }
             }
         }
     }

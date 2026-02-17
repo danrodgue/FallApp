@@ -241,6 +241,45 @@ public class EstadisticasService {
         
         return actividad;
     }
+
+    /**
+     * Obtener estadísticas de sentimiento de comentarios para una falla concreta.
+     *
+     * Estructura de respuesta:
+     * {
+     *   "idFalla": 23,
+     *   "nombreFalla": "Falla Convento Jerusalén",
+     *   "totalComentarios": 33,
+     *   "sentimientos": {
+     *     "positive": 25,
+     *     "neutral": 5,
+     *     "negative": 3
+     *   }
+     * }
+     */
+    public Map<String, Object> obtenerSentimientoPorFalla(Long idFalla) {
+        var falla = fallaRepository.findById(idFalla)
+                .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
+
+        long totalComentarios = comentarioRepository.countByFalla(falla);
+
+        Map<String, Long> sentimientos = new HashMap<>();
+        comentarioRepository.countByFallaGroupBySentimiento(falla).forEach(row -> {
+            String sentimiento = (String) row[0];
+            Long total = (Long) row[1];
+            if (sentimiento != null) {
+                sentimientos.put(sentimiento, total);
+            }
+        });
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("idFalla", falla.getIdFalla());
+        resultado.put("nombreFalla", falla.getNombre());
+        resultado.put("totalComentarios", totalComentarios);
+        resultado.put("sentimientos", sentimientos);
+
+        return resultado;
+    }
     
     /**
      * Obtener estadísticas de eventos

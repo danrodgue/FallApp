@@ -42,6 +42,14 @@ public class Comentario {
     @Size(min = 3, max = 500, message = "El comentario debe tener entre 3 y 500 caracteres")
     private String contenido;
 
+    /**
+     * Sentimiento analizado del comentario mediante IA externa.
+     * Valores esperados: positive, neutral, negative.
+     * Puede ser null si todavía no se ha procesado o si hubo error.
+     */
+    @Column(name = "sentimiento", length = 20)
+    private String sentimiento;
+
     @CreationTimestamp
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime creadoEn;
