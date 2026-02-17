@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         localStorage.removeItem('fallapp_user');
         localStorage.removeItem('fallapp_token');
+        localStorage.removeItem('fallapp_user_id');
+        localStorage.removeItem('fallapp_user_idFalla');
       } catch (e) {
         console.error('Error removing user:', e);
       }
@@ -15,13 +17,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnLoad = document.getElementById('btn-sentiment-load');
   const inputFallaId = document.getElementById('sentiment-falla-id');
 
-  if (btnLoad && inputFallaId) {
+  // Obtener la falla asociada al usuario logueado (casal)
+  const storedFallaId = localStorage.getItem('fallapp_user_idFalla');
+  if (inputFallaId) {
+    if (storedFallaId && storedFallaId.trim() !== '') {
+      // Prefijar y bloquear el campo: el casal solo ve su propia falla
+      inputFallaId.value = storedFallaId;
+      inputFallaId.disabled = true;
+
+      const label = document.querySelector('label[for=\"sentiment-falla-id\"]');
+      if (label) {
+        label.textContent = `ID de tu falla (asociada a esta cuenta): ${storedFallaId}`;
+      }
+    }
+  }
+
+  if (btnLoad) {
     btnLoad.addEventListener('click', () => {
-      const fallaId = inputFallaId.value.trim();
+      // Si hay idFalla asociado en sesión, úsalo siempre
+      const fallaId = storedFallaId && storedFallaId.trim() !== ''
+        ? storedFallaId.trim()
+        : (inputFallaId ? inputFallaId.value.trim() : '');
+
       if (!fallaId) {
-        showSentimentMessage('Por favor, introduce un ID de falla.', 'warning');
+        showSentimentMessage('No se ha podido determinar tu falla. Inicia sesión de nuevo.', 'warning');
         return;
       }
+
       loadSentimentForFalla(fallaId);
     });
   }
