@@ -15,6 +15,7 @@ data class EventoDto(
     val descripcion: String? = null,
     val fechaEvento: String,
     val ubicacion: String? = null,
-    val participantesEstimado: Int? = null
+    val participantesEstimado: Int? = null,
+    val imagen: String? = null
 )
 

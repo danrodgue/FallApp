@@ -1,18 +1,25 @@
 package com.fallapp.features.eventos.presentation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import coil.compose.AsyncImage
 import com.fallapp.features.eventos.domain.model.Evento
 import com.fallapp.features.fallas.domain.model.Falla
 import org.koin.androidx.compose.koinViewModel
@@ -26,6 +33,15 @@ fun EventosScreen(
  ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by rememberSaveable { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Mostrar error en Snackbar
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
 
     // Recargar eventos cada vez que se entra a la pantalla
     LaunchedEffect(Unit) {
@@ -34,6 +50,7 @@ fun EventosScreen(
 
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -130,7 +147,16 @@ fun EventosScreen(
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        Text(
+                            text = "Cargando eventos...",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             } else if (uiState.eventosProximos.isEmpty()) {
                 Box(
@@ -207,113 +233,308 @@ private fun EventoRow(
     evento: Evento,
     onClick: () -> Unit
 ) {
+    var showDetails by remember { mutableStateOf(false) }
+
+    if (showDetails) {
+        EventoDetailsDialog(
+            evento = evento,
+            onDismiss = { showDetails = false }
+        )
+    }
+
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = onClick
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp),
+        onClick = { showDetails = true }
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Tipo y nombre del evento
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = when (evento.tipo.name) {
-                        "OFICIAL" -> "🎭"
-                        "CULTURAL" -> "🎨"
-                        "INFANTIL" -> "👶"
-                        "DEPORTIVO" -> "⚽"
-                        "MUSICAL" -> "🎵"
-                        else -> "📅"
-                    },
-                    style = MaterialTheme.typography.titleLarge
+            // Imagen a la izquierda
+            if (evento.imagen != null) {
+                AsyncImage(
+                    model = evento.imagen,
+                    contentDescription = "Imagen de ${evento.nombre}",
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    contentScale = ContentScale.Crop
                 )
-                Column(modifier = Modifier.weight(1f)) {
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = evento.nombre,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = evento.nombreFalla,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = when (evento.tipo.lowercase()) {
+                            "oficial" -> "🎭"
+                            "cultural" -> "🎨"
+                            "infantil" -> "👶"
+                            "deportivo" -> "⚽"
+                            "musical" -> "🎵"
+                            "exposicion" -> "🎪"
+                            "concierto" -> "🎵"
+                            else -> "📅"
+                        },
+                        style = MaterialTheme.typography.titleLarge
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Fecha del evento formateada
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            // Información a la derecha
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "📅",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = evento.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = evento.nombreFalla,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = formatEventDate(evento.fechaEvento),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-            // Ubicación si existe
-            evento.ubicacion?.let { ubicacion ->
+            // Flecha indicadora
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Ver detalles",
+                modifier = Modifier.padding(end = 12.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun EventoDetailsDialog(
+    evento: Evento,
+    onDismiss: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = true
+        )
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp)
+            ) {
+                // Header con título y botón cerrar
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "📍",
-                        style = MaterialTheme.typography.bodySmall
+                        text = "Detalles del Evento",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = ubicacion,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            // Descripción si existe
-            evento.descripcion?.let {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // Participantes estimados
-            evento.participantesEstimado?.let { participantes ->
-                if (participantes > 0) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "👥",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        Text(
-                            text = "$participantes participantes estimados",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cerrar",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
+                }
+
+                // Imagen del evento (si existe)
+                if (evento.imagen != null) {
+                    AsyncImage(
+                        model = evento.imagen,
+                        contentDescription = "Imagen de ${evento.nombre}",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .clip(MaterialTheme.shapes.medium),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Contenido
+                LazyColumn(
+                    modifier = Modifier.weight(1f, fill = false),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Nombre del evento
+                    item {
+                        Column {
+                            Text(
+                                text = "Nombre",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = evento.nombre,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
+                    // Falla
+                    item {
+                        Column {
+                            Text(
+                                text = "Falla",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = evento.nombreFalla,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+
+                    // Fecha
+                    item {
+                        Column {
+                            Text(
+                                text = "Fecha",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = formatEventDate(evento.fechaEvento),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    // Ubicación
+                    if (evento.ubicacion != null) {
+                        item {
+                            Column {
+                                Text(
+                                    text = "Ubicación",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = evento.ubicacion,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+
+                    // Descripción
+                    if (evento.descripcion != null) {
+                        item {
+                            Column {
+                                Text(
+                                    text = "Descripción",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = evento.descripcion,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+
+                    // Participantes estimados
+                    if (evento.participantesEstimado != null && evento.participantesEstimado > 0) {
+                        item {
+                            Column {
+                                Text(
+                                    text = "Participantes Estimados",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = "${evento.participantesEstimado} personas",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+
+                    // Tipo de evento
+                    item {
+                        Column {
+                            Text(
+                                text = "Tipo",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = when (evento.tipo.lowercase()) {
+                                        "oficial" -> "🎭"
+                                        "cultural" -> "🎨"
+                                        "infantil" -> "👶"
+                                        "deportivo" -> "⚽"
+                                        "musical" -> "🎵"
+                                        "exposicion" -> "🎪"
+                                        "concierto" -> "🎵"
+                                        else -> "📅"
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = evento.tipo.replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Botón cerrar
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Cerrar")
                 }
             }
         }
