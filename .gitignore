@@ -32,3 +32,5 @@ build/
 local.properties
 .gradle/
 **/.gradle/
+# Config local de Docker (no subir tokens)
+05.docker/.env
