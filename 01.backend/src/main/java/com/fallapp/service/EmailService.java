@@ -29,6 +29,9 @@ public class EmailService {
     @Value("${app.mail.from-name}")
     private String fromName;
 
+    @Value("${app.backend.public-url:http://localhost:8080}")
+    private String backendPublicUrl;
+
     /**
      * Enviar email simple (solo texto)
      * @param to Email destinatario
@@ -202,7 +205,7 @@ public class EmailService {
      */
     public void sendVerificationEmail(String to, String verificationToken) throws MessagingException {
         String subject = "Verifica tu cuenta - FallApp";
-        String verificationLink = "http://localhost:8080/api/auth/verify?token=" + verificationToken;
+        String verificationLink = backendPublicUrl + "/api/auth/verificar?token=" + verificationToken;
         
         String htmlContent = """
             <html>

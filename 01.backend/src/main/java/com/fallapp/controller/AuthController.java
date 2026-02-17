@@ -20,6 +20,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -32,6 +35,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Autenticación", description = "Endpoints para autenticación y registro")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+    @Value("${app.mail.debug.expose-verification-token:false}")
+    private boolean exposeVerificationTokenDebug;
+
+    @Value("${app.backend.public-url:http://localhost:8080}")
+    private String backendPublicUrl;
 
     private final UsuarioService usuarioService;
     private final AuthenticationManager authenticationManager;
@@ -58,11 +69,12 @@ public class AuthController {
         usuarioRepository.save(usuarioEntidad);
         
         // Enviar email de verificación
+        boolean emailEnviado = true;
         try {
             emailService.sendVerificationEmail(usuario.getEmail(), tokenVerificacion);
         } catch (Exception e) {
-            // Log error pero no falla el registro
-            System.err.println("Error al enviar email de verificación: " + e.getMessage());
+            emailEnviado = false;
+            logger.error("Error al enviar email de verificación a {}", usuario.getEmail(), e);
         }
         
         // Generar token JWT (usando email como username)
@@ -79,7 +91,9 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
-                    "Usuario registrado. Por favor verifica tu email para activar tu cuenta.", 
+                    emailEnviado
+                        ? "Usuario registrado. Por favor verifica tu email para activar tu cuenta."
+                        : "Usuario registrado, pero no se pudo enviar el email de verificación. Usa /api/auth/reenviar-verificacion.",
                     response
                 ));
     }
@@ -193,5 +207,35 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("Error al enviar email: " + e.getMessage()));
         }
+    }
+
+    @GetMapping("/debug/token-verificacion")
+    @Operation(summary = "[DEBUG] Obtener link de verificación por email")
+    public ResponseEntity<ApiResponse<String>> obtenerLinkVerificacionDebug(@RequestParam String email) {
+        if (!exposeVerificationTokenDebug) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Endpoint debug deshabilitado"));
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElse(null);
+
+        if (usuario == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Usuario no encontrado"));
+        }
+
+        if (Boolean.TRUE.equals(usuario.getVerificado())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("La cuenta ya está verificada"));
+        }
+
+        if (usuario.getTokenVerificacion() == null || usuario.getTokenVerificacion().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("El usuario no tiene token de verificación activo"));
+        }
+
+        String verificationLink = backendPublicUrl + "/api/auth/verificar?token=" + usuario.getTokenVerificacion();
+        return ResponseEntity.ok(ApiResponse.success("Link de verificación generado (debug)", verificationLink));
     }
 }
