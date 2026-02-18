@@ -323,6 +323,18 @@
   border-color: #d1d5db;
 }
 
+/* Botón Editar en rojo cuando está en modo edición */
+#editBtn {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+#editBtn:hover {
+  background: #fee2e2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
 /* Mostrar un pequeño helper indicando que los campos son editables en desarrollo */
 .falla-helper {
   font-size: 13px;

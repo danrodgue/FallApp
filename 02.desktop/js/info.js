@@ -54,11 +54,12 @@ document.addEventListener('DOMContentLoaded', function () {
    const editBtn = document.getElementById('editBtn');
    const deleteBtn = document.getElementById('deleteBtn');
 
+   // Arrancamos en modo SOLO LECTURA
+   setEditMode(false);
+
    if (saveBtn) saveBtn.addEventListener('click', saveFalla);
    if (editBtn) editBtn.addEventListener('click', toggleEditMode);
    if (deleteBtn) deleteBtn.addEventListener('click', function(){ if(confirm('¿Eliminar esta falla?')){ const idToDel = document.getElementById('fallaId').value; if(idToDel){ if(window.api && window.api.deleteFalla){ window.api.deleteFalla(idToDel).then(()=>{ alert('Falla eliminada'); window.location.href='events.html'; }).catch(()=>{ alert('Error al eliminar'); }); } else { alert('API no disponible'); } } else { alert('No hay id para eliminar'); } } });
-    // Habilitar edición por defecto para que el usuario pueda escribir aunque no se persista
-    setEditMode(true);
 });
 
 function loadFallaById(id) {
