@@ -5,6 +5,7 @@ import com.fallapp.model.Falla;
 import com.fallapp.model.Usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,4 +53,24 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
      * Comentarios que aún no tienen sentimiento analizado (para reanalizar en lote).
      */
     List<Comentario> findBySentimientoIsNull();
+
+        /**
+         * Rellena columna `contenido` desde `texto_comentario` para registros heredados.
+         */
+        @Modifying
+        @Query(value = "UPDATE comentarios " +
+            "SET contenido = texto_comentario " +
+            "WHERE contenido IS NULL AND texto_comentario IS NOT NULL", nativeQuery = true)
+        int sincronizarContenidoDesdeTextoComentario();
+
+        /**
+         * Obtiene comentarios pendientes de análisis con texto válido.
+         * Devuelve filas [id_comentario, texto].
+         */
+        @Query(value = "SELECT id_comentario, COALESCE(contenido, texto_comentario) AS texto " +
+            "FROM comentarios " +
+            "WHERE sentimiento IS NULL " +
+            "  AND COALESCE(contenido, texto_comentario) IS NOT NULL " +
+            "  AND BTRIM(COALESCE(contenido, texto_comentario)) <> ''", nativeQuery = true)
+        List<Object[]> findPendientesSentimientoConTexto();
 }

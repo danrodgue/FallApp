@@ -190,15 +190,23 @@ public class ComentarioService {
      *
      * @return Número de comentarios encolados para reanálisis
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public int reanalizarSentimientoPendientes() {
-        List<Comentario> pendientes = comentarioRepository.findBySentimientoIsNull();
-        for (Comentario c : pendientes) {
-            if (c.getContenido() != null && !c.getContenido().isBlank()) {
-                sentimentAnalysisService.analizarComentarioAsync(c.getIdComentario(), c.getContenido());
+        comentarioRepository.sincronizarContenidoDesdeTextoComentario();
+
+        List<Object[]> pendientes = comentarioRepository.findPendientesSentimientoConTexto();
+        int encolados = 0;
+
+        for (Object[] fila : pendientes) {
+            Long idComentario = ((Number) fila[0]).longValue();
+            String texto = fila[1] != null ? fila[1].toString() : null;
+            if (texto != null && !texto.isBlank()) {
+                sentimentAnalysisService.analizarComentarioAsync(idComentario, texto);
+                encolados++;
             }
         }
-        return pendientes.size();
+
+        return encolados;
     }
 
     /**

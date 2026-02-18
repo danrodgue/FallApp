@@ -261,21 +261,29 @@ public class EstadisticasService {
         var falla = fallaRepository.findById(idFalla)
                 .orElseThrow(() -> new RuntimeException("Falla no encontrada con ID: " + idFalla));
 
-        long totalComentarios = comentarioRepository.countByFalla(falla);
-
         Map<String, Long> sentimientos = new HashMap<>();
+        sentimientos.put("positive", 0L);
+        sentimientos.put("neutral", 0L);
+        sentimientos.put("negative", 0L);
+
         comentarioRepository.countByFallaGroupBySentimiento(falla).forEach(row -> {
             String sentimiento = (String) row[0];
             Long total = (Long) row[1];
-            if (sentimiento != null) {
+            if (sentimiento != null && sentimientos.containsKey(sentimiento)) {
                 sentimientos.put(sentimiento, total);
             }
         });
 
+        long totalComentariosFalla = comentarioRepository.countByFalla(falla);
+        long totalAnalizados = sentimientos.values().stream().mapToLong(Long::longValue).sum();
+        long totalPendientes = Math.max(totalComentariosFalla - totalAnalizados, 0L);
+
         Map<String, Object> resultado = new HashMap<>();
         resultado.put("idFalla", falla.getIdFalla());
         resultado.put("nombreFalla", falla.getNombre());
-        resultado.put("totalComentarios", totalComentarios);
+        resultado.put("totalComentarios", totalAnalizados);
+        resultado.put("totalComentariosFalla", totalComentariosFalla);
+        resultado.put("totalPendientes", totalPendientes);
         resultado.put("sentimientos", sentimientos);
 
         return resultado;

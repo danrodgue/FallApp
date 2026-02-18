@@ -118,9 +118,15 @@ function renderSentiment(data) {
 
   const sentimientos = data.sentimientos || {};
   const total = data.totalComentarios || 0;
+  const totalFalla = data.totalComentariosFalla || total;
+  const pendientes = data.totalPendientes || 0;
 
   if (total === 0) {
-    resultContainer.innerHTML = '<div class="muted">Esta falla todavía no tiene comentarios analizados.</div>';
+    if (totalFalla > 0) {
+      resultContainer.innerHTML = `<div class="muted">Hay ${totalFalla} comentarios en la falla, pero todavía no están analizados por IA. Pendientes: ${pendientes}.</div>`;
+    } else {
+      resultContainer.innerHTML = '<div class="muted">Esta falla todavía no tiene comentarios analizados.</div>';
+    }
     return;
   }
 
@@ -144,6 +150,7 @@ function renderSentiment(data) {
     <div class="sentiment-card">
       <h2>Falla #${data.idFalla} - ${data.nombreFalla || ''}</h2>
       <p class="muted">Total comentarios analizados: ${total}</p>
+      <p class="muted">Total comentarios en la falla: ${totalFalla} · Pendientes IA: ${pendientes}</p>
       ${alertHtml}
       <ul class="sentiment-list">
         <li><strong>Positivos</strong>: ${positive} (${pct(positive)}%)</li>
