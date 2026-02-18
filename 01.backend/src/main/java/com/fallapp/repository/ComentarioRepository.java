@@ -69,7 +69,9 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
          */
         @Query(value = "SELECT id_comentario, COALESCE(contenido, texto_comentario) AS texto " +
             "FROM comentarios " +
-            "WHERE sentimiento IS NULL " +
+                "WHERE (sentimiento IS NULL " +
+                "       OR BTRIM(sentimiento) = '' " +
+                "       OR LOWER(BTRIM(sentimiento)) NOT IN ('positive','neutral','negative')) " +
             "  AND COALESCE(contenido, texto_comentario) IS NOT NULL " +
             "  AND BTRIM(COALESCE(contenido, texto_comentario)) <> ''", nativeQuery = true)
         List<Object[]> findPendientesSentimientoConTexto();

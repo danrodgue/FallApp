@@ -269,8 +269,11 @@ public class EstadisticasService {
         comentarioRepository.countByFallaGroupBySentimiento(falla).forEach(row -> {
             String sentimiento = (String) row[0];
             Long total = (Long) row[1];
-            if (sentimiento != null && sentimientos.containsKey(sentimiento)) {
-                sentimientos.put(sentimiento, total);
+            if (sentimiento != null) {
+                String clave = sentimiento.trim().toLowerCase();
+                if (sentimientos.containsKey(clave)) {
+                    sentimientos.put(clave, sentimientos.get(clave) + total);
+                }
             }
         });
 

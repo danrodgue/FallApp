@@ -50,23 +50,32 @@ public class SentimentAnalysisService {
      */
     @Async
     public void analizarComentarioAsync(Long comentarioId, String texto) {
+        analizarComentario(comentarioId, texto);
+    }
+
+    /**
+     * Analiza y persiste el sentimiento en la misma petición (modo síncrono).
+     *
+     * @return true si se guardó un sentimiento válido, false en caso contrario.
+     */
+    public boolean analizarComentario(Long comentarioId, String texto) {
         if (huggingFaceToken == null || huggingFaceToken.isBlank()) {
             log.warn("HuggingFace token no configurado. Saltando análisis de sentimiento.");
-            return;
+            return false;
         }
 
         try {
             String label = llamarModeloYObtenerSentimiento(texto);
             if (label == null) {
                 log.warn("No se pudo determinar sentimiento para comentario {}", comentarioId);
-                return;
+                return false;
             }
 
             // Persistir resultado en la entidad Comentario
             Optional<Comentario> optionalComentario = comentarioRepository.findById(comentarioId);
             if (optionalComentario.isEmpty()) {
                 log.warn("Comentario {} no encontrado al intentar guardar sentimiento", comentarioId);
-                return;
+                return false;
             }
 
             Comentario comentario = optionalComentario.get();
@@ -74,8 +83,10 @@ public class SentimentAnalysisService {
             comentarioRepository.save(comentario);
 
             log.info("Sentimiento '{}' guardado para comentario {}", label, comentarioId);
+            return true;
         } catch (Exception e) {
             log.error("Error analizando sentimiento para comentario {}: {}", comentarioId, e.getMessage());
+            return false;
         }
     }
 
@@ -169,11 +180,15 @@ public class SentimentAnalysisService {
      */
     private String normalizarEtiqueta(String rawLabel) {
         if (rawLabel == null) return null;
-        String label = rawLabel.toLowerCase();
+        String label = rawLabel.trim().toLowerCase();
 
         if (label.contains("5") || label.contains("4")) return "positive";
         if (label.contains("3")) return "neutral";
         if (label.contains("1") || label.contains("2")) return "negative";
+
+        if (label.equals("label_2") || label.equals("2")) return "positive";
+        if (label.equals("label_1")) return "neutral";
+        if (label.equals("label_0") || label.equals("0")) return "negative";
 
         if (label.contains("pos")) return "positive";
         if (label.contains("neu")) return "neutral";

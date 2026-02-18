@@ -175,7 +175,7 @@ async function reanalizarSentimientoPendientes(fallaId) {
   }
   const url = `${getApiBase()}/admin/comentarios/reanalizar-sentimiento`;
   if (btn) btn.disabled = true;
-  if (statusEl) statusEl.textContent = 'Llamando al servidor...';
+  if (statusEl) statusEl.textContent = 'Intento implementar IA...';
 
   try {
     const response = await fetch(url, {
@@ -189,16 +189,13 @@ async function reanalizarSentimientoPendientes(fallaId) {
     const json = await response.json().catch(() => ({}));
     const datos = json.datos || json;
     const encolados = datos.comentariosEncolados != null ? datos.comentariosEncolados : 0;
-    const mensaje = datos.mensaje || (encolados > 0 ? 'Reanalizando ' + encolados + ' comentarios.' : 'No hay comentarios pendientes.');
+    const mensaje = datos.mensaje || (encolados > 0 ? 'Intento implementar IA: reanalizando ' + encolados + ' comentarios.' : 'Intento implementar IA: no hay comentarios pendientes.');
 
     if (statusEl) statusEl.textContent = mensaje;
     if (encolados > 0 && fallaId) {
-      if (statusEl) statusEl.textContent += ' Refrescando en 6 s...';
-      setTimeout(() => {
-        loadSentimentForFalla(fallaId);
-        if (statusEl) statusEl.textContent = '';
-        if (btn) btn.disabled = false;
-      }, 6000);
+      loadSentimentForFalla(fallaId);
+      if (statusEl) statusEl.textContent = '';
+      if (btn) btn.disabled = false;
     } else {
       if (btn) btn.disabled = false;
       if (encolados === 0 && fallaId) loadSentimentForFalla(fallaId);

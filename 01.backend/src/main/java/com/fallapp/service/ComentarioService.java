@@ -201,8 +201,10 @@ public class ComentarioService {
             Long idComentario = ((Number) fila[0]).longValue();
             String texto = fila[1] != null ? fila[1].toString() : null;
             if (texto != null && !texto.isBlank()) {
-                sentimentAnalysisService.analizarComentarioAsync(idComentario, texto);
-                encolados++;
+                boolean guardado = sentimentAnalysisService.analizarComentario(idComentario, texto);
+                if (guardado) {
+                    encolados++;
+                }
             }
         }
 

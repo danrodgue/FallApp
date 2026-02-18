@@ -52,8 +52,8 @@ public class AdminSentimientoController {
         Map<String, Object> datos = Map.of(
             "comentariosEncolados", encolados,
             "mensaje", encolados > 0
-                ? "Se están reanalizando " + encolados + " comentarios. Espera unos segundos y refresca la estadística."
-                : "No hay comentarios pendientes de analizar."
+                ? "Intento implementar IA: se analizaron y guardaron " + encolados + " comentarios."
+                : "Intento implementar IA: no se pudo analizar ningún comentario pendiente (revisa token/configuración de IA)."
         );
         return ResponseEntity.ok(ApiResponse.success(datos));
     }
