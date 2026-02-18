@@ -272,20 +272,43 @@ function openView(id){
     x.idEvento === parseInt(id) || x.id === id
   );
   if(!ev) return showNotification('Evento no encontrado', 'error');
-  
+
+  const viewModal = document.getElementById('view-modal');
+  const nameEl = document.getElementById('view-name');
+  const typeEl = document.getElementById('view-type');
+  const dateEl = document.getElementById('view-date');
+  const placeEl = document.getElementById('view-place');
+  const descEl = document.getElementById('view-description');
+  const imgEl = document.getElementById('view-image');
+
   let fechaFormato = '';
   if (ev.fecha_evento) {
     const fecha = new Date(ev.fecha_evento);
-    fechaFormato = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
+    fechaFormato = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   } else if (ev.fechaEvento) {
     const fecha = new Date(ev.fechaEvento);
-    fechaFormato = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES');
+    fechaFormato = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   } else if (ev.date) {
     fechaFormato = ev.date + ' ' + (ev.time || '');
   }
-  
-  const text = `Nombre: ${ev.nombre || ev.name}\nTipo: ${ev.tipo || 'Otro'}\nFecha: ${fechaFormato}\nLugar: ${ev.ubicacion || ev.place}\n\nDescripción:\n${ev.descripcion || ev.description || ''}`;
-  alert(text);
+
+  if (nameEl) nameEl.textContent = ev.nombre || ev.name || '(sin nombre)';
+  if (typeEl) typeEl.textContent = ev.tipo || 'Otro';
+  if (dateEl) dateEl.textContent = fechaFormato || 'Sin fecha';
+  if (placeEl) placeEl.textContent = ev.ubicacion || ev.place || '(sin lugar)';
+  if (descEl) descEl.textContent = ev.descripcion || ev.description || '(sin descripción)';
+
+  if (imgEl) {
+    const eventoId = ev.id_evento || ev.idEvento || ev.id;
+    if (ev.imagen_nombre || ev.imagenNombre) {
+      imgEl.src = `http://35.180.21.42:8080/api/eventos/${eventoId}/imagen`;
+      imgEl.style.display = 'block';
+    } else {
+      imgEl.style.display = 'none';
+    }
+  }
+
+  if (viewModal) viewModal.style.display = 'flex';
 }
 
 async function saveFromForm(){
@@ -352,9 +375,37 @@ async function saveFromForm(){
       if(idx >= 0) {
         events[idx] = { ...events[idx], ...payload };
       }
-      saveLocal(); 
+      // Subir imagen si se seleccionó al editar
+      const photoInput = document.getElementById('photo');
+      if (photoInput && photoInput.files.length > 0) {
+        try {
+          await uploadEventImage(id, photoInput.files[0]);
+          showNotification('Evento e imagen actualizados correctamente', 'success');
+        } catch (e) {
+          console.warn('Error al subir imagen en edición:', e);
+          showNotification('Evento actualizado, pero hubo error al subir la nueva imagen', 'warning');
+        }
+      } else {
+        showNotification('Evento actualizado correctamente', 'success');
+      }
+
+      // Recargar lista desde backend para reflejar cambios (incluida imagenNombre)
+      try {
+        const idFalla = localStorage.getItem('fallapp_user_idFalla');
+        if (idFalla) {
+          const response = await obtenerEventosPorFalla(idFalla);
+          if (response && response.content && Array.isArray(response.content)) {
+            events = response.content;
+          } else if (response && response.datos && Array.isArray(response.datos.content)) {
+            events = response.datos.content;
+          }
+          saveLocal();
+        }
+      } catch (e) {
+        console.warn('No se pudo recargar la lista de eventos tras actualizar:', e);
+      }
+
       renderList(currentSearchValue() || '');
-      showNotification('Evento actualizado correctamente', 'success');
     }catch(e){
       console.error('Error updating event:', e);
       showNotification(`Error al actualizar evento: ${e.message}`, 'error');
@@ -367,7 +418,6 @@ async function saveFromForm(){
       const nuevoEvento = created.datos || created;
       events.push(nuevoEvento); 
       saveLocal(); 
-      renderList(currentSearchValue() || '');
       
       // Subir imagen si se seleccionó
       const photoInput = document.getElementById('photo');
@@ -382,6 +432,24 @@ async function saveFromForm(){
       } else {
         showNotification('Evento creado correctamente', 'success');
       }
+
+      // Recargar lista desde backend para reflejar imagenNombre y datos calculados
+      try {
+        const idFalla = localStorage.getItem('fallapp_user_idFalla');
+        if (idFalla) {
+          const response = await obtenerEventosPorFalla(idFalla);
+          if (response && response.content && Array.isArray(response.content)) {
+            events = response.content;
+          } else if (response && response.datos && Array.isArray(response.datos.content)) {
+            events = response.datos.content;
+          }
+          saveLocal();
+        }
+      } catch (e) {
+        console.warn('No se pudo recargar la lista de eventos tras crear:', e);
+      }
+
+      renderList(currentSearchValue() || '');
     }catch(e){
       console.error('Error creating event:', e);
       showNotification(`Error al crear evento: ${e.message}`, 'error');
@@ -443,6 +511,20 @@ async function init(){
   const searchEl = document.getElementById('search'); if(searchEl) searchEl.addEventListener('input', function(e){ renderList(e.target.value); });
   if(form) form.addEventListener('submit', function(e){ e.preventDefault(); saveFromForm(); });
   const backBtn = document.getElementById('events-back'); if(backBtn) backBtn.addEventListener('click', function(){ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; });
+
+  // Wiring para modal de detalle (Ver)
+  const viewModalEl = document.getElementById('view-modal');
+  const viewModalClose = document.getElementById('view-modal-close');
+  if (viewModalClose) viewModalClose.addEventListener('click', () => {
+    if (viewModalEl) viewModalEl.style.display = 'none';
+  });
+  if (viewModalEl) {
+    viewModalEl.addEventListener('click', (ev) => {
+      if (ev.target && ev.target.id === 'view-modal') {
+        viewModalEl.style.display = 'none';
+      }
+    });
+  }
 
   // Load from backend if possible
   try{

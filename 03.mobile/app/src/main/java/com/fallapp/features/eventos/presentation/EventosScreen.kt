@@ -19,8 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.AsyncImage
 import com.fallapp.features.eventos.domain.model.Evento
 import com.fallapp.features.fallas.domain.model.Falla
 import org.koin.androidx.compose.koinViewModel
@@ -254,29 +253,15 @@ private fun EventoRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen a la izquierda (con placeholder mientras carga)
+            // Imagen a la izquierda
             if (evento.imagen != null) {
-                SubcomposeAsyncImage(
+                AsyncImage(
                     model = evento.imagen,
                     contentDescription = "Imagen de ${evento.nombre}",
                     modifier = Modifier
                         .size(100.dp)
                         .clip(MaterialTheme.shapes.medium),
-                    contentScale = ContentScale.Crop,
-                    loading = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.surfaceVariant),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(32.dp),
-                                strokeWidth = 2.dp
-                            )
-                        }
-                    },
-                    content = { SubcomposeAsyncImageContent() }
+                    contentScale = ContentScale.Crop
                 )
             } else {
                 Box(
@@ -384,30 +369,16 @@ private fun EventoDetailsDialog(
                     }
                 }
 
-                // Imagen del evento (si existe), con placeholder mientras carga
+                // Imagen del evento (si existe)
                 if (evento.imagen != null) {
-                    SubcomposeAsyncImage(
+                    AsyncImage(
                         model = evento.imagen,
                         contentDescription = "Imagen de ${evento.nombre}",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(180.dp)
                             .clip(MaterialTheme.shapes.medium),
-                        contentScale = ContentScale.Crop,
-                        loading = {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(40.dp),
-                                    strokeWidth = 2.dp
-                                )
-                            }
-                        },
-                        content = { SubcomposeAsyncImageContent() }
+                        contentScale = ContentScale.Crop
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }

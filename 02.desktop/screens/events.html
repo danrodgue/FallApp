@@ -119,6 +119,29 @@
       </div>
     </div>
 
+    <!-- Modal de detalle (Ver evento) -->
+    <div id="view-modal" class="modal" role="dialog" aria-modal="true" style="display:none;">
+      <div class="modal-card" role="document">
+        <div class="modal-header">
+          <h3 id="view-modal-title">Detalle del evento</h3>
+          <button id="view-modal-close" class="modal-close" aria-label="Cerrar">×</button>
+        </div>
+        <div class="event-view-body">
+          <div class="event-view-image">
+            <img id="view-image" alt="Imagen del evento" style="width:100%; max-height:220px; object-fit:cover; border-radius:12px; display:none;">
+          </div>
+          <div class="event-view-content">
+            <p><strong>Nombre:</strong> <span id="view-name"></span></p>
+            <p><strong>Tipo:</strong> <span id="view-type"></span></p>
+            <p><strong>Fecha:</strong> <span id="view-date"></span></p>
+            <p><strong>Lugar:</strong> <span id="view-place"></span></p>
+            <p><strong>Descripción:</strong></p>
+            <p id="view-description" class="muted" style="white-space:pre-wrap;"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="../js/events.js"></script>
   </div>
 </body>
