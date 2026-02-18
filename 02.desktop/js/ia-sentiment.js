@@ -32,6 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
       label.style.display = 'none';
     }
 
+    // Mostrar botón de reanalizar (solo cuando hay falla del casal)
+    const reanalizarWrap = document.getElementById('sentiment-reanalizar-wrap');
+    if (reanalizarWrap) reanalizarWrap.style.display = 'block';
+    const btnReanalizar = document.getElementById('btn-reanalizar-sentimiento');
+    if (btnReanalizar) {
+      btnReanalizar.addEventListener('click', () => reanalizarSentimientoPendientes(storedFallaId.trim()));
+    }
     // Cargar automáticamente el sentimiento de la falla del casal
     loadSentimentForFalla(storedFallaId.trim());
   } else {
@@ -139,6 +146,55 @@ function renderSentiment(data) {
       </ul>
     </div>
   `;
+}
+
+/**
+ * Llama al endpoint que reanaliza todos los comentarios con sentimiento NULL
+ * y luego refresca la estadística de la falla tras unos segundos.
+ */
+async function reanalizarSentimientoPendientes(fallaId) {
+  const btn = document.getElementById('btn-reanalizar-sentimiento');
+  const statusEl = document.getElementById('reanalizar-status');
+  const token = localStorage.getItem('fallapp_token');
+  if (!token) {
+    showSentimentMessage('No hay token de sesión. Inicia sesión de nuevo.', 'warning');
+    return;
+  }
+  const url = `${getApiBase()}/admin/comentarios/reanalizar-sentimiento`;
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = 'Llamando al servidor...';
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    const json = await response.json().catch(() => ({}));
+    const datos = json.datos || json;
+    const encolados = datos.comentariosEncolados != null ? datos.comentariosEncolados : 0;
+    const mensaje = datos.mensaje || (encolados > 0 ? 'Reanalizando ' + encolados + ' comentarios.' : 'No hay comentarios pendientes.');
+
+    if (statusEl) statusEl.textContent = mensaje;
+    if (encolados > 0 && fallaId) {
+      if (statusEl) statusEl.textContent += ' Refrescando en 6 s...';
+      setTimeout(() => {
+        loadSentimentForFalla(fallaId);
+        if (statusEl) statusEl.textContent = '';
+        if (btn) btn.disabled = false;
+      }, 6000);
+    } else {
+      if (btn) btn.disabled = false;
+      if (encolados === 0 && fallaId) loadSentimentForFalla(fallaId);
+    }
+  } catch (err) {
+    console.error('Error reanalizando sentimiento:', err);
+    if (statusEl) statusEl.textContent = 'Error: ' + (err.message || err);
+    if (btn) btn.disabled = false;
+  }
 }
 
 function showSentimentMessage(message, type) {
