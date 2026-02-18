@@ -10,6 +10,8 @@ import com.fallapp.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -133,11 +135,24 @@ public class ComentarioService {
         
         Comentario comentarioSaved = comentarioRepository.save(comentario);
 
-        // Lanzar análisis de sentimiento en segundo plano (no bloquea la respuesta al usuario)
-        sentimentAnalysisService.analizarComentarioAsync(
-                comentarioSaved.getIdComentario(),
-                comentarioSaved.getContenido()
-        );
+        // Lanzar análisis de sentimiento en segundo plano DESPUÉS del commit
+        // para evitar condiciones de carrera (el hilo async podría no ver el registro aún).
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    sentimentAnalysisService.analizarComentarioAsync(
+                            comentarioSaved.getIdComentario(),
+                            comentarioSaved.getContenido()
+                    );
+                }
+            });
+        } else {
+            sentimentAnalysisService.analizarComentarioAsync(
+                    comentarioSaved.getIdComentario(),
+                    comentarioSaved.getContenido()
+            );
+        }
 
         return convertirADTO(comentarioSaved);
     }

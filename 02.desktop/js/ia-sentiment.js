@@ -51,8 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function getApiBase() {
-  // Reutiliza la misma base de API usada en otras pantallas
-  return window._apiBase || 'http://35.180.21.42:8080/api';
+  const configured =
+    window._API_URL ||
+    window._apiBase ||
+    (window._API_BASE ? `${window._API_BASE}/api` : null);
+
+  const fallback = 'http://35.180.21.42:8080/api';
+  const base = configured || fallback;
+  return base.endsWith('/') ? base.slice(0, -1) : base;
 }
 
 async function loadSentimentForFalla(fallaId) {

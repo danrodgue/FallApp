@@ -1,6 +1,5 @@
 package com.fallapp.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fallapp.model.Comentario;
@@ -18,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.ArrayList;
 
 /**
  * Servicio encargado de llamar a la IA de Hugging Face
@@ -89,6 +89,10 @@ public class SentimentAnalysisService {
 
         Map<String, Object> body = new HashMap<>();
         body.put("inputs", texto);
+        body.put("options", Map.of(
+            "wait_for_model", true,
+            "use_cache", false
+        ));
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
@@ -107,24 +111,56 @@ public class SentimentAnalysisService {
 
         JsonNode root = objectMapper.readTree(json);
 
-        // El modelo suele devolver una lista de resultados: [{label, score}, ...]
-        JsonNode resultsNode;
-        if (root.isArray() && root.size() > 0 && root.get(0).isArray()) {
-            // A veces es [[{...}]] → nos quedamos con el primer array interno
-            resultsNode = root.get(0);
-        } else {
-            resultsNode = root;
+        if (root.isObject() && root.has("error")) {
+            log.warn("Hugging Face devolvió error: {}", root.path("error").asText());
+            return null;
         }
 
-        List<SentimentScore> scores = objectMapper.readValue(
-                resultsNode.traverse(),
-                new TypeReference<List<SentimentScore>>() {}
-        );
+        List<SentimentScore> scores = extraerScores(root);
+
+        if (scores.isEmpty()) {
+            log.warn("Formato inesperado de respuesta Hugging Face: {}", json);
+            return null;
+        }
 
         return scores.stream()
                 .max(Comparator.comparingDouble(SentimentScore::getScore))
                 .map(s -> normalizarEtiqueta(s.getLabel()))
                 .orElse(null);
+    }
+
+    private List<SentimentScore> extraerScores(JsonNode node) throws Exception {
+        List<SentimentScore> scores = new ArrayList<>();
+        recolectarScores(node, scores);
+        return scores;
+    }
+
+    private void recolectarScores(JsonNode node, List<SentimentScore> scores) throws Exception {
+        if (node == null || node.isNull()) {
+            return;
+        }
+
+        if (node.isArray()) {
+            for (JsonNode child : node) {
+                recolectarScores(child, scores);
+            }
+            return;
+        }
+
+        if (node.isObject()) {
+            if (node.has("label") && node.has("score")) {
+                SentimentScore score = objectMapper.convertValue(node, SentimentScore.class);
+                scores.add(score);
+                return;
+            }
+
+            if (node.has("result")) {
+                recolectarScores(node.get("result"), scores);
+            }
+            if (node.has("data")) {
+                recolectarScores(node.get("data"), scores);
+            }
+        }
     }
 
     /**
@@ -134,9 +170,19 @@ public class SentimentAnalysisService {
     private String normalizarEtiqueta(String rawLabel) {
         if (rawLabel == null) return null;
         String label = rawLabel.toLowerCase();
+
+        if (label.contains("5") || label.contains("4")) return "positive";
+        if (label.contains("3")) return "neutral";
+        if (label.contains("1") || label.contains("2")) return "negative";
+
         if (label.contains("pos")) return "positive";
         if (label.contains("neu")) return "neutral";
         if (label.contains("neg")) return "negative";
+
+        if (label.contains("positivo")) return "positive";
+        if (label.contains("neutro")) return "neutral";
+        if (label.contains("negativo")) return "negative";
+
         return label;
     }
 
