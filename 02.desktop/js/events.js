@@ -234,14 +234,17 @@ function openNew(){
 }
 
 function openEdit(id){
-  const ev = events.find(x => x.idEvento === parseInt(id) || x.id === id); 
+  const ev = events.find(x =>
+    (x.id_evento != null && (Number(x.id_evento) === Number(id) || x.id_evento === id)) ||
+    x.idEvento === parseInt(id) || x.id === id
+  );
   if(!ev) return showNotification('Evento no encontrado', 'error');
   
   openModal(); 
   const title = document.getElementById('modal-title'); 
   if(title) title.textContent='Editar evento';
   
-  if(inputs.id) inputs.id.value = ev.idEvento || ev.id; 
+  if(inputs.id) inputs.id.value = ev.id_evento || ev.idEvento || ev.id; 
   if(inputs.name) inputs.name.value = ev.nombre || ev.name || ''; 
   if(inputs.tipo) inputs.tipo.value = ev.tipo || 'otro';
   
@@ -264,7 +267,10 @@ function openEdit(id){
 }
 
 function openView(id){
-  const ev = events.find(x => x.idEvento === parseInt(id) || x.id === id); 
+  const ev = events.find(x =>
+    (x.id_evento != null && (Number(x.id_evento) === Number(id) || x.id_evento === id)) ||
+    x.idEvento === parseInt(id) || x.id === id
+  );
   if(!ev) return showNotification('Evento no encontrado', 'error');
   
   let fechaFormato = '';
