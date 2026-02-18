@@ -26,7 +26,7 @@ data class UsuarioDto(
     val email: String,
     val nombreCompleto: String,
     val rol: String,
-    val verificado: Boolean = false,  // Estado de verificación de email
+    val verificado: Boolean = false,
     val idFalla: Long? = null,
     val nombreFalla: String? = null,
     val ultimoAcceso: String? = null

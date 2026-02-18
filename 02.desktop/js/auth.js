@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.status === 401) {
                     return { success: false, message: 'Email o contraseña incorrectos.' };
                 } else if (response.status === 400) {
-                    return { success: false, message: 'Solicitud inválida. Verifica email y contraseña.' };
+                    return { success: false, message: 'Solicitud inválida. Revisa email y contraseña.' };
                 } else {
                     return { success: false, message: `Error del servidor (${response.status})` };
                 }

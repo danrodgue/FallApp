@@ -45,7 +45,7 @@ data class LoginResponseDto(
  * @property email Email de la cuenta
  * @property nombreCompleto Nombre completo del usuario
  * @property rol Rol del usuario (FALLERO, ADMIN, CASAL)
- * @property verificado Estado de verificación de email
+ * @property verificado Estado interno de cuenta
  * @property idFalla ID de la falla asociada (null si no tiene)
  * @property nombreFalla Nombre de la falla asociada (null si no tiene)
  * @property ultimoAcceso Timestamp del último acceso (opcional)

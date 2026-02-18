@@ -240,7 +240,7 @@ fun RegisterScreen(
                 }
             }
             
-            // Información sobre verificación de email
+            // Información sobre correo de bienvenida
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
@@ -258,7 +258,7 @@ fun RegisterScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Al registrarte, recibirás un email de verificación. Por favor, verifica tu cuenta para acceder a todas las funcionalidades.",
+                        text = "Al registrarte, recibirás un correo de bienvenida con la confirmación de alta en FallApp.",
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.weight(1f)

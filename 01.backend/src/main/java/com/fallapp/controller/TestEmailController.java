@@ -116,22 +116,6 @@ public class TestEmailController {
     }
 
     /**
-     * Enviar email de verificación de cuenta de prueba
-     * GET http://localhost:8080/api/test-email/verify?to=destino@ejemplo.com
-     */
-    @GetMapping("/verify")
-    public ResponseEntity<?> sendVerificationEmail(
-            @RequestParam String to,
-            @RequestParam(defaultValue = "VERIFY_TOKEN_789") String token) {
-        try {
-            emailService.sendVerificationEmail(to, token);
-            return ResponseEntity.ok(createResponse("Email de verificación enviado a " + to));
-        } catch (MessagingException e) {
-            return ResponseEntity.badRequest().body(createError(e.getMessage()));
-        }
-    }
-
-    /**
      * Información sobre los endpoints disponibles
      * GET http://localhost:8080/api/test-email/info
      */
@@ -144,8 +128,7 @@ public class TestEmailController {
             "GET /api/test-email/html?to=EMAIL",
             "GET /api/test-email/welcome?to=EMAIL&username=NOMBRE",
             "GET /api/test-email/reset?to=EMAIL&token=TOKEN",
-            "GET /api/test-email/comment?to=EMAIL&fallaName=FALLA&author=AUTOR&comment=TEXTO",
-            "GET /api/test-email/verify?to=EMAIL&token=TOKEN"
+            "GET /api/test-email/comment?to=EMAIL&fallaName=FALLA&author=AUTOR&comment=TEXTO"
         });
         info.put("warning", "⚠️ Estos endpoints son SOLO para desarrollo. Proteger o eliminar en producción.");
         return ResponseEntity.ok(info);

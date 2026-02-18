@@ -161,5 +161,4 @@ Ninguno por el momento.
 - [ ] Agregar avatar personalizado (upload de foto)
 - [ ] Mostrar historial de actividad
 - [ ] Opciones de privacidad/notificaciones
-- [ ] Verificación de email de dos factores
 

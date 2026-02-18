@@ -29,9 +29,6 @@ public class EmailService {
     @Value("${app.mail.from-name}")
     private String fromName;
 
-    @Value("${app.backend.public-url:http://localhost:8080}")
-    private String backendPublicUrl;
-
     /**
      * Enviar email simple (solo texto)
      * @param to Email destinatario
@@ -198,43 +195,4 @@ public class EmailService {
         sendHtmlEmail(to, subject, htmlContent);
     }
 
-    /**
-     * Enviar email de verificación de cuenta
-     * @param to Email a verificar
-     * @param verificationToken Token de verificación
-     */
-    public void sendVerificationEmail(String to, String verificationToken) throws MessagingException {
-        String subject = "Verifica tu cuenta - FallApp";
-        String verificationLink = backendPublicUrl + "/api/auth/verificar?token=" + verificationToken;
-        
-        String htmlContent = """
-            <html>
-                <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5;">
-                    <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
-                        <h2 style="color: #FF6B35;">✉️ Verifica tu email</h2>
-                        <p style="font-size: 16px;">
-                            Para completar tu registro en FallApp, verifica tu dirección de email.
-                        </p>
-                        <div style="text-align: center; margin: 30px 0;">
-                            <a href="%s" 
-                               style="background-color: #4CAF50; 
-                                      color: white; 
-                                      padding: 12px 30px; 
-                                      text-decoration: none; 
-                                      border-radius: 5px;
-                                      display: inline-block;
-                                      font-weight: bold;">
-                                Verificar mi cuenta
-                            </a>
-                        </div>
-                        <p style="font-size: 12px; color: #999;">
-                            <small>Este enlace expira en 24 horas.</small>
-                        </p>
-                    </div>
-                </body>
-            </html>
-            """.formatted(verificationLink);
-        
-        sendHtmlEmail(to, subject, htmlContent);
-    }
 }

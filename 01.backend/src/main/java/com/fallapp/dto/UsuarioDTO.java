@@ -24,7 +24,6 @@ public class UsuarioDTO {
     private Long idFalla;
     private String nombreFalla;
     private Boolean activo;
-    private Boolean verificado;
     private String telefono;
     private String direccion;
     private String ciudad;

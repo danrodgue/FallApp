@@ -19,6 +19,7 @@ public class OpenAPIConfig {
     @Bean
     public OpenAPI fallappOpenAPI() {
         return new OpenAPI()
+                .openapi("3.0.1")
                 .info(new Info()
                         .title("FallApp API")
                         .description("API REST para gestión de Fallas Valencianas")
