@@ -1,6 +1,7 @@
 package com.fallapp.controller;
 
 import com.fallapp.dto.ApiResponse;
+import com.fallapp.service.ComentarioService;
 import com.fallapp.service.EstadisticasService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class AdminSentimientoController {
 
     private final EstadisticasService estadisticasService;
+    private final ComentarioService comentarioService;
 
     /**
      * GET /api/admin/fallas/{idFalla}/sentimiento
@@ -34,6 +36,25 @@ public class AdminSentimientoController {
             @PathVariable Long idFalla
     ) {
         Map<String, Object> datos = estadisticasService.obtenerSentimientoPorFalla(idFalla);
+        return ResponseEntity.ok(ApiResponse.success(datos));
+    }
+
+    /**
+     * POST /api/admin/comentarios/reanalizar-sentimiento
+     *
+     * Reanaliza con IA todos los comentarios que tienen sentimiento NULL.
+     * Útil cuando el token de Hugging Face no estaba configurado al crear comentarios.
+     */
+    @PostMapping("/comentarios/reanalizar-sentimiento")
+    @Operation(summary = "Reanalizar sentimiento de comentarios pendientes")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> reanalizarSentimientoPendientes() {
+        int encolados = comentarioService.reanalizarSentimientoPendientes();
+        Map<String, Object> datos = Map.of(
+            "comentariosEncolados", encolados,
+            "mensaje", encolados > 0
+                ? "Se están reanalizando " + encolados + " comentarios. Espera unos segundos y refresca la estadística."
+                : "No hay comentarios pendientes de analizar."
+        );
         return ResponseEntity.ok(ApiResponse.success(datos));
     }
 }

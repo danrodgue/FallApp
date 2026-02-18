@@ -47,4 +47,9 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
             "WHERE c.falla = :falla AND c.sentimiento IS NOT NULL " +
             "GROUP BY c.sentimiento")
     List<Object[]> countByFallaGroupBySentimiento(@Param("falla") Falla falla);
+
+    /**
+     * Comentarios que aún no tienen sentimiento analizado (para reanalizar en lote).
+     */
+    List<Comentario> findBySentimientoIsNull();
 }

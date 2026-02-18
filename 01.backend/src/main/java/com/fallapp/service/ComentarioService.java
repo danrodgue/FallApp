@@ -169,6 +169,24 @@ public class ComentarioService {
     }
     
     /**
+     * Reanaliza el sentimiento de todos los comentarios que tienen sentimiento NULL.
+     * Útil para comentarios creados antes de tener el token de Hugging Face configurado.
+     * Lanza el análisis en segundo plano para cada uno (no bloquea).
+     *
+     * @return Número de comentarios encolados para reanálisis
+     */
+    @Transactional(readOnly = true)
+    public int reanalizarSentimientoPendientes() {
+        List<Comentario> pendientes = comentarioRepository.findBySentimientoIsNull();
+        for (Comentario c : pendientes) {
+            if (c.getContenido() != null && !c.getContenido().isBlank()) {
+                sentimentAnalysisService.analizarComentarioAsync(c.getIdComentario(), c.getContenido());
+            }
+        }
+        return pendientes.size();
+    }
+
+    /**
      * Convertir entidad a DTO
      */
     private ComentarioDTO convertirADTO(Comentario comentario) {
