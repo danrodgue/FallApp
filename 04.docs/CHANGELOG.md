@@ -7,6 +7,44 @@ y este proyecto adhiere a [Versionado Semántico](https://semver.org/lang/es/).
 
 ---
 
+## [2.0.5] - 2026-02-18
+
+### ✨ Agregado
+
+#### Frontend Escritorio (Electron) - Optimización de código
+- Nueva documentación técnica completa del cambio:
+  - `BUGFIX-2026-02-18-optimizacion-interfaz-escritorio.md`
+
+### 🔄 Cambiado
+
+#### 02.desktop - Refactor de estilo sin cambios visuales
+- Homogeneización de estilo de código inspirada en ejemplos de `07.datos/optimization/interfaces`
+- Refactor en:
+  - `02.desktop/js/auth.js`
+  - `02.desktop/js/register.js`
+  - `02.desktop/js/events.js`
+  - `02.desktop/js/user.js`
+  - `02.desktop/js/api.js`
+
+#### Validación de formularios
+- Utilidad común añadida:
+  - `02.desktop/js/validacion-formularios.js`
+- Integración en login, registro, eventos y perfil.
+- Reglas de validación reforzadas (email, contraseña, teléfono, código postal y campos obligatorios).
+
+#### Testing E2E (base)
+- Configuración WebdriverIO añadida:
+  - `02.desktop/wdio.conf.js`
+  - `02.desktop/tests/e2e/login.validacion.e2e.js`
+  - `02.desktop/tests/e2e/register.validacion.e2e.js`
+- `package.json` de `02.desktop` actualizado con script/dependencias E2E.
+
+### 📌 Nota operativa
+- No se ejecutó instalación ni tests en este servidor por política de entorno.
+- Se deja todo preparado para ejecución en entorno cliente/desarrollo.
+
+---
+
 ## [2.0.4] - 2026-02-18
 
 ### 🐛 Corregido

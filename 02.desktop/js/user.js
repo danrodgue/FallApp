@@ -1,21 +1,11 @@
-// API endpoint para obtener información del usuario
-const API_USER_URL = 'http://35.180.21.42:8080/api/usuarios';
-
-// Variable para rastrear si estamos en modo edición
 let isEditing = false;
 let currentUserId = null;
 let originalUserData = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🔄 Inicializando página de usuario...');
-  
-  // Cargar información del usuario
   await loadUserData();
-
-  // Cargar imagen del usuario si existe
   await loadUserImage();
 
-  // Configurar botones
   const editBtn = document.getElementById('editBtn');
   const saveBtn = document.getElementById('saveBtn');
   const cancelBtn = document.getElementById('cancelBtn');
@@ -25,33 +15,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (editBtn) {
     editBtn.addEventListener('click', toggleEditMode);
-    console.log('✓ Event listener agregado a editBtn');
   } else {
-    console.error('❌ No se encontró el elemento editBtn');
+    console.error('No se encontró editBtn');
   }
 
   if (saveBtn) {
     saveBtn.addEventListener('click', saveUserData);
-    console.log('✓ Event listener agregado a saveBtn');
   } else {
-    console.error('❌ No se encontró el elemento saveBtn');
+    console.error('No se encontró saveBtn');
   }
 
   if (cancelBtn) {
     cancelBtn.addEventListener('click', toggleEditMode);
-    console.log('✓ Event listener agregado a cancelBtn');
   } else {
-    console.error('❌ No se encontró el elemento cancelBtn');
+    console.error('No se encontró cancelBtn');
   }
 
   if (logoutBtn) {
     logoutBtn.addEventListener('click', handleLogout);
-    console.log('✓ Event listener agregado a logoutBtn');
   } else {
-    console.error('❌ No se encontró el elemento logoutBtn');
+    console.error('No se encontró logoutBtn');
   }
 
-  // Configurar botón de cambiar foto
+  ['userNombreCompleto', 'userEmail', 'userTelefono', 'userCodigoPostal'].forEach((idCampo) => {
+    const campo = document.getElementById(idCampo);
+    if (!campo) return;
+    campo.addEventListener('input', () => {
+      campo.setCustomValidity('');
+    });
+  });
+
   if (uploadPhotoBtn && userPhotoInput) {
     uploadPhotoBtn.addEventListener('click', () => {
       userPhotoInput.click();
@@ -68,58 +61,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
     
-    console.log('✓ Event listeners agregados al botón de cambiar foto');
   } else {
-    console.error('❌ No se encontró uploadPhotoBtn o userPhotoInput');
+    console.error('No se encontró uploadPhotoBtn o userPhotoInput');
   }
-  
-  console.log('✓ Página de usuario inicializada correctamente');
 });
 
-// Cargar datos del usuario desde el backend
 async function loadUserData() {
   try {
-    // Obtener el idUsuario desde localStorage (guardado en el login)
     const idUsuario = localStorage.getItem('fallapp_user_id');
     
     if (!idUsuario) {
-      console.error('❌ No hay idUsuario en localStorage');
+      console.error('No hay idUsuario en localStorage');
       redirectToLogin();
       return;
     }
 
-    console.log(`📥 Cargando datos del usuario ID: ${idUsuario}`);
     currentUserId = idUsuario;
 
-    // Obtener los datos del usuario específico desde la API
     const response = await obtenerUsuario(idUsuario);
-    
-    // Manejo de diferentes formatos de respuesta
     const userData = response.datos || response.data || response;
     
     if (!userData) {
       throw new Error('Usuario no encontrado');
     }
     
-    // Guardar datos originales para comparación en cancelar
     originalUserData = JSON.parse(JSON.stringify(userData));
-    
-    console.log('✓ Datos del usuario cargados:', userData);
+
     populateUserForm(userData);
   } catch (error) {
-    console.error('❌ Error loading user data:', error);
+    console.error('Error loading user data:', error);
     showErrorMessage(`Error al cargar datos: ${error.message}`);
   }
 }
 
-// Rellenar el formulario con datos del usuario
 function populateUserForm(userData) {
   if (!userData) {
     showErrorMessage('No se encontraron datos del usuario.');
     return;
   }
 
-  // Establecer valores en los campos
   document.getElementById('userId').value = userData.idUsuario || '';
   document.getElementById('userName').value = userData.email || '';
   document.getElementById('userEmail').value = userData.email || '';
@@ -132,13 +112,11 @@ function populateUserForm(userData) {
   document.getElementById('userIdFalla').value = userData.idFalla || '';
   document.getElementById('userEstado').value = userData.activo ? 'Activo' : 'Inactivo';
 
-  // Formatear fecha de creación si existe
   if (userData.fechaCreacion) {
     const fecha = new Date(userData.fechaCreacion);
     document.getElementById('userFechaRegistro').value = fecha.toLocaleDateString('es-ES');
   }
 
-  // Actualizar avatar con iniciales del usuario
   const initials = (userData.nombreCompleto || userData.email || 'U')
     .split(' ')
     .map(word => word[0])
@@ -148,7 +126,6 @@ function populateUserForm(userData) {
   
   document.getElementById('avatarInitials').textContent = initials;
 
-  // Actualizar información en la barra lateral
   const sideStatus = document.getElementById('sideStatus');
   const estadoTexto = userData.activo ? 'activa' : 'inactiva';
   const fecha = userData.fechaCreacion 
@@ -157,7 +134,6 @@ function populateUserForm(userData) {
   sideStatus.textContent = `Tu cuenta está ${estadoTexto}. Registrado desde ${fecha}.`;
 }
 
-// Alternar modo de edición
 function toggleEditMode() {
   isEditing = !isEditing;
 
@@ -168,9 +144,6 @@ function toggleEditMode() {
   const fields = document.querySelectorAll('.field input');
 
   if (isEditing) {
-    console.log('✏️ Entrando en modo edición...');
-    // Habilitar campos editables (excepto algunos)
-    // Los campos no editables son: id, rol, idFalla, estado, fechaRegistro
     const nonEditableFields = ['userId', 'userRol', 'userIdFalla', 'userEstado', 'userFechaRegistro', 'userName'];
     
     fields.forEach((field) => {
@@ -188,10 +161,7 @@ function toggleEditMode() {
       uploadPhotoBtn.style.display = 'inline-flex';
     }
     
-    console.log('✓ Modo edición activado');
   } else {
-    console.log('🔒 Saliendo del modo edición...');
-    // Deshabilitar campos
     fields.forEach((field) => {
       field.disabled = true;
     });
@@ -203,45 +173,42 @@ function toggleEditMode() {
       uploadPhotoBtn.style.display = 'none';
     }
 
-    // Recargar datos para descartar cambios (sin hacer petición si tenemos datos originales)
     if (originalUserData) {
-      console.log('📄 Restaurando datos originales...');
       populateUserForm(originalUserData);
     } else {
-      console.log('🔄 Recargando datos desde servidor...');
       loadUserData();
     }
-    
-    console.log('✓ Modo edición desactivado');
   }
 }
 
-// Validar datos del usuario
 function validateUserData(formData) {
   const errors = [];
+  const v = window.validacionFormulario;
   
-  // Validar que al menos someCompleto no esté vacío
   if (!formData.nombreCompleto || formData.nombreCompleto.length === 0) {
     errors.push('El nombre completo es requerido');
   }
   
-  // Validar email
-  if (formData.email && !formData.email.includes('@')) {
+  if (v && !v.emailValido(formData.email || '')) {
+    errors.push('El email no es válido');
+  } else if (formData.email && !formData.email.includes('@')) {
     errors.push('El email no es válido');
   } else if (!formData.email || formData.email.length === 0) {
     errors.push('El email es requerido');
   }
   
-  // Validar teléfono (opcional pero si se proporciona debe tener formato)
   if (formData.telefono && formData.telefono.length > 0) {
-    if (formData.telefono.replace(/\D/g, '').length < 9) {
+    if (v && !v.telefonoValido(formData.telefono)) {
+      errors.push('El teléfono debe tener al menos 9 dígitos');
+    } else if (formData.telefono.replace(/\D/g, '').length < 9) {
       errors.push('El teléfono debe tener al menos 9 dígitos');
     }
   }
   
-  // Validar código postal (opcional pero si se proporciona)
   if (formData.codigoPostal && formData.codigoPostal.length > 0) {
-    if (!/^\d{5}$/.test(formData.codigoPostal)) {
+    if (v && !v.codigoPostalValido(formData.codigoPostal)) {
+      errors.push('El código postal debe tener 5 dígitos');
+    } else if (!/^\d{5}$/.test(formData.codigoPostal)) {
       errors.push('El código postal debe tener 5 dígitos');
     }
   }
@@ -249,11 +216,34 @@ function validateUserData(formData) {
   return errors;
 }
 
-// Guardar cambios del usuario
+function validarCamposPerfil(formData) {
+  const v = window.validacionFormulario;
+  if (!v) {
+    return true;
+  }
+
+  const campoNombre = document.getElementById('userNombreCompleto');
+  const campoEmail = document.getElementById('userEmail');
+  const campoTelefono = document.getElementById('userTelefono');
+  const campoCodigoPostal = document.getElementById('userCodigoPostal');
+
+  const nombreOk = v.validarCampo(campoNombre, v.texto(formData.nombreCompleto).length >= 3, 'El nombre completo es requerido');
+  const emailOk = v.validarCampo(campoEmail, v.emailValido(formData.email), 'El email no es válido');
+  const telefonoOk = v.validarCampo(campoTelefono, v.telefonoValido(formData.telefono), 'El teléfono debe tener al menos 9 dígitos');
+  const cpOk = v.validarCampo(campoCodigoPostal, v.codigoPostalValido(formData.codigoPostal), 'El código postal debe tener 5 dígitos');
+
+  if (!nombreOk) return campoNombre.reportValidity();
+  if (!emailOk) return campoEmail.reportValidity();
+  if (!telefonoOk) return campoTelefono.reportValidity();
+  if (!cpOk) return campoCodigoPostal.reportValidity();
+
+  return true;
+}
+
 async function saveUserData() {
   try {
     if (!currentUserId) {
-      showErrorMessage('❌ No se puede identificar al usuario.');
+      showErrorMessage('No se puede identificar al usuario.');
       console.error('No hay currentUserId');
       return;
     }
@@ -267,52 +257,41 @@ async function saveUserData() {
       codigoPostal: document.getElementById('userCodigoPostal').value.trim(),
     };
 
-    console.log('📤 Enviando datos del usuario:', formData);
+    if (!validarCamposPerfil(formData)) {
+      return;
+    }
 
-    // Validar datos
     const validationErrors = validateUserData(formData);
     if (validationErrors.length > 0) {
-      const errorMsg = '❌ Errores de validación:\n' + validationErrors.join('\n');
+      const errorMsg = 'Errores de validación:\n' + validationErrors.join('\n');
       console.error(errorMsg);
       showErrorMessage(validationErrors.join('\n'));
       return;
     }
 
-    // Mostrar indicador de carga
     const saveBtn = document.getElementById('saveBtn');
     const originalText = saveBtn.textContent;
     saveBtn.textContent = 'Guardando...';
     saveBtn.disabled = true;
 
-    console.log(`🔄 Actualizando usuario ${currentUserId}...`);
-    
-    // Enviar actualización utilizando la función mejorada de api.js
     const result = await actualizarUsuario(currentUserId, formData);
-
-    console.log('✓ Usuario actualizado en el servidor:', result);
     
     if (!result.exito) {
       throw new Error(`Error del servidor: ${result.mensaje}`);
     }
 
-    // Actualizar los datos originales con los nuevos para que cancelar funcione correctamente
-    // La respuesta tiene estructura: { exito: true, mensaje: "...", datos: {...} }
     originalUserData = JSON.parse(JSON.stringify(result.datos || result));
-    console.log('✓ Datos guardados en memoria:', originalUserData);
 
-    // Deshabilitar modo edición
     isEditing = true;
     toggleEditMode();
 
-    showSuccessMessage('✓ Perfil actualizado correctamente.');
-    
-    // Recargar datos del servidor para confirmar que se guardó
+    showSuccessMessage('Perfil actualizado correctamente.');
+
     await loadUserData();
   } catch (error) {
-    console.error('❌ Error saving user data:', error);
+    console.error('Error saving user data:', error);
     showErrorMessage(`Error al guardar: ${error.message}`);
   } finally {
-    // Restaurar botón de guardar
     const saveBtn = document.getElementById('saveBtn');
     if (saveBtn) {
       saveBtn.textContent = 'Guardar';
@@ -321,23 +300,18 @@ async function saveUserData() {
   }
 }
 
-// Mostrar mensaje de éxito
 function showSuccessMessage(message) {
   const messageDiv = createMessageElement(message, 'success');
   document.body.appendChild(messageDiv);
-  console.log('✓ ' + message);
   setTimeout(() => messageDiv.remove(), 4000);
 }
 
-// Mostrar mensaje de error
 function showErrorMessage(message) {
   const messageDiv = createMessageElement(message, 'error');
   document.body.appendChild(messageDiv);
-  console.error('❌ ' + message);
   setTimeout(() => messageDiv.remove(), 6000);
 }
 
-// Crear elemento de mensaje
 function createMessageElement(message, type) {
   const div = document.createElement('div');
   div.style.cssText = `
@@ -363,11 +337,8 @@ function createMessageElement(message, type) {
   return div;
 }
 
-// Manejar cierre de sesión
 function handleLogout() {
   try {
-    console.log('🚪 Cerrando sesión...');
-    // Limpiar todos los datos de sesión
     localStorage.removeItem('fallapp_token');
     localStorage.removeItem('fallapp_user_id');
     localStorage.removeItem('fallapp_user_email');
@@ -376,26 +347,21 @@ function handleLogout() {
     localStorage.removeItem('fallapp_user_idFalla');
     localStorage.removeItem('fallapp_user');
     
-    console.log('✓ Sesión cerrada, redirigiendo a login...');
     showSuccessMessage('Sesión cerrada correctamente');
-    
-    // Pequeño delay para que se vea el mensaje
+
     setTimeout(() => {
       window.location.href = '../js/index.html';
     }, 500);
   } catch (e) {
-    console.error('❌ Error removing user from localStorage:', e);
+    console.error('Error removing user from localStorage:', e);
     window.location.href = '../js/index.html';
   }
 }
 
-// Redirigir a login si no hay usuario
 function redirectToLogin() {
-  console.warn('⚠️ Redirigiendo a login...');
   window.location.href = '../js/index.html';
 }
 
-// Cargar imagen del usuario
 async function loadUserImage() {
   try {
     const idUsuario = localStorage.getItem('fallapp_user_id');
@@ -420,7 +386,6 @@ async function loadUserImage() {
         avatarImg.style.display = 'block';
         const initials = document.getElementById('avatarInitials');
         if (initials) initials.style.display = 'none';
-        console.log('✓ Imagen de usuario cargada');
       }
     }
   } catch (e) {
@@ -428,8 +393,6 @@ async function loadUserImage() {
   }
 }
 
-// Subir imagen de usuario
-// Wrapper para subir imagen de usuario - obtiene el archivo del input
 async function subirImagenUsuarioLocal() {
   try {
     const idUsuario = localStorage.getItem('fallapp_user_id');
@@ -446,12 +409,10 @@ async function subirImagenUsuarioLocal() {
     
     const archivo = inputImagen.files[0];
     
-    // Llamar a la función de api.js
     await subirImagenUsuario(idUsuario, archivo);
     
     showSuccessMessage('Imagen de perfil actualizada');
     
-    // Recargar imagen - mostrar iniciales de nuevo y luego cargar la imagen
     const avatarImg = document.getElementById('avatarImg');
     const avatarInitials = document.getElementById('avatarInitials');
     if (avatarImg) {
@@ -462,18 +423,16 @@ async function subirImagenUsuarioLocal() {
       avatarInitials.style.display = 'block';
     }
     
-    // Esperar un poco y recargar la nueva imagen
     setTimeout(() => {
       loadUserImage();
     }, 500);
     
   } catch (e) {
-    console.error('❌ Error al subir imagen:', e);
+    console.error('Error al subir imagen:', e);
     showErrorMessage(`Error al subir imagen: ${e.message}`);
   }
 }
 
-// Agregar animación de deslizamiento
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideIn {

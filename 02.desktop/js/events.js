@@ -1,4 +1,3 @@
-// Externalized events UI logic. Uses preload API (main process) for HTTP.
 const STORAGE_KEY = 'fallapp_events_v1';
 
 let events = [];
@@ -8,10 +7,6 @@ function escapeHtml(s){ return String(s||'').replace(/[&<>\"]/g, c=>({ '&':'&amp
 
 function saveLocal(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); }catch(e){} }
 function loadLocal(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s? JSON.parse(s): [] }catch(e){ return [] } }
-
-// ============================================
-// UTILIDADES DE MENSAJES
-// ============================================
 
 function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
@@ -40,10 +35,6 @@ function showNotification(message, type = 'info') {
   setTimeout(() => notification.remove(), timeout);
 }
 
-// ============================================
-// VALIDACIONES
-// ============================================
-
 function validateEventData(data) {
   const errors = [];
   
@@ -66,7 +57,51 @@ function validateEventData(data) {
   return errors;
 }
 
-// Render list
+function validarCamposFormularioEvento() {
+  const v = window.validacionFormulario;
+  if (!inputs || !v) {
+    return true;
+  }
+
+  const nombreOk = v.validarCampo(
+    inputs.name,
+    v.texto(inputs.name.value).length >= 3,
+    'El nombre debe tener al menos 3 caracteres.'
+  );
+
+  const tipoOk = v.validarCampo(
+    inputs.tipo,
+    v.texto(inputs.tipo.value).length > 0,
+    'Selecciona un tipo de evento.'
+  );
+
+  const fechaOk = v.validarCampo(
+    inputs.date,
+    v.texto(inputs.date.value).length > 0,
+    'Selecciona una fecha.'
+  );
+
+  const horaOk = v.validarCampo(
+    inputs.time,
+    v.texto(inputs.time.value).length > 0,
+    'Selecciona una hora.'
+  );
+
+  const lugarOk = v.validarCampo(
+    inputs.place,
+    v.texto(inputs.place.value).length >= 3,
+    'El lugar debe tener al menos 3 caracteres.'
+  );
+
+  if (!nombreOk) return inputs.name.reportValidity();
+  if (!tipoOk) return inputs.tipo.reportValidity();
+  if (!fechaOk) return inputs.date.reportValidity();
+  if (!horaOk) return inputs.time.reportValidity();
+  if (!lugarOk) return inputs.place.reportValidity();
+
+  return true;
+}
+
 function renderList(filter=''){
   if(!eventsEl) return;
   eventsEl.innerHTML = '';
@@ -80,7 +115,6 @@ function renderList(filter=''){
 
   if(filtered.length===0){ if(emptyEl) emptyEl.style.display='block'; return } else { if(emptyEl) emptyEl.style.display='none' }
 
-  // Ordenar por fecha del evento
   filtered.sort((a, b) => {
     const fechaA = new Date(a.fecha_evento || a.fechaEvento || (a.date + ' ' + (a.time||'00:00')));
     const fechaB = new Date(b.fecha_evento || b.fechaEvento || (b.date + ' ' + (b.time||'00:00')));
@@ -91,12 +125,10 @@ function renderList(filter=''){
     const card = document.createElement('div'); 
     card.className='event-card';
     
-    // Imagen del evento
     const eventImage = document.createElement('div'); 
     eventImage.className='event-image';
     const img = document.createElement('img');
     
-    // Si el evento tiene imagen, usar la URL del servidor, si no usar logo por defecto
     if (ev.imagen_nombre || ev.imagenNombre) {
       const eventoId = ev.id_evento || ev.idEvento || ev.id;
       img.src = `http://35.180.21.42:8080/api/eventos/${eventoId}/imagen`;
@@ -118,7 +150,6 @@ function renderList(filter=''){
     const meta = document.createElement('div'); 
     meta.className='event-meta';
     
-    // Formatear fecha desde fecha_evento
     let fechaFormato = '';
     if (ev.fecha_evento) {
       const fecha = new Date(ev.fecha_evento);
@@ -191,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
     preview.style.display = 'block';
   });
 });
-// Modal helpers
 function openModal(){ if(modal) modal.style.display='flex'; }
 function closeModal(){ if(modal) modal.style.display='none'; }
 
@@ -199,7 +229,6 @@ function generateId(){ return 'ev_' + Math.random().toString(36).slice(2,9); }
 
 function currentSearchValue(){ const s = document.getElementById('search'); return (s && s.value) ? s.value : ''; }
 
-// API wrappers via preload/contextBridge (main process will call the HTTP API)
 async function apiFetchEvents(){
   if (window.api && window.api.getEvents) return await window.api.getEvents();
   throw new Error('API bridge not available');
@@ -220,13 +249,10 @@ async function apiDeleteEvent(id){
   throw new Error('API bridge not available');
 }
 
-// Función para subir imagen de evento
-// Función para obtener URL de imagen de evento
 function obtenerUrlImagenEvento(eventoId) {
   return `http://35.180.21.42:8080/api/eventos/${eventoId}/imagen`;
 }
 
-// UI actions
 function openNew(){
   openModal();
   const title = document.getElementById('modal-title'); if(title) title.textContent='Nuevo evento';
@@ -248,7 +274,6 @@ function openEdit(id){
   if(inputs.name) inputs.name.value = ev.nombre || ev.name || ''; 
   if(inputs.tipo) inputs.tipo.value = ev.tipo || 'otro';
   
-  // Extraer fecha y hora de fecha_evento
   if (ev.fecha_evento) {
     const fecha = new Date(ev.fecha_evento);
     if(inputs.date) inputs.date.value = fecha.toISOString().split('T')[0];
@@ -312,6 +337,10 @@ function openView(id){
 }
 
 async function saveFromForm(){
+  if (!validarCamposFormularioEvento()) {
+    return;
+  }
+
   const id = inputs.id.value;
   const eventData = {
     nombre: inputs.name.value.trim(),
@@ -322,7 +351,6 @@ async function saveFromForm(){
     descripcion: inputs.description.value.trim()
   };
   
-  // Validar datos
   const validationErrors = validateEventData(eventData);
   if (validationErrors.length > 0) {
     showNotification(validationErrors.join('\n'), 'error');
@@ -334,24 +362,20 @@ async function saveFromForm(){
     return;
   }
 
-  // Obtener la falla del usuario
   const idFalla = localStorage.getItem('fallapp_user_idFalla');
   if (!idFalla) {
     showNotification('No tienes asignada una falla. No se puede crear el evento.', 'error');
     return;
   }
 
-  // Obtener ID del usuario para creado_por
   const creadoPor = localStorage.getItem('fallapp_user_id');
   if (!creadoPor) {
     showNotification('No se puede identificar tu usuario. Por favor, inicia sesión de nuevo.', 'error');
     return;
   }
 
-  // Crear fecha_evento combinando fecha y hora (sin zona horaria)
   const fecha_evento = `${eventData.date}T${eventData.time || '00:00'}:00`;
 
-  // Preparar payload para el backend - mapear a los campos exactos de la tabla
   const payload = { 
     nombre: eventData.nombre,
     descripcion: eventData.descripcion,
@@ -362,20 +386,16 @@ async function saveFromForm(){
     creado_por: parseInt(creadoPor)
   };
   
-  console.log('📤 Enviando evento al backend:', payload);
-
   if(id){
-    // Update
     try{
       payload.id_evento = id;
       await actualizarEvento(id, payload);
-      
-      // Actualizar en la lista local
+
       const idx = events.findIndex(x => x.id_evento === parseInt(id) || x.idEvento === parseInt(id) || x.id === id);
       if(idx >= 0) {
         events[idx] = { ...events[idx], ...payload };
       }
-      // Subir imagen si se seleccionó al editar
+
       const photoInput = document.getElementById('photo');
       if (photoInput && photoInput.files.length > 0) {
         try {
@@ -389,7 +409,7 @@ async function saveFromForm(){
         showNotification('Evento actualizado correctamente', 'success');
       }
 
-      // Recargar lista desde backend para reflejar cambios (incluida imagenNombre)
+
       try {
         const idFalla = localStorage.getItem('fallapp_user_idFalla');
         if (idFalla) {
@@ -411,15 +431,13 @@ async function saveFromForm(){
       showNotification(`Error al actualizar evento: ${e.message}`, 'error');
     }
   } else {
-    // Create
     try{
       const created = await crearEvento(payload);
-      // Usar la respuesta del backend si tiene datos
+
       const nuevoEvento = created.datos || created;
       events.push(nuevoEvento); 
       saveLocal(); 
-      
-      // Subir imagen si se seleccionó
+
       const photoInput = document.getElementById('photo');
       if (photoInput && photoInput.files.length > 0) {
         try {
@@ -433,7 +451,7 @@ async function saveFromForm(){
         showNotification('Evento creado correctamente', 'success');
       }
 
-      // Recargar lista desde backend para reflejar imagenNombre y datos calculados
+
       try {
         const idFalla = localStorage.getItem('fallapp_user_idFalla');
         if (idFalla) {
@@ -472,7 +490,6 @@ async function deleteEvent(id){
   }
 }
 
-// Subir imagen de evento
 async function uploadEventImage(eventoId, archivo) {
   if (!archivo) return;
   
@@ -486,9 +503,7 @@ async function uploadEventImage(eventoId, archivo) {
   }
 }
 
-// Init
 async function init(){
-  // Initialize DOM references (safer if script loads early)
   eventsEl = document.getElementById('events');
   emptyEl = document.getElementById('empty');
   modal = document.getElementById('modal');
@@ -503,16 +518,23 @@ async function init(){
     description: document.getElementById('description')
   };
 
-  // Wire buttons (defensive checks for older runtimes)
   const btnNew = document.getElementById('btn-new'); if(btnNew) btnNew.addEventListener('click', openNew);
   const btnCancel = document.getElementById('btn-cancel'); if(btnCancel) btnCancel.addEventListener('click', closeModal);
   const modalClose = document.getElementById('modal-close'); if(modalClose) modalClose.addEventListener('click', closeModal);
   const modalEl = document.getElementById('modal'); if(modalEl) modalEl.addEventListener('click', function(ev){ if(ev.target && ev.target.id==='modal') closeModal(); });
   const searchEl = document.getElementById('search'); if(searchEl) searchEl.addEventListener('input', function(e){ renderList(e.target.value); });
   if(form) form.addEventListener('submit', function(e){ e.preventDefault(); saveFromForm(); });
+
+  ['name', 'tipo', 'date', 'time', 'place'].forEach((clave) => {
+    const campo = inputs[clave];
+    if (!campo) return;
+    campo.addEventListener('input', () => {
+      campo.setCustomValidity('');
+    });
+  });
+
   const backBtn = document.getElementById('events-back'); if(backBtn) backBtn.addEventListener('click', function(){ if(window.history.length>1) window.history.back(); else window.location.href='home.html'; });
 
-  // Wiring para modal de detalle (Ver)
   const viewModalEl = document.getElementById('view-modal');
   const viewModalClose = document.getElementById('view-modal-close');
   if (viewModalClose) viewModalClose.addEventListener('click', () => {
@@ -526,7 +548,6 @@ async function init(){
     });
   }
 
-  // Load from backend if possible
   try{
     const idFalla = localStorage.getItem('fallapp_user_idFalla');
     
@@ -534,10 +555,8 @@ async function init(){
       showNotification('No tienes asignada una falla. Por favor, contacta al administrador.', 'warning');
       events = [];
     } else {
-      // Obtener eventos de la falla asignada al usuario
       const response = await obtenerEventosPorFalla(idFalla);
-      
-      // El backend retorna un PagedResponse con content, así que extraemos el array
+
       if (response && response.content && Array.isArray(response.content)) {
         events = response.content;
       } else if (response && response.datos && Array.isArray(response.datos.content)) {
@@ -559,7 +578,6 @@ async function init(){
   renderList();
 }
 
-// Agregar animación de deslizamiento
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideIn {
@@ -575,7 +593,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Configurar botones del header y inicializar eventos
 document.addEventListener('DOMContentLoaded', () => {
   init();
   

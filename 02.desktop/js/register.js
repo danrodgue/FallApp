@@ -1,6 +1,5 @@
-// Base de la API: preferimos la misma configuración que usa el resto de la app (config.js)
 const API_BASE_URL =
-  window._API_URL || // normalmente algo como "http://HOST:8080/api"
+  window._API_URL ||
   (window._API_BASE ? `${window._API_BASE}/api` : 'http://35.180.21.42:8080/api');
 
 const API_AUTH_REGISTRO = `${API_BASE_URL}/auth/registro`;
@@ -9,204 +8,228 @@ const API_FALLAS_BUSCAR = `${API_BASE_URL}/fallas/buscar`;
 const API_USUARIOS_BASE = `${API_BASE_URL}/usuarios`;
 
 document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('register-form');
-  const errorMsg = document.getElementById('register-error-msg');
-  const registerBtn = document.getElementById('registerBtn');
+  const formulario = document.getElementById('register-form');
+  const cajaError = document.getElementById('register-error-msg');
+  const botonRegistro = document.getElementById('registerBtn');
 
-  const fallaSearchInput = document.getElementById('fallaSearch');
-  const fallaResultsEl = document.getElementById('fallaResults');
-  const fallaSelectedEl = document.getElementById('fallaSelected');
-  const idFallaInput = document.getElementById('idFalla');
+  const inputNombre = document.getElementById('nombreCompleto');
+  const inputEmail = document.getElementById('email');
+  const inputPassword = document.getElementById('password');
+  const inputTelefono = document.getElementById('telefono');
+  const inputDireccion = document.getElementById('direccion');
+  const inputCiudad = document.getElementById('ciudad');
+  const inputCodigoPostal = document.getElementById('codigoPostal');
 
-  const avatarFileInput = document.getElementById('avatarFile');
-  const avatarPreview = document.getElementById('avatarPreview');
-  const avatarInitialsPreview = document.getElementById('avatarInitialsPreview');
+  const inputBuscarFalla = document.getElementById('fallaSearch');
+  const cajaResultadosFalla = document.getElementById('fallaResults');
+  const textoFallaSeleccionada = document.getElementById('fallaSelected');
+  const inputIdFalla = document.getElementById('idFalla');
 
-  let allFallasCache = null;
-  let fallaSearchTimeout = null;
+  const inputAvatar = document.getElementById('avatarFile');
+  const previewAvatar = document.getElementById('avatarPreview');
+  const inicialesAvatar = document.getElementById('avatarInitialsPreview');
 
-  function showError(message) {
-    errorMsg.textContent = message;
-    errorMsg.style.display = 'block';
-  }
+  let cacheFallas = null;
+  let timeoutBusqueda = null;
 
-  function clearError() {
-    errorMsg.textContent = '';
-    errorMsg.style.display = 'none';
-  }
-
-  function updateAvatarInitialsFromName() {
-    const nombre = document.getElementById('nombreCompleto').value.trim();
-    if (!nombre) {
-      avatarInitialsPreview.textContent = 'C';
+  function mostrarError(mensaje) {
+    if (window.validacionFormulario && window.validacionFormulario.pintarError) {
+      window.validacionFormulario.pintarError(cajaError, mensaje);
       return;
     }
-    const initials = nombre
+    cajaError.textContent = mensaje;
+    cajaError.style.display = mensaje ? 'block' : 'none';
+  }
+
+  function limpiarError() {
+    mostrarError('');
+  }
+
+  function actualizarInicialesAvatar() {
+    const nombre = inputNombre.value.trim();
+    if (!nombre) {
+      inicialesAvatar.textContent = 'C';
+      return;
+    }
+
+    const iniciales = nombre
       .split(' ')
       .filter(Boolean)
-      .map(p => p[0])
+      .map((parte) => parte[0])
       .join('')
       .toUpperCase()
       .slice(0, 2);
-    avatarInitialsPreview.textContent = initials || 'C';
+
+    inicialesAvatar.textContent = iniciales || 'C';
   }
 
-  // Avatar: previsualización básica, se puede reutilizar más adelante en la app
-  if (avatarFileInput && avatarPreview) {
-    avatarFileInput.addEventListener('change', () => {
-      const file = avatarFileInput.files[0];
-      if (!file) {
-        avatarPreview.innerHTML = '';
-        avatarPreview.appendChild(avatarInitialsPreview);
+  function configurarPreviewAvatar() {
+    if (!inputAvatar || !previewAvatar) {
+      return;
+    }
+
+    inputAvatar.addEventListener('change', () => {
+      const archivo = inputAvatar.files[0];
+      if (!archivo) {
+        previewAvatar.innerHTML = '';
+        previewAvatar.appendChild(inicialesAvatar);
         return;
       }
-      const img = document.createElement('img');
-      img.onload = () => {
-        avatarPreview.innerHTML = '';
-        avatarPreview.appendChild(img);
+
+      const imagen = document.createElement('img');
+      imagen.onload = () => {
+        previewAvatar.innerHTML = '';
+        previewAvatar.appendChild(imagen);
       };
-      img.onerror = () => {
-        avatarPreview.innerHTML = '';
-        avatarPreview.appendChild(avatarInitialsPreview);
+      imagen.onerror = () => {
+        previewAvatar.innerHTML = '';
+        previewAvatar.appendChild(inicialesAvatar);
       };
-      img.src = URL.createObjectURL(file);
+      imagen.src = URL.createObjectURL(archivo);
     });
   }
 
-  const nombreInput = document.getElementById('nombreCompleto');
-  if (nombreInput) {
-    nombreInput.addEventListener('input', updateAvatarInitialsFromName);
-  }
-
-  async function loadAllFallas() {
-    if (allFallasCache) {
-      return allFallasCache;
+  async function cargarFallas() {
+    if (cacheFallas) {
+      return cacheFallas;
     }
 
     try {
-      const url = `${API_FALLAS_URL}?pagina=0&tamano=400`;
-      console.log('[Registro Casal] Cargando fallas desde:', url);
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        console.error('[Registro Casal] Error HTTP al obtener fallas:', res.status, res.statusText);
-        throw new Error(`HTTP ${res.status}`);
+      const respuesta = await fetch(`${API_FALLAS_URL}?pagina=0&tamano=400`);
+      if (!respuesta.ok) {
+        throw new Error(`HTTP ${respuesta.status}`);
       }
 
-      const data = await res.json();
-      const contenido = data.datos && data.datos.contenido ? data.datos.contenido : [];
-      allFallasCache = Array.isArray(contenido) ? contenido : [];
-      console.log('[Registro Casal] Fallas cargadas para búsqueda local:', allFallasCache.length);
-    } catch (err) {
-      console.error('[Registro Casal] Error cargando listado de fallas:', err);
-      allFallasCache = [];
-      // No mostramos error aquí para no bloquear el formulario; se usará solo como fallback
+      const datos = await respuesta.json();
+      const contenido = datos.datos && datos.datos.contenido ? datos.datos.contenido : [];
+      cacheFallas = Array.isArray(contenido) ? contenido : [];
+    } catch (error) {
+      console.error('Error cargando fallas:', error);
+      cacheFallas = [];
     }
 
-    return allFallasCache;
+    return cacheFallas;
   }
 
-  // Búsqueda de fallas con autocompletado usando /fallas/buscar
-  async function buscarFallas(texto) {
-    const query = (texto || '').trim().toLowerCase();
-    if (!query) {
-      if (fallaResultsEl) {
-        fallaResultsEl.style.display = 'none';
-        fallaResultsEl.innerHTML = '';
-      }
+  function ocultarResultadosFalla() {
+    if (!cajaResultadosFalla) {
+      return;
+    }
+    cajaResultadosFalla.style.display = 'none';
+    cajaResultadosFalla.innerHTML = '';
+  }
+
+  function pintarResultadosFalla(lista, query) {
+    if (!cajaResultadosFalla) {
       return;
     }
 
-    let resultados = [];
-    try {
-      const url = `${API_FALLAS_BUSCAR}?texto=${encodeURIComponent(query)}`;
-      console.log('[Registro Casal] Buscando fallas en:', url);
-      const res = await fetch(url);
-      const data = await res.json();
-      const lista = data.datos || data.data || [];
-
-      if (Array.isArray(lista)) {
-        const empiezaPor = lista.filter(f => (f.nombre || '').toLowerCase().startsWith(query));
-        const contiene = lista.filter(
-          f => (f.nombre || '').toLowerCase().includes(query) && !empiezaPor.includes(f)
-        );
-        resultados = [...empiezaPor, ...contiene];
-      }
-    } catch (err) {
-      console.error('[Registro Casal] Error en /fallas/buscar, usando fallback local si existe:', err);
-      // Fallback local en caso de que el endpoint falle (por ejemplo, mientras se arregla el backend)
-      const todas = await loadAllFallas();
-      if (Array.isArray(todas) && todas.length) {
-        const empiezaPor = todas.filter(f => (f.nombre || '').toLowerCase().startsWith(query));
-        const contiene = todas.filter(
-          f => (f.nombre || '').toLowerCase().includes(query) && !empiezaPor.includes(f)
-        );
-        resultados = [...empiezaPor, ...contiene];
-      }
-    }
-
-    if (!Array.isArray(resultados) || resultados.length === 0) {
-      if (fallaResultsEl) {
-        fallaResultsEl.style.display = 'none';
-        fallaResultsEl.innerHTML = '';
-      }
+    if (!Array.isArray(lista) || lista.length === 0) {
+      ocultarResultadosFalla();
       return;
     }
 
-    if (!fallaResultsEl) return;
+    const inicio = lista.filter((falla) => (falla.nombre || '').toLowerCase().startsWith(query));
+    const contiene = lista.filter(
+      (falla) => (falla.nombre || '').toLowerCase().includes(query) && !inicio.includes(falla)
+    );
 
-    fallaResultsEl.innerHTML = '';
-    resultados.slice(0, 25).forEach(f => {
+    cajaResultadosFalla.innerHTML = '';
+    [...inicio, ...contiene].slice(0, 25).forEach((falla) => {
       const item = document.createElement('div');
       item.className = 'falla-result-item';
-      item.innerHTML = `
-        <strong>${f.nombre}</strong>
-        <span>Sección: ${f.seccion || '-'}</span>
-      `;
+      item.innerHTML = `<strong>${falla.nombre}</strong><span>Sección: ${falla.seccion || '-'}</span>`;
+
       item.addEventListener('click', () => {
-        idFallaInput.value = f.idFalla;
-        if (fallaSearchInput) fallaSearchInput.value = f.nombre;
-        if (fallaSelectedEl) {
-          fallaSelectedEl.textContent = `Falla seleccionada: ${f.nombre} (${f.seccion || 'sin sección'})`;
+        inputIdFalla.value = falla.idFalla;
+        if (inputBuscarFalla) {
+          inputBuscarFalla.value = falla.nombre;
+          inputBuscarFalla.setCustomValidity('');
         }
-        fallaResultsEl.style.display = 'none';
+        if (textoFallaSeleccionada) {
+          textoFallaSeleccionada.textContent = `Falla seleccionada: ${falla.nombre} (${falla.seccion || 'sin sección'})`;
+        }
+        ocultarResultadosFalla();
       });
-      fallaResultsEl.appendChild(item);
+
+      cajaResultadosFalla.appendChild(item);
     });
 
-    fallaResultsEl.style.display = 'block';
+    cajaResultadosFalla.style.display = 'block';
   }
 
-  if (fallaSearchInput) {
-    fallaSearchInput.addEventListener('input', (e) => {
-      const value = e.target.value;
-      idFallaInput.value = '';
-      if (fallaSelectedEl) fallaSelectedEl.textContent = '';
+  async function buscarFallas(textoBusqueda) {
+    const query = String(textoBusqueda || '').trim().toLowerCase();
+    if (!query) {
+      ocultarResultadosFalla();
+      return;
+    }
 
-      if (fallaSearchTimeout) {
-        clearTimeout(fallaSearchTimeout);
+    try {
+      const url = `${API_FALLAS_BUSCAR}?texto=${encodeURIComponent(query)}`;
+      const respuesta = await fetch(url);
+      const datos = await respuesta.json();
+      const lista = datos.datos || datos.data || [];
+      if (Array.isArray(lista)) {
+        pintarResultadosFalla(lista, query);
+        return;
       }
-      fallaSearchTimeout = setTimeout(() => buscarFallas(value), 250);
-    });
+    } catch (error) {
+      console.warn('Fallo en /fallas/buscar, usando fallback local:', error);
+    }
 
-    fallaSearchInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        buscarFallas(fallaSearchInput.value);
-      }
-    });
+    const listaLocal = await cargarFallas();
+    pintarResultadosFalla(listaLocal, query);
+  }
 
-    document.addEventListener('click', (ev) => {
-      if (!fallaResultsEl) return;
-      if (!fallaResultsEl.contains(ev.target) && ev.target !== fallaSearchInput) {
-        fallaResultsEl.style.display = 'none';
-      }
-    });
+  function validarFormulario() {
+    const v = window.validacionFormulario;
+    const nombre = inputNombre.value;
+    const email = inputEmail.value;
+    const password = inputPassword.value;
+    const telefono = inputTelefono.value;
+    const codigoPostal = inputCodigoPostal.value;
+
+    const nombreOk = v
+      ? v.validarCampo(inputNombre, v.texto(nombre).length >= 3, 'Escribe tu nombre completo.')
+      : String(nombre || '').trim().length >= 3;
+
+    const emailOk = v
+      ? v.validarCampo(inputEmail, v.emailValido(email), 'Escribe un email válido.')
+      : String(email || '').trim().length > 0;
+
+    const passOk = v
+      ? v.validarCampo(inputPassword, v.passwordValida(password, 6), 'La contraseña debe tener al menos 6 caracteres.')
+      : String(password || '').length >= 6;
+
+    const telefonoOk = v
+      ? v.validarCampo(inputTelefono, v.telefonoValido(telefono), 'El teléfono debe tener al menos 9 dígitos.')
+      : true;
+
+    const cpOk = v
+      ? v.validarCampo(inputCodigoPostal, v.codigoPostalValido(codigoPostal), 'El código postal debe tener 5 dígitos.')
+      : true;
+
+    const fallaOk = inputIdFalla.value && Number(inputIdFalla.value) > 0;
+    if (!fallaOk && inputBuscarFalla) {
+      inputBuscarFalla.setCustomValidity('Selecciona una falla de la lista.');
+    } else if (inputBuscarFalla) {
+      inputBuscarFalla.setCustomValidity('');
+    }
+
+    if (!nombreOk) return inputNombre.reportValidity();
+    if (!emailOk) return inputEmail.reportValidity();
+    if (!passOk) return inputPassword.reportValidity();
+    if (!telefonoOk) return inputTelefono.reportValidity();
+    if (!cpOk) return inputCodigoPostal.reportValidity();
+    if (!fallaOk && inputBuscarFalla) return inputBuscarFalla.reportValidity();
+
+    return true;
   }
 
   async function registrarCasal(payload) {
     try {
-      const response = await fetch(API_AUTH_REGISTRO, {
+      const respuesta = await fetch(API_AUTH_REGISTRO, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -214,20 +237,19 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        const data = await response.json().catch(() => null);
-        const mensaje = data && data.mensaje ? data.mensaje : `Error del servidor (${response.status})`;
+      if (!respuesta.ok) {
+        const dataError = await respuesta.json().catch(() => null);
+        const mensaje = dataError && dataError.mensaje ? dataError.mensaje : `Error del servidor (${respuesta.status})`;
         return { success: false, message: mensaje };
       }
 
-      const data = await response.json();
-      if (!data.exito || !data.datos) {
-        return { success: false, message: data.mensaje || 'Error en el registro.' };
+      const datos = await respuesta.json();
+      if (!datos.exito || !datos.datos) {
+        return { success: false, message: datos.mensaje || 'Error en el registro.' };
       }
 
-      const loginData = data.datos;
+      const loginData = datos.datos;
       const usuario = loginData.usuario;
-
       if (!loginData.token || !usuario) {
         return { success: false, message: 'Respuesta del servidor incompleta.' };
       }
@@ -237,115 +259,167 @@ document.addEventListener('DOMContentLoaded', () => {
         token: loginData.token,
         user: usuario
       };
-    } catch (err) {
-      console.error('Error en registro:', err);
+    } catch (error) {
       return {
         success: false,
-        message: `Error de conexión: ${err.message}`
+        message: `Error de conexión: ${error.message}`
       };
     }
   }
 
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearError();
+  async function guardarSesionRegistro(resultado) {
+    try {
+      localStorage.setItem('fallapp_token', resultado.token);
+      localStorage.setItem('fallapp_user_id', resultado.user.idUsuario);
+      localStorage.setItem('fallapp_user_email', resultado.user.email);
+      localStorage.setItem('fallapp_user_nombre', resultado.user.nombreCompleto);
+      localStorage.setItem('fallapp_user_rol', resultado.user.rol);
+      localStorage.setItem('fallapp_user_idFalla', resultado.user.idFalla || '');
+      localStorage.setItem('fallapp_user', resultado.user.email);
+    } catch (errorStorage) {
+      console.error('Error guardando datos de sesión:', errorStorage);
+    }
+  }
 
-      const nombreCompleto = nombreInput.value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const telefono = document.getElementById('telefono').value.trim();
-      const direccion = document.getElementById('direccion').value.trim();
-      const ciudad = document.getElementById('ciudad').value.trim();
-      const codigoPostal = document.getElementById('codigoPostal').value.trim();
-      const idFalla = idFallaInput.value ? parseInt(idFallaInput.value, 10) : null;
+  async function actualizarPerfilInicialSiHaceFalta(resultado, datosPerfil) {
+    const { nombreCompleto, telefono, direccion, ciudad, codigoPostal, idFalla } = datosPerfil;
+    if (!telefono && !direccion && !ciudad && !codigoPostal) {
+      return;
+    }
 
-      if (!idFalla) {
-        showError('Debes seleccionar una falla de la lista para registrar el casal.');
-        return;
-      }
-
-      if (password.length < 6) {
-        showError('La contraseña debe tener al menos 6 caracteres.');
-        return;
-      }
-
-      registerBtn.disabled = true;
-      const originalText = registerBtn.textContent;
-      registerBtn.textContent = 'Creando cuenta...';
-
+    try {
       const payload = {
-        email,
-        contrasena: password,
         nombreCompleto,
-        idFalla,
-        rol: 'casal',  // Especificar explícitamente que es un casal
-        telefono: telefono || undefined,
-        direccion: direccion || undefined,
-        ciudad: ciudad || undefined,
-        codigoPostal: codigoPostal || undefined
+        telefono: telefono || null,
+        direccion: direccion || null,
+        ciudad: ciudad || null,
+        codigoPostal: codigoPostal || null,
+        idFalla: idFalla
       };
 
-      const result = await registrarCasal(payload);
+      await fetch(`${API_USUARIOS_BASE}/${resultado.user.idUsuario}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${resultado.token}`
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (error) {
+      console.warn('No se pudo completar la actualización inicial del perfil:', error);
+    }
+  }
 
-      if (!result.success) {
-        showError(result.message || 'No se ha podido completar el registro.');
-        registerBtn.disabled = false;
-        registerBtn.textContent = originalText;
-        return;
-      }
+  function conectarEventos() {
+    if (inputNombre) {
+      inputNombre.addEventListener('input', actualizarInicialesAvatar);
+    }
 
-      try {
-        localStorage.setItem('fallapp_token', result.token);
-        localStorage.setItem('fallapp_user_id', result.user.idUsuario);
-        localStorage.setItem('fallapp_user_email', result.user.email);
-        localStorage.setItem('fallapp_user_nombre', result.user.nombreCompleto);
-        localStorage.setItem('fallapp_user_rol', result.user.rol);
-        localStorage.setItem('fallapp_user_idFalla', result.user.idFalla || '');
-        localStorage.setItem('fallapp_user', result.user.email);
-      } catch (eStorage) {
-        console.error('Error guardando datos de sesión:', eStorage);
-      }
-
-      // Si el usuario ha introducido datos adicionales, hacer una actualización inicial del perfil
-      if (telefono || direccion || ciudad || codigoPostal) {
-        try {
-          const updatePayload = {
-            nombreCompleto,
-            telefono: telefono || null,
-            direccion: direccion || null,
-            ciudad: ciudad || null,
-            codigoPostal: codigoPostal || null,
-            idFalla: idFalla
-          };
-
-          await fetch(`${API_USUARIOS_BASE}/${result.user.idUsuario}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${result.token}`
-            },
-            body: JSON.stringify(updatePayload)
-          }).catch(err => {
-            console.warn('No se pudo completar la actualización inicial del perfil:', err);
-          });
-        } catch (eUpdate) {
-          console.warn('Error en actualización inicial del perfil:', eUpdate);
+    if (inputBuscarFalla) {
+      inputBuscarFalla.addEventListener('input', (evento) => {
+        inputIdFalla.value = '';
+        if (textoFallaSeleccionada) {
+          textoFallaSeleccionada.textContent = '';
         }
-      }
 
-      if (result.user.rol !== 'casal') {
-        showError('La cuenta creada no tiene rol CASAL. Contacta con soporte.');
-        registerBtn.disabled = false;
-        registerBtn.textContent = originalText;
-        return;
-      }
+        if (timeoutBusqueda) {
+          clearTimeout(timeoutBusqueda);
+        }
 
-      alert('¡Registro exitoso! 🎉\n\n' +
-            'Te hemos enviado un correo de bienvenida a: ' + result.user.email);
+        timeoutBusqueda = setTimeout(() => {
+          buscarFallas(evento.target.value);
+        }, 250);
+      });
 
-      window.location.href = '../screens/home.html';
+      inputBuscarFalla.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Enter') {
+          evento.preventDefault();
+          buscarFallas(inputBuscarFalla.value);
+        }
+      });
+
+      document.addEventListener('click', (evento) => {
+        if (!cajaResultadosFalla) {
+          return;
+        }
+        if (!cajaResultadosFalla.contains(evento.target) && evento.target !== inputBuscarFalla) {
+          ocultarResultadosFalla();
+        }
+      });
+    }
+
+    [inputEmail, inputPassword, inputNombre, inputTelefono, inputCodigoPostal].forEach((campo) => {
+      if (!campo) return;
+      campo.addEventListener('input', () => {
+        campo.setCustomValidity('');
+      });
     });
   }
-});
 
+  formulario.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    limpiarError();
+
+    if (!validarFormulario()) {
+      return;
+    }
+
+    const nombreCompleto = inputNombre.value.trim();
+    const email = inputEmail.value.trim();
+    const password = inputPassword.value;
+    const telefono = inputTelefono.value.trim();
+    const direccion = inputDireccion.value.trim();
+    const ciudad = inputCiudad.value.trim();
+    const codigoPostal = inputCodigoPostal.value.trim();
+    const idFalla = inputIdFalla.value ? parseInt(inputIdFalla.value, 10) : null;
+
+    botonRegistro.disabled = true;
+    const textoOriginalBoton = botonRegistro.textContent;
+    botonRegistro.textContent = 'Creando cuenta...';
+
+    const payloadRegistro = {
+      email,
+      contrasena: password,
+      nombreCompleto,
+      idFalla,
+      rol: 'casal',
+      telefono: telefono || undefined,
+      direccion: direccion || undefined,
+      ciudad: ciudad || undefined,
+      codigoPostal: codigoPostal || undefined
+    };
+
+    const resultado = await registrarCasal(payloadRegistro);
+    if (!resultado.success) {
+      mostrarError(resultado.message || 'No se ha podido completar el registro.');
+      botonRegistro.disabled = false;
+      botonRegistro.textContent = textoOriginalBoton;
+      return;
+    }
+
+    await guardarSesionRegistro(resultado);
+
+    await actualizarPerfilInicialSiHaceFalta(resultado, {
+      nombreCompleto,
+      telefono,
+      direccion,
+      ciudad,
+      codigoPostal,
+      idFalla
+    });
+
+    if (resultado.user.rol !== 'casal') {
+      mostrarError('La cuenta creada no tiene rol CASAL. Contacta con soporte.');
+      botonRegistro.disabled = false;
+      botonRegistro.textContent = textoOriginalBoton;
+      return;
+    }
+
+    alert(`¡Registro exitoso! 🎉\n\nTe hemos enviado un correo de bienvenida a: ${resultado.user.email}`);
+    window.location.href = '../screens/home.html';
+  });
+
+  configurarPreviewAvatar();
+  actualizarInicialesAvatar();
+  conectarEventos();
+});

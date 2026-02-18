@@ -10,6 +10,7 @@
 <body class="events-page user-page">
      <script src="../js/config.js"></script>
      <script src="../js/api.js"></script>
+     <script src="../js/validacion-formularios.js"></script>
      
      <header class="site-header">
           <div class="header-rect">
@@ -64,18 +65,18 @@
                                    </div>
                                    <div class="field">
                                         <label>Correo Electrónico</label>
-                                        <input id="userEmail" name="email" disabled />
+                                        <input id="userEmail" name="email" type="email" disabled />
                                    </div>
                               </div>
 
                               <div class="form-row">
                                    <div class="field">
                                         <label>Nombre Completo</label>
-                                        <input id="userNombreCompleto" name="nombreCompleto" disabled />
+                                        <input id="userNombreCompleto" name="nombreCompleto" minlength="3" disabled />
                                    </div>
                                    <div class="field">
                                         <label>Teléfono</label>
-                                        <input id="userTelefono" name="telefono" disabled />
+                                        <input id="userTelefono" name="telefono" type="tel" pattern="[+()\-\s\d]{7,20}" disabled />
                                    </div>
                               </div>
 
@@ -109,7 +110,7 @@
                                    </div>
                                    <div class="field">
                                         <label>Código Postal</label>
-                                        <input id="userCodigoPostal" name="codigoPostal" disabled />
+                                        <input id="userCodigoPostal" name="codigoPostal" pattern="\d{5}" disabled />
                                    </div>
                               </div>
 
