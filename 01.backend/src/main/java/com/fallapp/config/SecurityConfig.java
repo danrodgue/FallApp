@@ -66,39 +66,67 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Preflight CORS
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                 // Endpoints públicos (sin autenticación)
                 .requestMatchers(
                     "/api/auth/**",
+                    "/auth/**",
                     "/api/test-email/**",  // Endpoints de prueba de email
+                    "/test-email/**",
+                    "/api/health",
+                    "/health",
+                    "/actuator/health",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/swagger-ui.html"
                 ).permitAll()
                 // Endpoints de solo lectura públicos (exploración sin login)
                 .requestMatchers(HttpMethod.GET, "/api/fallas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/fallas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/eventos/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/eventos/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/comentarios/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/comentarios/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/estadisticas/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/estadisticas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/usuarios/{id}").permitAll()
+
+                // Endpoints admin: autenticado
+                .requestMatchers("/api/admin/**").authenticated()
+                .requestMatchers("/admin/**").authenticated()
                 
                 // Endpoints de creación (requieren autenticación, cualquier usuario)
                 .requestMatchers(HttpMethod.POST, "/api/fallas").authenticated()
+                .requestMatchers(HttpMethod.POST, "/fallas").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/eventos").authenticated()
+                .requestMatchers(HttpMethod.POST, "/eventos").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/comentarios").authenticated()
+                .requestMatchers(HttpMethod.POST, "/comentarios").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/votos").authenticated()
+                .requestMatchers(HttpMethod.POST, "/votos").authenticated()
                 
                 // Endpoints de actualización (requieren autenticación)
                 .requestMatchers(HttpMethod.PUT, "/api/fallas/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/fallas/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/eventos/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/eventos/**").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/comentarios/**").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/comentarios/**").authenticated()
                 
                 // Endpoints de eliminación (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/api/fallas/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/fallas/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/eventos/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/comentarios/**").hasRole("ADMIN")
                 
                 // Gestión de usuarios (requiere autenticación)
                 .requestMatchers("/api/usuarios/**").authenticated()
+                .requestMatchers("/usuarios/**").authenticated()
                 
                 // Por defecto, requiere autenticación
                 .anyRequest().authenticated()

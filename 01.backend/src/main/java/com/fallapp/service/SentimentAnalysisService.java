@@ -41,8 +41,11 @@ public class SentimentAnalysisService {
     @Value("${huggingface.api.token:}")
     private String huggingFaceToken;
 
-    private static final String MODEL_URL =
-            "https://api-inference.huggingface.co/models/lxyuan/distilbert-base-multilingual-cased-sentiments-student";
+    @Value("${huggingface.api.model:lxyuan/distilbert-base-multilingual-cased-sentiments-student}")
+    private String huggingFaceModel;
+
+    @Value("${huggingface.api.base-url:https://router.huggingface.co/hf-inference/models}")
+    private String huggingFaceBaseUrl;
 
     /**
      * Analiza el contenido de un comentario y actualiza su campo `sentimiento` en BD.
@@ -94,8 +97,11 @@ public class SentimentAnalysisService {
      * Llama al modelo de Hugging Face y devuelve la etiqueta con mayor score.
      */
     private String llamarModeloYObtenerSentimiento(String texto) throws Exception {
+        String modelUrl = huggingFaceBaseUrl + "/" + huggingFaceModel;
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.setBearerAuth(huggingFaceToken);
 
         Map<String, Object> body = new HashMap<>();
@@ -107,7 +113,7 @@ public class SentimentAnalysisService {
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(MODEL_URL, request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(modelUrl, request, String.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             log.warn("Llamada a Hugging Face falló con status {}: {}",
