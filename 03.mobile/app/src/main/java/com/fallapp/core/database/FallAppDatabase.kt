@@ -16,21 +16,15 @@ import com.fallapp.core.database.entity.UsuarioEntity
 
 /**
  * Base de datos Room de FallApp.
- * 
+ *
  * Almacena datos localmente para estrategia offline-first:
  * - Fallas, Eventos, Ninots se cachean
  * - Usuario autenticado se guarda
  * - Votos y favoritos se sincronizan
- * 
- * Versión: 1
- * - Tablas iniciales: fallas, eventos, ninots, usuarios
- * 
- * Migraciones futuras:
- * - Versión 2: Agregar tabla votos_locales
- * - Versión 3: Agregar tabla favoritos
- * 
- * @author Equipo FallApp
- * @since 1.0.0
+ *
+ * Versión: 2
+ * - v1: Tablas iniciales: fallas, eventos, ninots, usuarios
+ * - v2: Ajustes de entidades (cambios de schema). Se destruye y recrea la BD en caso de cambio.
  */
 @Database(
     entities = [
@@ -39,7 +33,7 @@ import com.fallapp.core.database.entity.UsuarioEntity
         NinotEntity::class,
         UsuarioEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -52,7 +46,9 @@ abstract class FallAppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     
     companion object {
-        private const val DATABASE_NAME = "fallapp_database"
+        // Cambiamos el nombre físico del fichero para forzar una BD nueva
+        // y evitar conflictos de hash con instalaciones antiguas.
+        private const val DATABASE_NAME = "fallapp_database_v2"
         
         @Volatile
         private var INSTANCE: FallAppDatabase? = null
