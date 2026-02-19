@@ -3,6 +3,7 @@ let cachedUserData = null;
 document.addEventListener('DOMContentLoaded', async () => {
   // Cargar datos del usuario al iniciar
   await loadUserDataForModal();
+  await loadProfileAvatarImage();
 
   // Configurar botones de logout
   const logoutBtn = document.getElementById('logout');
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     profileBtn.addEventListener('click', async () => {
       // Recargar datos frescos cuando se abre el modal
       await loadUserDataForModal();
+      await loadProfileAvatarImage();
       profileModal.classList.add('active');
       document.body.style.overflow = 'hidden';
     });
@@ -93,6 +95,46 @@ function populateProfileModal(userData) {
   document.getElementById('modalUserDireccion').textContent = userData.direccion || '-';
   document.getElementById('modalUserCiudad').textContent = userData.ciudad || '-';
   document.getElementById('modalUserCodigoPostal').textContent = userData.codigoPostal || '-';
+}
+
+// Cargar imagen de perfil para el avatar del modal
+async function loadProfileAvatarImage() {
+  try {
+    const idUsuario = localStorage.getItem('fallapp_user_id');
+    if (!idUsuario) return;
+
+    const token = localStorage.getItem('fallapp_token');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const base = (typeof API_BASE_URL !== 'undefined')
+      ? API_BASE_URL
+      : 'http://35.180.21.42:8080/api';
+    const urlImagen = `${base}/usuarios/${idUsuario}/imagen`;
+
+    const response = await fetch(urlImagen, { headers });
+    const imgEl = document.getElementById('profileAvatarImg');
+    const initialsEl = document.getElementById('profileAvatarInitials');
+
+    if (!imgEl || !initialsEl) return;
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      imgEl.src = objectUrl;
+      imgEl.style.display = 'block';
+      initialsEl.style.display = 'none';
+    } else {
+      // Si no hay imagen, mostramos iniciales
+      imgEl.style.display = 'none';
+      imgEl.src = '';
+      initialsEl.style.display = 'block';
+    }
+  } catch (e) {
+    console.debug('No se pudo cargar la imagen de perfil para el modal:', e);
+  }
 }
 
 // Manejar cierre de sesión

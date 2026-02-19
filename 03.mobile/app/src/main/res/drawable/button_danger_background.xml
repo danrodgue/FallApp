@@ -3,7 +3,7 @@
     <!-- Estado presionado -->
     <item android:state_pressed="true">
         <shape>
-            <solid android:color="#7b0014"/>
+            <solid android:color="@color/border"/>
             <corners android:radius="@dimen/radius_sm"/>
         </shape>
     </item>

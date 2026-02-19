@@ -101,6 +101,42 @@ class ProfileRepositoryImpl(
             ))
         }
     }
+
+    override fun uploadUserImage(
+        userId: Long,
+        imageBytes: ByteArray,
+        fileName: String,
+        mimeType: String?
+    ): Flow<Result<Unit>> = flow {
+        try {
+            emit(Result.Loading)
+
+            val response = profileApiService.uploadUserImage(
+                userId = userId,
+                imageBytes = imageBytes,
+                fileName = fileName,
+                mimeType = mimeType
+            )
+
+            if (response.exito) {
+                emit(Result.Success(Unit))
+            } else {
+                emit(
+                    Result.Error(
+                        exception = Exception(response.mensaje ?: "Error al subir imagen"),
+                        message = response.mensaje ?: "Error al subir imagen"
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            emit(
+                Result.Error(
+                    exception = e,
+                    message = e.message ?: "Error desconocido al subir imagen"
+                )
+            )
+        }
+    }
 }
 
 

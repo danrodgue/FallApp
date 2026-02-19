@@ -1,0 +1,356 @@
+/* ================================
+   IA-SENTIMENT.CSS - Panel Análisis de Feedback
+   Estilos para screen1.html
+==================================*/
+
+.sentiment-page .login-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.sentiment-page .events-center {
+    max-width: 1120px;
+    width: 100%;
+    padding: var(--spacing-lg);
+    padding-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+@media (min-width: 640px) {
+    .sentiment-page .events-center {
+        padding: var(--spacing-xl);
+        padding-top: 3rem;
+    }
+}
+
+.sentiment-header {
+    text-align: center;
+    margin-bottom: 0;
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+/* Espacio bajo el header fijo - hasta el límite máximo de altura del título */
+.sentiment-page .header-spacer {
+    height: 60px;
+    min-height: 60px;
+}
+
+.sentiment-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 var(--spacing-sm);
+    letter-spacing: -0.5px;
+}
+
+.sentiment-header .subtitle {
+    color: var(--color-text-muted);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Wrapper resultado - ocupa más alto de pantalla */
+.sentiment-result-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+}
+
+/* Tarjeta principal - alargada, cubre resto de pantalla */
+.sentiment-card {
+    background: var(--color-card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border-light);
+    overflow: hidden;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sentiment-card-header {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #9f1e1e 100%);
+    color: white;
+    padding: 20px var(--spacing-lg);
+    text-align: center;
+}
+
+.sentiment-card-header h2 {
+    margin: 0 0 var(--spacing-sm);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.sentiment-card-header .falla-subtitle {
+    opacity: 0.9;
+    font-size: 15px;
+}
+
+.sentiment-stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: 8px var(--spacing-lg);
+    background: var(--color-border-light);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    justify-content: center;
+}
+
+.sentiment-stats-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Barras de sentimiento - más grandes, expanden para llenar espacio */
+.sentiment-bars {
+    padding: 18px var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    flex: 1;
+    justify-content: center;
+}
+
+.sentiment-empty-bars {
+    text-align: center;
+}
+
+.sentiment-empty-bars p {
+    margin: 0;
+}
+
+.sentiment-bar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.sentiment-bar-label {
+    width: 110px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.sentiment-bar-track {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+@media (min-width: 640px) {
+    .sentiment-bar-track {
+        height: 40px;
+    }
+    .sentiment-bar-label {
+        width: 120px;
+    }
+}
+
+.sentiment-bar-fill {
+    height: 100%;
+    border-radius: var(--radius-sm);
+    transition: width 0.5s ease;
+}
+
+.sentiment-bar-fill.positive { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.sentiment-bar-fill.neutral  { background: linear-gradient(90deg, #64748b, #475569); }
+.sentiment-bar-fill.negative { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+.sentiment-bar-value {
+    min-width: 90px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: right;
+    color: var(--color-text);
+}
+
+@media (min-width: 640px) {
+    .sentiment-bar-value {
+        min-width: 100px;
+        font-size: 17px;
+    }
+}
+
+/* Alerta negativos */
+.sentiment-alert {
+    margin: 0 var(--spacing-lg) var(--spacing-lg);
+    padding: var(--spacing-md);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-sm);
+    color: #b91c1c;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Botón actualizar - presentable para cliente */
+.sentiment-reanalizar-wrap {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+.sentiment-reanalizar-wrap .btn-reanalizar {
+    width: auto;
+    padding: 12px 24px;
+    font-size: 15px;
+}
+
+#reanalizar-status {
+    font-size: 14px;
+    color: var(--color-text-muted);
+}
+
+/* Tarjeta de comentarios - al lado de estadísticas */
+.sentiment-comments-wrapper {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sentiment-comments-card {
+    background: var(--color-card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border-light);
+    overflow: hidden;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    flex: 1;
+}
+
+.sentiment-comments-card h3 {
+    margin: 0 0 var(--spacing-lg);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.comment-item {
+    padding: var(--spacing-md);
+    background: var(--color-border-light);
+    border-radius: var(--radius-sm);
+    border-left: 4px solid var(--color-border);
+}
+
+.comment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    font-size: 13px;
+}
+
+.comment-date {
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.comment-text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text);
+}
+
+.comment-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.comment-badge.positive { background: #dcfce7; color: #166534; }
+.comment-badge.neutral  { background: #f1f5f9; color: #475569; }
+.comment-badge.negative { background: #fee2e2; color: #b91c1c; }
+
+.sentiment-empty-hint {
+    flex-shrink: 0;
+}
+
+/* Fila principal: analítica izquierda, comentarios derecha */
+.sentiment-main-row {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: stretch;
+    margin-top: 0;
+}
+
+.sentiment-main-row .sentiment-result-wrapper,
+.sentiment-main-row .sentiment-comments-wrapper {
+    flex: 1 1 0;
+}
+
+.sentiment-main-row .sentiment-result-wrapper {
+    flex: 1.4 1 0; /* carta analítica más ancha */
+}
+
+.sentiment-main-row .sentiment-comments-wrapper {
+    flex: 0.9 1 0; /* comentarios algo más estrechos */
+}
+
+@media (max-width: 900px) {
+    .sentiment-main-row {
+        flex-direction: column;
+    }
+}
+
+/* Botón reanalizar dentro de la cabecera de la carta */
+.sentiment-card-header {
+    position: relative;
+    padding-right: calc(var(--spacing-lg) + 140px);
+}
+
+.sentiment-card-header .btn-reanalizar {
+    position: absolute;
+    right: var(--spacing-lg);
+    top: calc(var(--spacing-lg) + 4px);
+    background: #fed7aa; /* naranja pastel */
+    color: #111827;      /* texto negro/gris muy oscuro */
+    border: none;
+    padding: 10px 18px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.sentiment-card-header .btn-reanalizar:hover {
+    background: #fdba74;
+    box-shadow: var(--shadow);
+}
+
+.reanalizar-status-inline {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    text-align: right;
+}

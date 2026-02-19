@@ -4,6 +4,7 @@ import com.fallapp.features.profile.data.remote.ProfileApiService
 import com.fallapp.features.profile.data.repository.ProfileRepositoryImpl
 import com.fallapp.features.profile.domain.repository.ProfileRepository
 import com.fallapp.features.profile.domain.usecase.GetUserProfileUseCase
+import com.fallapp.features.profile.domain.usecase.UploadUserImageUseCase
 import com.fallapp.features.profile.domain.usecase.UpdateUserProfileUseCase
 import com.fallapp.features.profile.presentation.ProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -16,7 +17,7 @@ import org.koin.dsl.module
 val profileModule = module {
 
     // Data Layer - API
-    single { ProfileApiService(httpClient = get()) }
+    single { ProfileApiService(httpClient = get(), tokenManager = get()) }
 
     // Data Layer - Repository
     single<ProfileRepository> {
@@ -26,12 +27,14 @@ val profileModule = module {
     // Domain Layer - Use Cases
     factory { GetUserProfileUseCase(profileRepository = get()) }
     factory { UpdateUserProfileUseCase(profileRepository = get()) }
+    factory { UploadUserImageUseCase(profileRepository = get()) }
 
     // Presentation Layer - ViewModels
     viewModel {
         ProfileViewModel(
             getUserProfileUseCase = get(),
             updateUserProfileUseCase = get(),
+            uploadUserImageUseCase = get(),
             tokenManager = get()
         )
     }

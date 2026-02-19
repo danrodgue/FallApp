@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>IA - Sentimiento Comentarios - FallApp</title>
+  <title>Análisis de Feedback - FallApp</title>
   <link rel="stylesheet" href="../css/login.css">
   <link rel="stylesheet" href="../css/events.css">
+  <link rel="stylesheet" href="../css/ia-sentiment.css">
 </head>
-<body class="login-page events-page">
+<body class="login-page events-page sentiment-page">
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <header class="site-header">
@@ -21,13 +22,9 @@
 
   <div class="login-container">
     <div class="events-center">
-      <div class="events-header">
-        <div>
-          <h1 class="events-title">Análisis de Sentimiento (IA)</h1>
-          <div class="muted">
-            Panel simple para ver cómo son los comentarios de los usuarios (positivos, neutros o negativos).
-          </div>
-        </div>
+      <div class="sentiment-header">
+        <h1>Análisis de Feedback</h1>
+        <p class="subtitle">Consulta cómo valoran los usuarios los comentarios de tu falla</p>
       </div>
 
       <div class="search-wrapper">
@@ -35,16 +32,15 @@
         <button id="btn-sentiment-load" class="btn-primary" style="margin-left:8px;">Cargar sentimiento</button>
       </div>
 
-      <div id="sentiment-reanalizar-wrap" style="display:none; margin-bottom:12px;">
-        <button type="button" id="btn-reanalizar-sentimiento" class="btn-primary">
-          Reanalizar comentarios sin sentimiento
-        </button>
-        <span id="reanalizar-status" class="muted" style="margin-left:8px;"></span>
+      <div class="sentiment-main-row">
+        <div id="sentiment-result" class="sentiment-result-wrapper" aria-live="polite">
+          <!-- Estadísticas renderizadas aquí -->
+        </div>
+        <div id="sentiment-comments" class="sentiment-comments-wrapper">
+          <!-- Comentarios de usuarios renderizados aquí -->
+        </div>
       </div>
-      <div id="sentiment-result" class="events-list" aria-live="polite">
-        <!-- Resultado de sentimiento renderizado aquí -->
-      </div>
-      <div id="sentiment-empty" class="muted">Introduce un ID de falla y pulsa "Cargar sentimiento".</div>
+      <div id="sentiment-empty" class="muted sentiment-empty-hint">Cargando...</div>
     </div>
   </div>
 

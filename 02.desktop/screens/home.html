@@ -38,6 +38,7 @@
             <div class="profile-modal-body">
                 <div class="profile-avatar-section">
                     <div class="profile-avatar">
+                        <img id="profileAvatarImg" alt="Avatar del usuario" style="display:none;" />
                         <span id="profileAvatarInitials">--</span>
                     </div>
                     <p class="avatar-hint muted">Avatar del usuario</p>
@@ -91,13 +92,22 @@
     </div>
 
     <div class="main-actions">
-        <a href="screen1.html" class="action-card">
+        <a href="screen1.html" class="action-card action-card-ia">
             <div class="card-content">
-                <h3>Próximamente...</h3>
-                <p class="card-description">Funcionalidad en desarrollo</p>
+                <h3>Análisis de Feedback</h3>
+                <p class="card-description">Consulta cómo valoran los usuarios los comentarios de tu falla</p>
             </div>
-            <div class="card-image">
-                <img src="../renderer/src/img/fallap_logo.png" alt="Próximamente" onerror="this.style.display='none'">
+            <div class="card-image card-image-ia">
+                <!-- Imagen estática por defecto -->
+                <img src="../renderer/src/img/NN.png"
+                     alt="Análisis de Feedback"
+                     class="ia-image ia-image-static"
+                     onerror="this.style.display='none'">
+                <!-- GIF animado solo al pasar el ratón -->
+                <img src="../renderer/src/img/NN.gif"
+                     alt="Análisis de Feedback animado"
+                     class="ia-image ia-image-gif"
+                     onerror="this.style.display='none'">
             </div>
         </a>
         <a href="info.html" class="action-card">

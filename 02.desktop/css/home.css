@@ -142,6 +142,42 @@
     transform: scale(1.05);
 }
 
+/* Carta especial para Red Neuronal (IA) */
+.action-card-ia .card-image-ia {
+    background: #ffffff; /* fondo blanco */
+    height: 190px;
+    position: relative;
+}
+
+.card-image-ia .ia-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.25s ease-in-out;
+}
+
+.card-image-ia .ia-image-static {
+    opacity: 1;
+}
+
+.card-image-ia .ia-image-gif {
+    opacity: 0;
+}
+
+.action-card-ia:hover .card-image-ia .ia-image-static {
+    opacity: 0;
+}
+
+.action-card-ia:hover .card-image-ia .ia-image-gif {
+    opacity: 1;
+}
+
+.action-card-ia:hover .card-image-ia {
+    background: #ffffff;
+}
+
 @media (max-width: 480px) {
     .action-card {
         width: calc(100% - 40px);

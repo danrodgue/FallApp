@@ -2,7 +2,7 @@
 <resources>
     <!-- Tema principal - Material con colores de estética desktop -->
     <style name="Theme.FallApp" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Colores primarios -->
+        <!-- Colores primarios nueva paleta -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="android:colorBackground">@color/background_light</item>

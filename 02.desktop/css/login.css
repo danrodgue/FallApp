@@ -679,6 +679,14 @@ a, button {
     margin-bottom: 8px;
 }
 
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: none;
+}
+
 .avatar-hint {
     font-size: 11px;
     color: var(--color-text-muted);

@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Obtener la falla asociada al usuario logueado (casal)
   const storedFallaId = localStorage.getItem('fallapp_user_idFalla');
   if (storedFallaId && storedFallaId.trim() !== '') {
+    window._fallaIdCasal = storedFallaId.trim();
     // Ocultar por completo el campo y botón de búsqueda por ID (no se usa ya)
     if (inputFallaId) {
       inputFallaId.style.display = 'none';
@@ -32,19 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
       label.style.display = 'none';
     }
 
-    // Mostrar botón de reanalizar (solo cuando hay falla del casal)
-    const reanalizarWrap = document.getElementById('sentiment-reanalizar-wrap');
-    if (reanalizarWrap) reanalizarWrap.style.display = 'block';
-    const btnReanalizar = document.getElementById('btn-reanalizar-sentimiento');
-    if (btnReanalizar) {
-      btnReanalizar.addEventListener('click', () => reanalizarSentimientoPendientes(storedFallaId.trim()));
-    }
     // Cargar automáticamente el sentimiento de la falla del casal
     loadSentimentForFalla(storedFallaId.trim());
   } else {
-    // Si no hay falla asociada, mostrar mensaje claro
+    const emptyLabel = document.getElementById('sentiment-empty');
+    if (emptyLabel) emptyLabel.style.display = 'none';
     showSentimentMessage(
-      'No se ha podido determinar tu falla (idFalla vacío). Inicia sesión de nuevo con un usuario de casal.',
+      'No se ha podido cargar la información de tu falla. Inicia sesión de nuevo.',
       'warning'
     );
   }
@@ -67,7 +62,7 @@ async function loadSentimentForFalla(fallaId) {
 
   if (emptyLabel) emptyLabel.style.display = 'none';
   if (resultContainer) {
-    resultContainer.innerHTML = '<div class="muted">Cargando sentimiento...</div>';
+    resultContainer.innerHTML = '<div class="muted">Cargando análisis...</div>';
   }
 
   const url = `${getApiBase()}/admin/fallas/${encodeURIComponent(fallaId)}/sentimiento`;
@@ -75,7 +70,7 @@ async function loadSentimentForFalla(fallaId) {
   // Añadir JWT del usuario (casal) para acceder al endpoint /api/admin/**
   const token = localStorage.getItem('fallapp_token');
   if (!token) {
-    showSentimentMessage('No hay token de sesión. Inicia sesión de nuevo en el panel.', 'warning');
+    showSentimentMessage('No hay sesión activa. Inicia sesión de nuevo.', 'warning');
     return;
   }
 
@@ -108,7 +103,7 @@ async function loadSentimentForFalla(fallaId) {
     renderSentiment(datos);
   } catch (err) {
     console.error('Error cargando sentimiento:', err);
-    showSentimentMessage(`No se pudo cargar el sentimiento para esta falla: ${err.message || err}`, 'error');
+    showSentimentMessage(`No se pudo cargar el análisis. Vuelve a intentarlo más tarde.`, 'error');
   }
 }
 
@@ -120,13 +115,44 @@ function renderSentiment(data) {
   const total = data.totalComentarios || 0;
   const totalFalla = data.totalComentariosFalla || total;
   const pendientes = data.totalPendientes || 0;
+  const canReanalizar = !!window._fallaIdCasal;
+  const actionHtml = canReanalizar
+    ? `<button type="button" id="btn-reanalizar-sentimiento" class="btn-reanalizar">Actualizar análisis</button>`
+    : '';
+  const statusHtml = canReanalizar
+    ? `<span id="reanalizar-status" class="muted reanalizar-status-inline"></span>`
+    : '';
 
   if (total === 0) {
-    if (totalFalla > 0) {
-      resultContainer.innerHTML = `<div class="muted">Hay ${totalFalla} comentarios en la falla, pero todavía no están analizados por IA. Pendientes: ${pendientes}.</div>`;
-    } else {
-      resultContainer.innerHTML = '<div class="muted">Esta falla todavía no tiene comentarios analizados.</div>';
+    resultContainer.innerHTML = `
+      <div class="sentiment-card">
+        <div class="sentiment-card-header">
+          <h2>${data.nombreFalla || 'Tu falla'}</h2>
+          <span class="falla-subtitle">Comentarios de los usuarios</span>
+          ${actionHtml}
+          ${statusHtml}
+        </div>
+        <div class="sentiment-stats-row">
+          <span>💬 Total comentarios: <strong>${totalFalla}</strong></span>
+          <span>·</span>
+          <span>⏳ Por analizar: <strong>${pendientes}</strong></span>
+        </div>
+        <div class="sentiment-bars sentiment-empty-bars">
+          <p class="muted">${totalFalla > 0
+            ? pendientes > 0
+              ? `Hay ${totalFalla} comentarios. Usa "Actualizar análisis" para procesarlos.`
+              : 'No hay comentarios analizados todavía.'
+            : 'Tu falla aún no tiene comentarios.'}</p>
+        </div>
+      </div>
+    `;
+    if (canReanalizar && window._fallaIdCasal) {
+      const btn = document.getElementById('btn-reanalizar-sentimiento');
+      if (btn) {
+        btn.onclick = () => reanalizarSentimientoPendientes(window._fallaIdCasal);
+      }
     }
+    loadComentariosFalla(data.idFalla);
     return;
   }
 
@@ -135,30 +161,126 @@ function renderSentiment(data) {
   const negative = sentimientos.negative || 0;
 
   const pct = (value) => total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+  const pctNum = (v) => total > 0 ? (v / total) * 100 : 0;
 
   let alertHtml = '';
-  const negativePct = total > 0 ? (negative / total) * 100 : 0;
+  const negativePct = pctNum(negative);
   if (negativePct >= 30) {
     alertHtml = `
-      <div class="muted" style="color:#b91c1c; margin-bottom:8px; font-weight:600;">
-        ⚠ Muchos comentarios negativos (${pct(negative)}%). Revisa qué está ocurriendo con esta falla.
+      <div class="sentiment-alert">
+        ⚠ Hay un porcentaje alto de comentarios negativos (${pct(negative)}%). Te recomendamos revisar el feedback.
       </div>
     `;
   }
 
   resultContainer.innerHTML = `
     <div class="sentiment-card">
-      <h2>Falla #${data.idFalla} - ${data.nombreFalla || ''}</h2>
-      <p class="muted">Total comentarios analizados: ${total}</p>
-      <p class="muted">Total comentarios en la falla: ${totalFalla} · Pendientes IA: ${pendientes}</p>
+      <div class="sentiment-card-header">
+        <h2>${data.nombreFalla || 'Tu falla'}</h2>
+        <span class="falla-subtitle">Comentarios de los usuarios</span>
+        ${actionHtml}
+        ${statusHtml}
+      </div>
+      <div class="sentiment-stats-row">
+        <span>📊 Analizados: <strong>${total}</strong></span>
+        <span>·</span>
+        <span>💬 Total comentarios: <strong>${totalFalla}</strong></span>
+        <span>·</span>
+        <span>⏳ Por analizar: <strong>${pendientes}</strong></span>
+      </div>
+      <div class="sentiment-bars">
+        <div class="sentiment-bar-item">
+          <span class="sentiment-bar-label">Positivos</span>
+          <div class="sentiment-bar-track">
+            <div class="sentiment-bar-fill positive" style="width:${pctNum(positive)}%"></div>
+          </div>
+          <span class="sentiment-bar-value">${positive} (${pct(positive)}%)</span>
+        </div>
+        <div class="sentiment-bar-item">
+          <span class="sentiment-bar-label">Neutros</span>
+          <div class="sentiment-bar-track">
+            <div class="sentiment-bar-fill neutral" style="width:${pctNum(neutral)}%"></div>
+          </div>
+          <span class="sentiment-bar-value">${neutral} (${pct(neutral)}%)</span>
+        </div>
+        <div class="sentiment-bar-item">
+          <span class="sentiment-bar-label">Negativos</span>
+          <div class="sentiment-bar-track">
+            <div class="sentiment-bar-fill negative" style="width:${pctNum(negative)}%"></div>
+          </div>
+          <span class="sentiment-bar-value">${negative} (${pct(negative)}%)</span>
+        </div>
+      </div>
       ${alertHtml}
-      <ul class="sentiment-list">
-        <li><strong>Positivos</strong>: ${positive} (${pct(positive)}%)</li>
-        <li><strong>Neutros</strong>: ${neutral} (${pct(neutral)}%)</li>
-        <li><strong>Negativos</strong>: ${negative} (${pct(negative)}%)</li>
-      </ul>
     </div>
   `;
+  if (canReanalizar && window._fallaIdCasal) {
+    const btn = document.getElementById('btn-reanalizar-sentimiento');
+    if (btn) {
+      btn.onclick = () => reanalizarSentimientoPendientes(window._fallaIdCasal);
+    }
+  }
+  loadComentariosFalla(data.idFalla);
+}
+
+async function loadComentariosFalla(fallaId) {
+  const container = document.getElementById('sentiment-comments');
+  if (!container || !fallaId) return;
+
+  const base = getApiBase();
+  const token = localStorage.getItem('fallapp_token');
+  const headers = { 'Accept': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(`${base}/comentarios?idFalla=${fallaId}`, { headers });
+    const json = await res.json().catch(() => ({}));
+    const lista = json.datos || json.content || json || [];
+    const comentarios = Array.isArray(lista) ? lista : [];
+
+    if (comentarios.length === 0) {
+      container.innerHTML = `
+        <div class="sentiment-comments-card">
+          <h3>Comentarios de los usuarios</h3>
+          <p class="muted">No hay comentarios todavía.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const items = comentarios.map(c => {
+      const sent = (c.sentimiento || '').toLowerCase();
+      const badge = sent === 'positive' ? '<span class="comment-badge positive">Positivo</span>' :
+                    sent === 'negative' ? '<span class="comment-badge negative">Negativo</span>' :
+                    sent === 'neutral' ? '<span class="comment-badge neutral">Neutro</span>' : '';
+      const autor = c.nombreUsuario || 'Usuario';
+      const fecha = c.fechaCreacion ? new Date(c.fechaCreacion).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const texto = String(c.contenido || '').replace(/</g, '&lt;');
+      return `
+        <div class="comment-item">
+          <div class="comment-meta">
+            <strong>${autor}</strong> ${badge}
+            ${fecha ? `<span class="comment-date">${fecha}</span>` : ''}
+          </div>
+          <p class="comment-text">${texto}</p>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="sentiment-comments-card">
+        <h3>Comentarios de los usuarios</h3>
+        <div class="comment-list">${items}</div>
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `
+      <div class="sentiment-comments-card">
+        <h3>Comentarios de los usuarios</h3>
+        <p class="muted">No se pudieron cargar los comentarios.</p>
+      </div>
+    `;
+  }
 }
 
 /**
@@ -175,7 +297,7 @@ async function reanalizarSentimientoPendientes(fallaId) {
   }
   const url = `${getApiBase()}/admin/comentarios/reanalizar-sentimiento`;
   if (btn) btn.disabled = true;
-  if (statusEl) statusEl.textContent = 'Intento implementar IA...';
+  if (statusEl) statusEl.textContent = 'Procesando...';
 
   try {
     const response = await fetch(url, {
@@ -189,7 +311,7 @@ async function reanalizarSentimientoPendientes(fallaId) {
     const json = await response.json().catch(() => ({}));
     const datos = json.datos || json;
     const encolados = datos.comentariosEncolados != null ? datos.comentariosEncolados : 0;
-    const mensaje = datos.mensaje || (encolados > 0 ? 'Intento implementar IA: reanalizando ' + encolados + ' comentarios.' : 'Intento implementar IA: no hay comentarios pendientes.');
+    const mensaje = datos.mensaje || (encolados > 0 ? 'Analizando ' + encolados + ' comentarios...' : 'No hay comentarios pendientes.');
 
     if (statusEl) statusEl.textContent = mensaje;
     if (encolados > 0 && fallaId) {

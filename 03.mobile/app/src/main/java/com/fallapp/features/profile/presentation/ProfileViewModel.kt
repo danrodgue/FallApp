@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.fallapp.core.util.Result
 import com.fallapp.features.profile.domain.model.UsuarioPerfil
 import com.fallapp.features.profile.domain.usecase.GetUserProfileUseCase
+import com.fallapp.features.profile.domain.usecase.UploadUserImageUseCase
 import com.fallapp.features.profile.domain.usecase.UpdateUserProfileUseCase
 import com.fallapp.core.util.TokenManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +29,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val getUserProfileUseCase: GetUserProfileUseCase,
     private val updateUserProfileUseCase: UpdateUserProfileUseCase,
+    private val uploadUserImageUseCase: UploadUserImageUseCase,
     private val tokenManager: TokenManager
 ) : ViewModel() {
 
@@ -37,6 +39,15 @@ class ProfileViewModel(
      */
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+
+    private val _isUploadingPhoto = MutableStateFlow(false)
+    val isUploadingPhoto: StateFlow<Boolean> = _isUploadingPhoto.asStateFlow()
+
+    private val _photoUploadMessage = MutableStateFlow<String?>(null)
+    val photoUploadMessage: StateFlow<String?> = _photoUploadMessage.asStateFlow()
+
+    private val _profileImageVersion = MutableStateFlow(0L)
+    val profileImageVersion: StateFlow<Long> = _profileImageVersion.asStateFlow()
 
     init {
         loadUserProfile()
@@ -90,6 +101,54 @@ class ProfileViewModel(
      */
     fun refreshProfile() {
         loadUserProfile()
+    }
+
+    fun clearPhotoUploadMessage() {
+        _photoUploadMessage.value = null
+    }
+
+    fun uploadProfileImage(
+        imageBytes: ByteArray,
+        fileName: String,
+        mimeType: String?
+    ) {
+        viewModelScope.launch {
+            try {
+                val userId = getUserIdFromToken()
+
+                if (userId == null) {
+                    _photoUploadMessage.value = "No se encontró ID de usuario"
+                    return@launch
+                }
+
+                uploadUserImageUseCase(
+                    userId = userId,
+                    imageBytes = imageBytes,
+                    fileName = fileName,
+                    mimeType = mimeType
+                ).collect { result ->
+                    when (result) {
+                        is Result.Loading -> {
+                            _isUploadingPhoto.value = true
+                        }
+
+                        is Result.Success -> {
+                            _isUploadingPhoto.value = false
+                            _photoUploadMessage.value = "Foto de perfil actualizada"
+                            _profileImageVersion.value = System.currentTimeMillis()
+                        }
+
+                        is Result.Error -> {
+                            _isUploadingPhoto.value = false
+                            _photoUploadMessage.value = result.message ?: "Error al subir foto"
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                _isUploadingPhoto.value = false
+                _photoUploadMessage.value = e.message ?: "Error desconocido"
+            }
+        }
     }
 
     /**
