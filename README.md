@@ -378,7 +378,7 @@ Ver [Issues del Proyecto](https://github.com/danrodgue/FallApp/issues)
 El código fuente de FallApp (backend, desktop, móvil, scripts y documentación)
 es **software propietario**.  
 Copyright (c) 2026,
-Daniel Rodríguez, Gautier Bastidas Joly y Jose Burgos Martínez.  
+Daniel Rodríguez Guerola, Gautier Bastidas Joly y Jose Burgos Martínez.  
 **Todos los derechos reservados.**
 
 - No se permite su copia, modificación, redistribución ni uso comercial sin
