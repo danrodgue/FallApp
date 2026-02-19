@@ -27,6 +27,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.fallapp.user.R
@@ -754,8 +755,8 @@ private fun SwipeFallaCard(
                             R.drawable.risa
                         )
                         TipoVoto.ARTISTICO -> Triple(
-                            MaterialTheme.colorScheme.tertiary,
-                            MaterialTheme.colorScheme.onTertiary,
+                            Color(0xFFFFE3A1),
+                            MaterialTheme.colorScheme.onSurface,
                             R.drawable.experimental
                         )
                     }
@@ -991,13 +992,17 @@ private fun MiVotoCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = when (voto.tipoVoto) {
-                            TipoVoto.INGENIOSO -> "🏆"
-                            TipoVoto.CRITICO -> "😄"
-                            TipoVoto.ARTISTICO -> "🧪"
-                        },
-                        style = MaterialTheme.typography.titleLarge
+                    Icon(
+                        painter = painterResource(
+                            id = when (voto.tipoVoto) {
+                                TipoVoto.INGENIOSO -> R.drawable.trofeo
+                                TipoVoto.CRITICO -> R.drawable.risa
+                                TipoVoto.ARTISTICO -> R.drawable.experimental
+                            }
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = Color.Unspecified
                     )
                     Text(
                         text = when (voto.tipoVoto) {
@@ -1070,10 +1075,28 @@ private fun RankingTab(
                 text = { Text("Todos") }
             )
             TipoVoto.entries.forEach { tipo ->
+                val label = when (tipo) {
+                    TipoVoto.INGENIOSO -> "Mejor Falla"
+                    TipoVoto.CRITICO -> "Ingenio y Gracia"
+                    TipoVoto.ARTISTICO -> "Mejor Experimental"
+                }
+                val iconRes = when (tipo) {
+                    TipoVoto.INGENIOSO -> R.drawable.trofeo
+                    TipoVoto.CRITICO -> R.drawable.risa
+                    TipoVoto.ARTISTICO -> R.drawable.experimental
+                }
                 Tab(
                     selected = selectedTipoVoto == tipo,
                     onClick = { onFilterChange(tipo) },
-                    text = { Text(tipo.getDisplayName()) }
+                    text = { Text(label) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
                 )
             }
         }

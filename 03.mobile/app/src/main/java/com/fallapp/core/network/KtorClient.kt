@@ -53,7 +53,7 @@ object KtorClient {
                     encodeDefaults = true
                 })
             }
-            
+
             // ====== Logging ======
             if (enableLogging) {
                 install(Logging) {
@@ -110,7 +110,7 @@ object KtorClient {
                     encodeDefaults = true
                 })
             }
-            
+
             if (enableLogging) {
                 install(Logging) {
                     logger = object : Logger {
