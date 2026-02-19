@@ -1,0 +1,49 @@
+Copyright (c) 2026,
+Daniel Rodríguez, Gautier Bastidas Joly y Jose Burgos Martínez.
+Todos los derechos reservados.
+
+Este repositorio contiene:
+- Código fuente de las aplicaciones FallApp (backend, desktop, móvil).
+- Scripts y documentación desarrollados por el equipo.
+- Datos de terceros procedentes del Ayuntamiento de Valencia.
+
+1. Concesión de uso académico
+
+Se concede al profesorado y al centro educativo un derecho de uso limitado
+exclusivamente para:
+
+- Revisar el código fuente.
+- Ejecutar las aplicaciones con fines de prueba y evaluación académica.
+- Conservar una copia con fines de archivo académico del proyecto.
+
+Queda expresamente prohibido:
+
+- Cualquier uso comercial del software sin autorización escrita de los autores.
+- La redistribución pública del código fuente o binarios.
+- La incorporación del código a otros proyectos sin autorización escrita.
+
+2. Explotación comercial
+
+Los autores se reservan el derecho exclusivo de licenciar y explotar
+comercialmente este software. Cualquier licencia comercial deberá ser otorgada
+por escrito y aceptada por todos los coautores.
+
+3. Datos de terceros (Ayuntamiento de Valencia)
+
+Parte de los datos utilizados por este proyecto (por ejemplo, información y
+ubicaciones de fallas) proceden del Ayuntamiento de Valencia y se ofrecen bajo
+licencia Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+Los autores de FallApp no son propietarios de dichos datos. Cualquier uso,
+redistribución o explotación de estos datos debe cumplir con los términos de
+la licencia CC BY 4.0, incluyendo la atribución adecuada al Ayuntamiento de
+Valencia y a la fuente original de los datos.
+
+4. Ausencia de garantías
+
+Este software se proporciona "tal cual", sin garantías de ningún tipo, ya sean
+expresas o implícitas, incluidas, entre otras, las garantías de comerciabilidad
+o idoneidad para un propósito particular. En ningún caso los autores serán
+responsables de ningún daño derivado del uso de este software.
+

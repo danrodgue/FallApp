@@ -373,9 +373,29 @@ Ver [Issues del Proyecto](https://github.com/danrodgue/FallApp/issues)
 
 ## 📝 Licencia
 
-Este proyecto es propietario (Privado).
+### Código
 
-Para uso comercial o distribución, contactar con el propietario.
+El código fuente de FallApp (backend, desktop, móvil, scripts y documentación)
+es **software propietario**.  
+Copyright (c) 2026,
+Daniel Rodríguez, Gautier Bastidas Joly y Jose Burgos Martínez.  
+**Todos los derechos reservados.**
+
+- No se permite su copia, modificación, redistribución ni uso comercial sin
+  autorización expresa y por escrito de los autores.
+- El código se entrega al profesorado y al centro educativo **únicamente** para
+  evaluación académica del proyecto intermodular de DAM.
+
+### Datos de terceros
+
+Parte de los datos de la base de datos (por ejemplo, información y ubicaciones
+de fallas) proceden del Ayuntamiento de Valencia y se ofrecen bajo licencia
+[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+
+Los autores de FallApp **no son propietarios** de dichos datos. Cualquier uso
+de estos datos debe cumplir con los términos de la licencia CC BY 4.0,
+incluyendo la atribución adecuada al Ayuntamiento de Valencia y a la fuente
+original de los datos.
 
 ## 📞 Contacto
 
