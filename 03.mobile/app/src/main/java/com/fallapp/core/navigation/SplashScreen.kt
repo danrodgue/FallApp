@@ -12,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fallapp.core.util.TokenManager
-import kotlinx.coroutines.flow.first
 import org.koin.compose.koinInject
 
 /**
@@ -30,10 +29,10 @@ fun SplashScreen(
     tokenManager: TokenManager = koinInject()
 ) {
     LaunchedEffect(Unit) {
-        // Verificar si hay token guardado
-        val token = tokenManager.authToken.first()
+        // Verificar sesión real (también valida expiración JWT)
+        val hasSession = tokenManager.hasActiveSession()
 
-        if (token != null) {
+        if (hasSession) {
             // Hay sesión activa, ir a Main
             onNavigateToMain()
         } else {

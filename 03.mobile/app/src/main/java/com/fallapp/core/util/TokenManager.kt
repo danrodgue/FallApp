@@ -1,6 +1,7 @@
 package com.fallapp.core.util
 
 import android.content.Context
+import android.util.Base64
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -10,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.json.JSONObject
 
 /**
  * Gestiona el almacenamiento seguro del token JWT.
@@ -83,6 +85,20 @@ class TokenManager(private val context: Context) {
     }
 
     /**
+     * Devuelve token solo si sigue vigente.
+     * Si está expirado, limpia la sesión y devuelve null.
+     */
+    suspend fun getValidToken(): String? {
+        val token = getToken() ?: return null
+        return if (isTokenExpired(token)) {
+            clearToken()
+            null
+        } else {
+            token
+        }
+    }
+
+    /**
      * Recupera el ID del usuario actual de forma síncrona.
      * @return ID del usuario o null si no está disponible
      */
@@ -105,6 +121,31 @@ class TokenManager(private val context: Context) {
      * @return true si existe un token guardado
      */
     suspend fun hasActiveSession(): Boolean {
-        return getToken() != null
+        return getValidToken() != null
+    }
+
+    /**
+     * Comprueba expiración leyendo claim "exp" del JWT (epoch seconds).
+     * Si no puede parsearse, se considera expirado por seguridad.
+     */
+    private fun isTokenExpired(token: String): Boolean {
+        return try {
+            val parts = token.split(".")
+            if (parts.size < 2) return true
+
+            val payloadBytes = Base64.decode(
+                parts[1],
+                Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+            )
+            val payload = String(payloadBytes, Charsets.UTF_8)
+            val expSeconds = JSONObject(payload).optLong("exp", -1L)
+
+            if (expSeconds <= 0L) return true
+
+            val nowSeconds = System.currentTimeMillis() / 1000
+            nowSeconds >= expSeconds
+        } catch (_: Exception) {
+            true
+        }
     }
 }

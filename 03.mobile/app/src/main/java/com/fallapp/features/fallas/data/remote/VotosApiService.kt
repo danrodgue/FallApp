@@ -27,8 +27,8 @@ class VotosApiService(
 ) {
 
     private suspend fun HttpRequestBuilder.attachAuthHeader() {
-        val token = tokenManager.getToken()
-            ?: throw ApiException("No hay sesión activa. Inicia sesión para poder votar.")
+        val token = tokenManager.getValidToken()
+            ?: throw ApiException("Sesión expirada. Inicia sesión de nuevo para poder votar.")
         header(ApiConfig.AUTH_HEADER, "${ApiConfig.TOKEN_PREFIX}$token")
     }
 

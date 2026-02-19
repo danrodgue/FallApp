@@ -22,8 +22,8 @@ class ComentariosApiService(
 ) {
 
     private suspend fun HttpRequestBuilder.attachAuthHeader() {
-        val token = tokenManager.getToken()
-            ?: throw ApiException("Inicia sesión para poder comentar.")
+        val token = tokenManager.getValidToken()
+            ?: throw ApiException("Sesión expirada. Inicia sesión de nuevo para poder comentar.")
         header(ApiConfig.AUTH_HEADER, "${ApiConfig.TOKEN_PREFIX}$token")
     }
 
