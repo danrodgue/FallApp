@@ -46,5 +46,20 @@ interface ProfileRepository {
         ciudad: String?,
         codigoPostal: String?
     ): Flow<Result<UsuarioPerfil>>
+
+    /**
+     * Sube la foto de perfil del usuario.
+     *
+     * @param userId ID del usuario
+     * @param imageBytes Contenido binario de la imagen
+     * @param fileName Nombre del archivo
+     * @param mimeType Mime type de la imagen
+     */
+    fun uploadUserImage(
+        userId: Long,
+        imageBytes: ByteArray,
+        fileName: String,
+        mimeType: String?
+    ): Flow<Result<Unit>>
 }
 

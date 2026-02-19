@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,8 +25,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.fallapp.user.R
 import coil.compose.AsyncImage
 import com.fallapp.features.fallas.domain.model.Falla
 import com.fallapp.features.fallas.domain.model.FallaRanking
@@ -54,6 +59,18 @@ fun VotosScreen(
     var searchQuery by remember { mutableStateOf("") }
     var showSearchField by remember { mutableStateOf(false) }
 
+    fun openFallaInVoteCard(idFalla: Long) {
+        val falla = uiState.fallas.firstOrNull { it.idFalla == idFalla }
+            ?: uiState.fallasParaVotar.firstOrNull { it.idFalla == idFalla }
+
+        if (falla != null) {
+            selectedFalla = falla
+            selectedTab = 1
+            showSearchField = false
+            searchQuery = ""
+        }
+    }
+
     // Mostrar mensajes
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { message ->
@@ -70,6 +87,10 @@ fun VotosScreen(
             )
             viewModel.clearMessages()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshData()
     }
 
     Scaffold(
@@ -208,10 +229,31 @@ fun VotosScreen(
                     ) {
                         Text(
                             text = "• Cada usuario puede votar una falla una sola vez por categoría.\n" +
-                                    "• Las categorías siguen la guía oficial: Experimental, Ingenio y Gracia, Monumento.\n" +
+                                    "• Pulsa uno de los 3 botones de icono para votar por categoría.\n" +
                                     "• Tus votos se ligan a tu usuario y se usan para construir el ranking general.\n" +
                                     "• Puedes ver y gestionar tus votos en la pestaña «Mis Votos».",
                             style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        HorizontalDivider()
+
+                        Text(
+                            text = "Leyenda de iconos:",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        VoteLegendRow(
+                            iconRes = R.drawable.trofeo,
+                            label = "Mejor Falla (Monumento)"
+                        )
+                        VoteLegendRow(
+                            iconRes = R.drawable.risa,
+                            label = "Ingenio y Gracia"
+                        )
+                        VoteLegendRow(
+                            iconRes = R.drawable.experimental,
+                            label = "Mejor Experimental"
                         )
                     }
                 },
@@ -231,7 +273,9 @@ fun VotosScreen(
                 onFilterChange = { tipoVoto ->
                     viewModel.setRankingFilter(tipoVoto)
                 },
-                onFallaClick = onFallaClick,
+                onFallaClick = { idFalla ->
+                    openFallaInVoteCard(idFalla)
+                },
                 modifier = Modifier.padding(padding)
             )
             1 -> VotarTab(
@@ -620,7 +664,7 @@ private fun SwipeFallaCard(
                     Text("Ver en el mapa")
                 }
 
-                FilledTonalButton(
+                TextButton(
                     onClick = { showCommentBox = !showCommentBox }
                 ) {
                     Icon(
@@ -698,44 +742,92 @@ private fun SwipeFallaCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 TipoVoto.entries.forEach { tipoVoto ->
+                    val voteColors = when (tipoVoto) {
+                        TipoVoto.INGENIOSO -> Triple(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.onPrimary,
+                            R.drawable.trofeo
+                        )
+                        TipoVoto.CRITICO -> Triple(
+                            MaterialTheme.colorScheme.secondary,
+                            MaterialTheme.colorScheme.onSecondary,
+                            R.drawable.risa
+                        )
+                        TipoVoto.ARTISTICO -> Triple(
+                            MaterialTheme.colorScheme.tertiary,
+                            MaterialTheme.colorScheme.onTertiary,
+                            R.drawable.experimental
+                        )
+                    }
+
                     Button(
                         onClick = {
                             selectedTipoVoto = tipoVoto
                             showVoteDialog = true
                         },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 64.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 8.dp,
+                            hoveredElevation = 5.dp
+                        ),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 10.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = when (tipoVoto) {
-                                TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary
-                                TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary
-                                TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.tertiary
-                            }
+                            containerColor = voteColors.first,
+                            contentColor = voteColors.second,
+                            disabledContainerColor = voteColors.first.copy(alpha = 0.5f),
+                            disabledContentColor = voteColors.second.copy(alpha = 0.75f)
                         )
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = when (tipoVoto) {
-                                    TipoVoto.INGENIOSO -> "🏆"
-                                    TipoVoto.CRITICO -> "😄"
-                                    TipoVoto.ARTISTICO -> "🧪"
+                            val iconSize = if (tipoVoto == TipoVoto.CRITICO) 36.dp else 28.dp
+
+                            Image(
+                                painter = painterResource(id = voteColors.third),
+                                contentDescription = when (tipoVoto) {
+                                    TipoVoto.INGENIOSO -> "Votar Mejor Falla"
+                                    TipoVoto.CRITICO -> "Votar Ingenio y Gracia"
+                                    TipoVoto.ARTISTICO -> "Votar Mejor Experimental"
                                 },
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = when (tipoVoto) {
-                                    TipoVoto.INGENIOSO -> "Mejor Falla"
-                                    TipoVoto.CRITICO -> "Ingenio y Gracia"
-                                    TipoVoto.ARTISTICO -> "Mejor Experimental"
-                                },
-                                style = MaterialTheme.typography.labelSmall
+                                modifier = Modifier.size(iconSize),
+                                contentScale = ContentScale.Fit
                             )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun VoteLegendRow(
+    iconRes: Int,
+    label: String
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Image(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp),
+            contentScale = ContentScale.Fit
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 

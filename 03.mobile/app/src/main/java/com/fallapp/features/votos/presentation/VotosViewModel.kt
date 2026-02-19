@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -40,6 +41,10 @@ class VotosViewModel(
     val uiState: StateFlow<VotosUiState> = _uiState.asStateFlow()
 
     init {
+        loadData()
+    }
+
+    fun refreshData() {
         loadData()
     }
 
@@ -92,14 +97,18 @@ class VotosViewModel(
      */
     private fun loadMisVotos() {
         viewModelScope.launch {
-            val currentUser = getCurrentUserUseCase()
-            if (currentUser == null) {
-                // No hay usuario en sesión: no hay votos que cargar
-                _uiState.update { it.copy(misVotos = emptyList()) }
+            val userId = resolveCurrentUserId()
+            if (userId == null) {
+                _uiState.update {
+                    it.copy(
+                        misVotos = emptyList(),
+                        errorMessage = "No se pudo cargar tus votos. Vuelve a abrir la pestaña de Votos."
+                    )
+                }
                 return@launch
             }
 
-            when (val result = getVotosUsuarioUseCase(currentUser.idUsuario)) {
+            when (val result = getVotosUsuarioUseCase(userId)) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(misVotos = result.data)
@@ -112,17 +121,33 @@ class VotosViewModel(
                     }
                 }
                 is Result.Error -> {
-                    // Evitar mostrar el error técnico del backend "Request method 'GET' is not supported"
                     val msg = result.message ?: ""
-                    if (!msg.contains("Request method 'GET' is not supported", ignoreCase = true)) {
-                        _uiState.update {
-                            it.copy(errorMessage = msg.ifBlank { "Error al cargar tus votos" })
-                        }
+                    val userFriendly = if (
+                        msg.contains("Request method 'GET' is not supported", ignoreCase = true)
+                    ) {
+                        "La API de votos no respondió correctamente. Reintenta en unos segundos."
+                    } else {
+                        msg.ifBlank { "Error al cargar tus votos" }
+                    }
+                    _uiState.update {
+                        it.copy(errorMessage = userFriendly)
                     }
                 }
                 is Result.Loading -> {}
             }
         }
+    }
+
+    private suspend fun resolveCurrentUserId(maxRetries: Int = 4): Long? {
+        repeat(maxRetries) { attempt ->
+            val currentUser = getCurrentUserUseCase()
+            if (currentUser != null) return currentUser.idUsuario
+
+            if (attempt < maxRetries - 1) {
+                delay(250L * (attempt + 1))
+            }
+        }
+        return null
     }
 
     /**

@@ -18,12 +18,12 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = FallaTextPrimary,
     
     secondary = FallaSecondary,
-    onSecondary = Color.White,
+    onSecondary = FallaTextPrimary,
     secondaryContainer = FallaSecondaryLight,
     onSecondaryContainer = FallaTextPrimary,
     
     tertiary = FallaPrimaryDark,
-    onTertiary = Color.White,
+    onTertiary = Seashell,
     
     error = FallaError,
     onError = Color.White,
@@ -49,34 +49,34 @@ private val LightColorScheme = lightColorScheme(
  * Usa tonos beige oscuro cálidos en lugar de grises fríos.
  */
 private val DarkColorScheme = darkColorScheme(
-    primary = FallaPrimaryLight,
+    primary = LegacyPrimaryLight,
     onPrimary = FallaTextPrimary,
-    primaryContainer = FallaPrimaryDark,
+    primaryContainer = LegacyPrimaryDark,
     onPrimaryContainer = Color.White,
     
-    secondary = FallaSecondaryLight,
+    secondary = LegacySecondaryLight,
     onSecondary = FallaTextPrimary,
-    secondaryContainer = FallaSecondaryDark,
+    secondaryContainer = LegacySecondaryDark,
     onSecondaryContainer = Color.White,
     
-    tertiary = FallaPrimary,
+    tertiary = LegacyPrimary,
     onTertiary = Color.White,
     
     error = FallaErrorLight,
-    onError = FallaErrorDark,
+    onError = Color.White,
     errorContainer = FallaError,
     onErrorContainer = Color.White,
     
-    background = Color(0xFF2a1f1a),      // Beige oscuro cálido
-    onBackground = Color(0xFFf5e6d3),    // Beige muy claro
+    background = LegacyBackgroundDark,
+    onBackground = LegacyTextPrimaryDark,
 
-    surface = Color(0xFF3a2f2a),         // Beige oscuro para tarjetas
-    onSurface = Color(0xFFf5e6d3),       // Beige muy claro
-    surfaceVariant = Color(0xFF4a3f3a),  // Beige medio oscuro
-    onSurfaceVariant = Color(0xFFd4c4b0), // Beige medio
+    surface = LegacySurfaceDark,
+    onSurface = LegacyTextPrimaryDark,
+    surfaceVariant = LegacySurfaceVariantDark,
+    onSurfaceVariant = LegacyTextSecondaryDark,
 
-    outline = Color(0xFF5a4a4a),         // Marrón medio para bordes
-    outlineVariant = Color(0xFF4a3a3a),  // Marrón oscuro
+    outline = LegacyOutlineDark,
+    outlineVariant = LegacyOutlineVariantDark,
 
     scrim = Color.Black
 )

@@ -76,7 +76,6 @@ object KtorClient {
             // ====== Headers por defecto ======
             install(DefaultRequest) {
                 url(ApiConfig.BASE_URL)
-                contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 
                 // Headers comunes
@@ -131,7 +130,6 @@ object KtorClient {
             
             install(DefaultRequest) {
                 url(ApiConfig.BASE_URL)
-                contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
                 
                 // Agregar token JWT

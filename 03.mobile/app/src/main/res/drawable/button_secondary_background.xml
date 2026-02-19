@@ -3,7 +3,7 @@
     <!-- Estado presionado -->
     <item android:state_pressed="true">
         <shape>
-            <solid android:color="@color/primary_light"/>
+            <solid android:color="@color/border"/>
             <stroke android:color="@color/primary" android:width="2dp"/>
             <corners android:radius="@dimen/radius_sm"/>
         </shape>
@@ -20,7 +20,7 @@
     <item>
         <shape>
             <solid android:color="@color/card_background"/>
-            <stroke android:color="@color/primary" android:width="1.5dp"/>
+            <stroke android:color="@color/border" android:width="1.5dp"/>
             <corners android:radius="@dimen/radius_sm"/>
         </shape>
     </item>
