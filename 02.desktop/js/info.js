@@ -339,6 +339,8 @@ function populateForm(data) {
    console.log('  - foto:', data.foto);
    console.log('  - URL final encontrada:', uriBoceto);
    
+   if (el('fallaUrlBoceto')) el('fallaUrlBoceto').value = uriBoceto || '';
+   
    const bocetoImg = el('fallaBoceto');
    const bocetoContainer = bocetoImg ? bocetoImg.parentElement : null;
    
