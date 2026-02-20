@@ -149,8 +149,10 @@ function toggleEditMode() {
     fields.forEach((field) => {
       if (!nonEditableFields.includes(field.id)) {
         field.disabled = false;
+        field.readOnly = false;
       } else {
         field.disabled = true;
+        field.readOnly = true;
       }
     });
 
@@ -164,6 +166,7 @@ function toggleEditMode() {
   } else {
     fields.forEach((field) => {
       field.disabled = true;
+      field.readOnly = true;
     });
 
     editBtn.style.display = 'inline-flex';

@@ -1,401 +1,248 @@
-# FallApp - Plataforma de Fallas Falleras de Valencia
+# FallApp — Plataforma digital para las Fallas de Valencia
 
-> Plataforma digital para gestión, votación y promoción de las Fallas de Valencia
+FallApp es una plataforma para la gestión, consulta y promoción de las Fallas de Valencia. El repositorio incluye el **backend (API)**, un cliente **desktop**, una app **móvil Android** y recursos para **base de datos**.
 
-![Status](https://img.shields.io/badge/Status-En%20Desarrollo-yellow)
-![Java](https://img.shields.io/badge/Java-17%2B-red)
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
+La **API está desplegada en AWS** (no es necesario levantarla en local para usar los clientes).
 
-## Descripción
+---
 
-FallApp es una plataforma integral para la gestión digital de las Fallas de Valencia, que permite:
+## Autores
 
-- Catálogo de fallas y monumentos falleros
-- Galería de ninots (figuras) con detalle técnico
-- Sistema de votación y ranking
-- Comunidad de comentarios y opiniones
-- Calendario de eventos falleros
-- Gestión de usuarios con roles
-- Estadísticas y análisis
+- **Daniel Rodríguez Guerola** — GitHub: [@danrodgue](https://github.com/danrodgue)
+- **Gautier Bastidas Joly** — GitHub: [@gautierbastidas](https://github.com/gautierbastidas)
+- **Jose Burgos Martínez** — GitHub: [@Joseburgosmtnz](https://github.com/Joseburgosmtnz)
 
-## Stack Tecnológico
 
-### Backend
-- **Framework**: Spring Boot 3.x
-- **Lenguaje**: Java 17+
-- **ORM**: Hibernate/JPA
-- **Base de Datos**: PostgreSQL 13
-- **API**: REST + OpenAPI/Swagger
-- **Autenticación**: JWT
+
+---
+
+## Contenido del repositorio
+
+- **API (backend)**: `01.backend/` (Spring Boot).
+- **Desktop**: `02.desktop/` (Electron).
+- **Móvil (Android)**: `03.mobile/` (Kotlin + Jetpack Compose).
+- **Testing / utilidades**: `04.testing-dashboard/`, `06.tests/`.
+- **Docker (DB)**: `05.docker/` (PostgreSQL + pgAdmin).
+- **Datos y scripts SQL**: `07.datos/`.
+
+---
+
+## Funcionalidades principales
+
+- Catálogo/consulta de fallas y monumentos falleros.
+- Consulta de información asociada (ubicación, detalles, etc.).
+- Gestión de usuarios y autenticación mediante JWT.
+- Base para votaciones, comentarios y rankings (según el modelo de datos).
+- Cliente desktop para consumo de la API.
+- App móvil Android para consumo de la API.
+
+---
+
+## Tecnologías
+
+### Backend (API)
+- Java 17
+- Spring Boot (REST)
+- Spring Data JPA (Hibernate)
+- Spring Security + JWT
+- Validación (Bean Validation)
+- OpenAPI/Swagger (springdoc)
+- PostgreSQL
+- Email (Spring Boot Mail)
 
 ### Infraestructura
-- **Contenedorización**: Docker + Docker Compose
-- **Base de Datos**: PostgreSQL con volúmenes persistentes
-- **Gestión DB**: pgAdmin para desarrollo
-- **Control de Versiones**: Git + GitHub
+- API desplegada en AWS
+- Docker / Docker Compose (base de datos local y herramientas de desarrollo)
 
-### Frontend (Próximamente)
-- **Framework**: React 18 / Angular 16+
-- **UI**: TailwindCSS / Material Design
-- **Despliegue**: Vercel / Netlify
+### Desktop
+- Electron
+- Node.js / npm
+- electron-builder (distribución)
+- Jest (tests)
 
-## Estado del Proyecto
+### Móvil
+- Android (Kotlin)
+- Jetpack Compose + Material 3
+- Koin (inyección de dependencias)
+- Estructura por features (estilo Clean Architecture)
 
-| Componente | Estado | Detalles |
-|------------|--------|----------|
-| **Base de Datos PostgreSQL** | **COMPLETADO** | 347 fallas (253 con ubicación GPS), 346 ninots, 4 usuarios, 9 vistas, tests 85% |
-| **Backend Spring Boot API** | **OPERATIVO v0.5.0** | 50 endpoints REST, JWT implementado, CRUD, Ubicaciones GPS, servicio systemd |
-| **Despliegue Automático** | **CONFIGURADO** | Servicio systemd con autoarranque y reinicio automático |
-| **Frontend Desktop (Electron)** | Pendiente | |
-| **Tests Backend** | **COMPLETADO** | 27 tests unitarios, 0 fallos, 0 errores |
-| **Mobile Android** | Pendiente | |
-| **Docker Compose** | Operativo | PostgreSQL + pgAdmin |
+---
 
-**[Ver Checklist de Completitud](CHECKLIST.DESPLIEGUE.BD.md)** - Despliegue de Base de Datos
+## Arquitectura (visión rápida)
 
-### API Backend en Producción
+- Los clientes (Desktop y Android) consumen la **API REST**.
+- La API persiste información en **PostgreSQL**.
+- Para desarrollo de datos, se puede levantar PostgreSQL en local con Docker.
 
-**Estado actual:** **OPERATIVO** en http://35.180.21.42:8080
+---
 
-**Servicio systemd:**
-- Autoarranque al iniciar el sistema
-- Reinicio automático en caso de fallos
-- Logs centralizados con journald
-- Script de monitoreo rápido: `fallapp-status`
-- Gestión de usuarios: `fallapp-users`
+## API (AWS)
 
-**Comandos útiles:**
-```bash
-# Ver estado del servicio
-sudo systemctl status fallapp
-fallapp-status
+La API está desplegada en AWS.
 
-# Ver usuarios de la base de datos
-fallapp-users
+- Base URL: `http://35.180.21.42:8080`
+- Base path: `/api`
 
-# Reiniciar backend
-sudo systemctl restart fallapp
+Recomendación: centralizar cualquier cambio de URL en el cliente móvil:
+- `03.mobile/.../core/config/ApiConfig.kt`
 
-# Ver logs en tiempo real
-sudo journalctl -u fallapp -f
-```
+---
 
-**Documentación:**
-- [Servicio Systemd](04.docs/despliegue/SERVICIO-SYSTEMD.md)
-- [Gestión de Usuarios BD](04.docs/despliegue/GESTION-USUARIOS-BD.md)
+## Endpoints
 
-## Base de Datos
+Documentados en Swagger:
 
-### Estado Actual
-- **Motor**: PostgreSQL 13 Alpine
-- **Fallas importadas**: 346 (desde datos municipales)
-- **Usuarios de prueba**: 3 (admin, demo, casal)
-- **Tablas**: 6 (usuarios, fallas, eventos, ninots, votos, comentarios)
-- **Vistas**: 9 vistas especializadas para consultas
-- **Funciones**: 2 funciones SQL reutilizables
+- Swagger UI: **[ENLACE_SWAGGER_AQUI]**
 
-### Acceso Rápido
+---
 
-**PostgreSQL**:
-```bash
-Host: localhost:5432
-Base de datos: fallapp
-Usuario: fallapp_user
-Password: (ver .env)
-```
+## Requisitos
 
-**pgAdmin** (interfaz web): http://localhost:5050
+### Para usar / desarrollar Desktop
+- Node.js (LTS recomendado)
+- npm
 
-### Documentación
-- [CHECKLIST.DESPLIEGUE.BD.md](CHECKLIST.DESPLIEGUE.BD.md) - Checklist de completitud (85% cobertura tests)
-- [DESPLIEGUE.COMPLETADO.md](05.docker/DESPLIEGUE.COMPLETADO.md) - Estado completo del despliegue
-- [03.BASE-DATOS.md](04.docs/especificaciones/03.BASE-DATOS.md) - Especificación técnica
-- [Scripts SQL](07.datos/scripts/README.md) - Guía de scripts de inicialización
-- [Tests](06.tests/README.md) - Suite de tests automatizados (28/34 SQL + 10/27 E2E)
+### Para usar / desarrollar Móvil
+- Android Studio
+- Android SDK (ver `03.mobile/README.SETUP.md`)
 
-## Estructura del Proyecto
+### Para trabajar con BD local (opcional)
+- Docker
+- Docker Compose
 
-```
-FallApp/
-├── 01.backend/                 # Spring Boot API
-│   ├── src/main/java/         # Código fuente
-│   ├── src/main/resources/    # Configuración
-│   ├── pom.xml                 # Dependencias Maven
-│   └── Dockerfile              # Imagen Docker del backend
-│
-├── 02.frontend/                # Aplicación React/Angular (próximamente)
-│   ├── src/                    # Código fuente
-│   ├── package.json            # Dependencias npm
-│   └── Dockerfile              # Imagen Docker del frontend
-│
-├── 03.mobile/                  # Aplicación móvil (próximamente)
-│   ├── ios/                    # Código iOS
-│   └── android/                # Código Android
-│
-├── 04.docs/                    # Documentación del proyecto
-│   ├── arquitectura/           # ADRs (Architecture Decision Records)
-│   │   ├── ADR-001-postgresql-vs-mongodb.md
-│   │   ├── ADR-002-docker-local-development.md
-│   │   ├── ADR-003-nomenclatura-scripts-sql.md
-│   │   ├── ADR-004-postgis-opcional.md
-│   │   ├── ADR-005-vistas-vs-queries-backend.md
-│   │   ├── ADR-006-autenticacion-jwt-pendiente.md (Implementado)
-│   │   ├── ADR-007-formato-respuesta-api.md
-│   │   └── ADR-008-postgresql-enum-varchar.md (Resuelto)
-│   ├── especificaciones/       # Documentación técnica
-│   │   ├── 00.VISION-GENERAL.md
-│   │   ├── 01.SISTEMA-USUARIOS.md
-│   │   ├── 02.FALLAS.md
-│   │   └── 03.BASE-DATOS.md   # Especificación de BD
-│   ├── 01.GUIA-PROGRAMACION.md
-│   ├── 02.GUIA-PROMPTS-IA.md
-│   ├── NOMENCLATURA.FICHEROS.md # Convenciones de nombres
-│   └── LEEME.DESARROLLADORES.md
-│
-├── 05.docker/                  # Configuración Docker
-│   ├── docker-compose.yml      # Orquestación de servicios
-│   ├── .env.example            # Plantilla de variables
-│   ├── .env                    # Configuración local (gitignored)
-│   ├── README.md               # Guía completa Docker
-│   ├── DESPLIEGUE.COMPLETADO.md # Estado del despliegue actual
-│   └── postgres_data/          # Volumen persistente (gitignored)
-│
-├── 06.tests/                   # Pruebas automatizadas
-│   ├── integration/            # Tests de integración SQL
-│   ├── e2e/                    # Tests end-to-end (Docker)
-│   ├── performance/            # Tests de carga
-│   └── run_tests.sh            # Script de ejecución de tests
-│
-├── 07.datos/                   # Gestión de datos
-│   ├── raw/                    # Datos brutos (JSON, CSV)
-│   ├── transformado/           # Datos procesados
-│   ├── scripts/                # Scripts SQL (NN.tipo.sql)
-│   │   ├── 01.schema.sql      # Creación de tablas
-│   │   ├── 10.seed.usuarios.sql # Datos iniciales
-│   │   ├── 20.import.fallas.json # Importación de fallas
-│   │   └── 30.vistas.consultas.sql # Vistas y funciones
-│   ├── migracion/              # Scripts de migración
-│   ├── PROXIMOS.PASOS.md       # Hoja de ruta
-│   ├── APPLICATION.PROPERTIES.REFERENCIA.md
-│   └── README.md               # Guía de datos
-│
-├── 99.obsoleto/                # Código/docs deprecated
-│   └── [archivos viejos]
-│
-├── CHANGELOG.md                # Historial de cambios
-├── AUDITORIA.DESPLIEGUE.BD.md  # Auditoría del despliegue de BD
-├── .gitignore                  # Archivos ignorados
-└── README.md                   # Este archivo
-└── CONTRIBUTING.md             # Guía de contribución
+### Para desarrollar API (si aplica)
+- Java 17
+- Maven
 
-```
+---
 
-## Quick Start
+## Quick start
 
-### Requisitos Previos
-- Docker 20.10+
-- Docker Compose 1.29+
-- Git
-- Java 17+ (para desarrollo local)
-- Maven 3.8+ (para desarrollo local)
-
-### 1. Clonar Repositorio
+### 1) Clonar el repositorio
 ```bash
 git clone https://github.com/danrodgue/FallApp.git
 cd FallApp
 ```
 
-### 2. Configurar Variables de Entorno
+### 2) (Opcional) Levantar PostgreSQL + pgAdmin en local
+Si necesitas una base de datos local para pruebas o para ejecutar scripts SQL:
+
 ```bash
 cp 05.docker/.env.example .env
-# Editar .env con credenciales propias
+docker compose -f 05.docker/docker-compose.yml up -d postgres pgadmin
 ```
 
-### 3. Levantar Infraestructura
+- PostgreSQL: `localhost:5432`
+- pgAdmin: `http://localhost:5050`
+
+---
+
+## Desktop (Electron)
+
+### Instalar dependencias y ejecutar
 ```bash
-docker-compose up -d postgres pgAdmin backend
+cd 02.desktop
+npm install
+npm run start
 ```
 
-### 4. Verificar Servicios
+### Tests y build
 ```bash
-# Logs en vivo
-docker-compose logs -f backend
-
-# Health check
-curl http://localhost:8080/api/actuator/health
+npm run test
+npm run dist
 ```
 
-### 5. Acceder a las Aplicaciones
-- **API**: http://localhost:8080/api
-- **Swagger API Docs**: http://localhost:8080/api/swagger-ui.html
-- **pgAdmin (DB)**: http://localhost:5050
+---
 
-## Credenciales por Defecto
+## Móvil (Android)
 
-ADVERTENCIA: SOLO PARA DESARROLLO - Cambiar inmediatamente en producción
+### Configuración inicial
+- Ver `03.mobile/README.SETUP.md` (creación de `local.properties` por máquina).
 
-| Servicio | Usuario | Contraseña | URL |
-|----------|---------|-----------|-----|
-| API Admin | admin@fallapp.es | Admin@2024 | localhost:8080/api |
-| pgAdmin | admin@pgadmin.com | pgadmin | localhost:5050 |
-| PostgreSQL | fallapp_user | fallapp_password | localhost:5432 |
-| API Demo | demo@fallapp.es | Demo@2024 | localhost:8080/api |
+### Ejecución
+- Abrir `03.mobile/` con Android Studio y ejecutar el módulo `app`.
 
-## Documentación
+---
 
-### Para Desarrolladores
-- [Guía de Configuración Backend](04.docs/README.md)
-- [Especificación de Base de Datos](04.docs/especificaciones/03.BASE-DATOS.md)
-- [Scripts SQL](07.datos/scripts/README.md)
-- [Docker & Compose](05.docker/README.md)
-- [Próximos Pasos](07.datos/PROXIMOS.PASOS.md)
+## Estructura de carpetas (ejemplos)
 
-### Convenciones
-- [Nomenclatura de Ficheros](04.docs/NOMENCLATURA.FICHEROS.md) - Convenciones de nombres
-- [Guía de Commits](CONTRIBUTING.md) - Formato de commits git
-
-### API
-- [OpenAPI/Swagger](http://localhost:8080/api/swagger-ui.html) - Documentación interactiva
-
-## Módulos Principales
-
-### Backend (01.backend/)
-Aplicación Spring Boot con:
-- **Controllers**: REST APIs (`/api/fallas`, `/api/usuarios`, etc.)
-- **Services**: Lógica de negocio
-- **Repositories**: Acceso a datos (JPA)
-- **Entities**: Modelos de dominio
-- **DTOs**: Objetos de transferencia
-
-### Base de Datos (PostgreSQL)
-- **6 tablas principales**: usuarios, fallas, eventos, ninots, votos, comentarios
-- **Tipos ENUM**: rol_usuario, tipo_evento, tipo_voto, categoria_falla
-- **Vistas especializadas**: rankings, búsqueda full-text, estadísticas
-- **Índices optimizados**: FTS, UNIQUE, Foreign Keys
-
-### Docker
-- **Servicios**: PostgreSQL, Backend, pgAdmin
-- **Redes**: Bridge personalizado
-- **Volúmenes**: Persistencia de datos
-- **Health checks**: Monitoreo de servicios
-
-## Flujo de Desarrollo (SCRUM)
-
-**Sprint de 15 días con equipo de 3 personas**
-
-### Semana 1: Infraestructura
-- [x] PostgreSQL + Docker Compose
-- [x] Scripts SQL (schema, seeds, import)
-- [ ] Integración con backend
-- [ ] Tests de BD
-
-### Semana 2: Backend
-- [ ] Entidades JPA
-- [ ] Controllers REST
-- [ ] Services y DTOs
-- [ ] Tests unitarios
-
-### Semana 3: Frontend (Próximo Sprint)
-- [ ] Proyecto React/Angular
-- [ ] Componentes UI
-- [ ] Integración con API
-- [ ] Tests E2E
-
-## Testing
-
-```bash
-# Tests unitarios
-mvn test
-
-# Tests de integración
-mvn verify
-
-# Coverage
-mvn clean test jacoco:report
-
-# Performance
-docker-compose up -d & \
-  ab -n 1000 -c 10 http://localhost:8080/api/fallas
+### API (Backend) — `01.backend/`
+```text
+01.backend/
+├── pom.xml
+├── Dockerfile
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── com/
+    │   │       └── fallapp/
+    │   │           ├── controllers/
+    │   │           ├── services/
+    │   │           ├── repositories/
+    │   │           ├── entities/
+    │   │           ├── dto/
+    │   │           └── security/
+    │   └── resources/
+    │       ├── application.properties
+    │       └── ...
+    └── test/
+        └── java/
+            └── com/
+                └── fallapp/
+                    └── ...
 ```
 
-## Estadísticas del Proyecto
+### Desktop (Electron) — `02.desktop/`
+```text
+02.desktop/
+├── package.json
+├── package-lock.json
+├── main/
+│   └── index.js
+├── js/
+│   └── ...
+├── build/
+│   ├── icon.ico
+│   └── ...
+├── tools/
+│   └── convert_icon.js
+├── wdio.conf.js
+└── ...
+```
 
-| Métrica | Valor |
-|---------|-------|
-| Tablas BD | 6 |
-| Vistas SQL | 9 |
-| Funciones SQL | 2 |
-| Líneas SQL | ~850 |
-| Endpoints API | 20+ (desarrollo) |
-| Cobertura Testing | (por configurar) |
+### Móvil (Android) — `03.mobile/`
+```text
+03.mobile/
+├── README.SETUP.md
+├── local.properties.example
+└── app/
+    └── src/
+        └── main/
+            └── java/
+                └── com/
+                    └─�� fallapp/
+                        ├── core/
+                        │   ├── config/
+                        │   ├── di/
+                        │   ├── ui/
+                        │   │   └── theme/
+                        │   └── util/
+                        └── features/
+                            └── auth/
+                                ├── data/
+                                ├── domain/
+                                └── presentation/
+```
 
-## Próximas Fases
+---
 
-### Completado
-- [x] Planificación y arquitectura
-- [x] Especificación de BD
-- [x] Docker Compose + PostgreSQL
-- [x] Scripts SQL
+## Convenciones y notas
 
-### En Progreso
-- [ ] Integración backend (Semana 1)
-- [ ] APIs REST (Semana 2)
-- [ ] Testing automatizado (Semana 2-3)
+- La URL de la API se gestiona de forma centralizada en el cliente móvil para facilitar cambios de entorno.
+- Para desarrollo, la base de datos puede recrearse con scripts SQL en `07.datos/`.
 
-### Por Iniciar
-- [ ] Interfaz web (Frontend)
-- [ ] Aplicación móvil
-- [ ] CI/CD (GitHub Actions)
-- [ ] Despliegue en producción
-
-Ver [Próximos Pasos Detallados](07.datos/PROXIMOS.PASOS.md)
-
-## Contribuir
-
-Este proyecto está en fase de desarrollo inicial.
-
-### Equipo Actual
-- **Daniel Rodríguez** (Lead)
-- [Team Members](CONTRIBUTING.md)
-
-### Cómo Contribuir
-1. Crear rama desde `main`: `git checkout -b feature/mi-caracteristica`
-2. Hacer cambios y commits siguiendo [convenciones](CONTRIBUTING.md)
-3. Push a rama: `git push origin feature/mi-caracteristica`
-4. Crear Pull Request con descripción detallada
-
-### Reportar Issues
-Ver [Issues del Proyecto](https://github.com/danrodgue/FallApp/issues)
+---
 
 ## Licencia
 
-### Código
-
-El código fuente de FallApp (backend, desktop, móvil, scripts y documentación)
-es **software propietario**.  
-Copyright (c) 2026,
-Daniel Rodríguez Guerola, Gautier Bastidas Joly y Jose Burgos Martínez.  
-**Todos los derechos reservados.**
-
-- No se permite su copia, modificación, redistribución ni uso comercial sin
-  autorización expresa y por escrito de los autores.
-- El código se entrega al profesorado y al centro educativo **únicamente** para
-  evaluación académica del proyecto intermodular de DAM.
-
-### Datos de terceros
-
-Parte de los datos de la base de datos (por ejemplo, información y ubicaciones
-de fallas) proceden del Ayuntamiento de Valencia y se ofrecen bajo licencia
-[Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
-
-Los autores de FallApp **no son propietarios** de dichos datos. Cualquier uso
-de estos datos debe cumplir con los términos de la licencia CC BY 4.0,
-incluyendo la atribución adecuada al Ayuntamiento de Valencia y a la fuente
-original de los datos.
-
-## Contacto
-
-Si necesitas más información, propuestas de mejora o ayuda con el despliegue,
-abre un issue en el repositorio o contacta con los responsables del proyecto.
+Ver `LICENSE`.
