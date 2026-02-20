@@ -47,16 +47,6 @@ public class VotoController {
                 .body(ApiResponse.success("Voto registrado", voto));
     }
 
-    @GetMapping("/mis-votos")
-    @Operation(summary = "Obtener mis votos (usuario del token)")
-    public ResponseEntity<ApiResponse<List<VotoDTO>>> obtenerMisVotos(
-            @AuthenticationPrincipal UserDetails userDetails) {
-        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
-        List<VotoDTO> votos = votoService.obtenerVotosUsuario(usuario.getIdUsuario());
-        return ResponseEntity.ok(ApiResponse.success(votos));
-    }
-
     @GetMapping("/usuario/{idUsuario}")
     @Operation(summary = "Obtener votos de un usuario")
     public ResponseEntity<ApiResponse<List<VotoDTO>>> obtenerVotosUsuario(

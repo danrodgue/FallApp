@@ -40,7 +40,7 @@ class VotosRepositoryImpl(
 
             // El backend puede no devolver un VotoDTO completo en `datos`,
             // pero para la UI solo necesitamos saber que se ha registrado el voto.
-            // El listado real de votos se vuelve a cargar desde /votos/mis-votos.
+            // El listado real de votos se vuelve a cargar desde GET /votos/usuario/{idUsuario}.
             val dummyVoto = Voto(
                 idVoto = -1L,
                 idUsuario = -1L,

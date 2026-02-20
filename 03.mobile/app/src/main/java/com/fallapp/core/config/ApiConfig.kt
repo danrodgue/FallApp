@@ -148,11 +148,8 @@ object ApiConfig {
         
         // -------------------- VOTOS --------------------
         
-        /** POST - Crear voto / GET - Mis votos */
+        /** POST - Crear voto / GET - Mis votos (usa GET /votos/usuario/{idUsuario}) */
         const val VOTOS = "$API_PATH/votos"
-        
-        /** GET - Mis votos */
-        const val MIS_VOTOS = "$API_PATH/votos/mis-votos"
         
         // -------------------- COMENTARIOS --------------------
         
