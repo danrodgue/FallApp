@@ -34,14 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const passwordOk = validacion
       ? validacion.validarCampo(campoPassword, validacion.passwordValida(password, 1), 'La contraseña es obligatoria.')
       : String(password || '').length > 0;
-
     if (!emailOk) {
-      campoEmail.reportValidity();
+      mostrarError('Escribe un email válido.');
+      try { campoEmail.reportValidity(); } catch (e) {}
       return false;
     }
 
     if (!passwordOk) {
-      campoPassword.reportValidity();
+      mostrarError('La contraseña es obligatoria.');
+      try { campoPassword.reportValidity(); } catch (e) {}
       return false;
     }
 
