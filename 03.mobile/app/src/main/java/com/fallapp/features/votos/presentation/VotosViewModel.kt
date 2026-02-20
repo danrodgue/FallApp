@@ -10,17 +10,15 @@ import com.fallapp.features.fallas.domain.model.Voto
 import com.fallapp.features.fallas.domain.model.VotoRequest
 import com.fallapp.features.fallas.domain.usecase.GetFallasUseCase
 import com.fallapp.features.fallas.domain.usecase.GetVotosFallaUseCase
-import com.fallapp.features.fallas.domain.usecase.GetVotosUsuarioUseCase
+import com.fallapp.features.fallas.domain.usecase.GetMisVotosUseCase
 import com.fallapp.features.fallas.domain.usecase.VotarFallaUseCase
 import com.fallapp.features.fallas.domain.usecase.EliminarVotoUseCase
-import com.fallapp.features.auth.domain.usecase.GetCurrentUserUseCase
 import com.fallapp.features.fallas.domain.usecase.CrearComentarioUseCase
 import com.fallapp.features.fallas.domain.usecase.GetRankingUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -29,10 +27,9 @@ import kotlinx.coroutines.launch
 class VotosViewModel(
     private val getFallasUseCase: GetFallasUseCase,
     private val votarFallaUseCase: VotarFallaUseCase,
-    private val getVotosUsuarioUseCase: GetVotosUsuarioUseCase,
+    private val getMisVotosUseCase: GetMisVotosUseCase,
     private val eliminarVotoUseCase: EliminarVotoUseCase,
     private val getVotosFallaUseCase: GetVotosFallaUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val getRankingUseCase: GetRankingUseCase,
     private val crearComentarioUseCase: CrearComentarioUseCase
 ) : ViewModel() {
@@ -97,23 +94,11 @@ class VotosViewModel(
      */
     private fun loadMisVotos() {
         viewModelScope.launch {
-            val userId = resolveCurrentUserId()
-            if (userId == null) {
-                _uiState.update {
-                    it.copy(
-                        misVotos = emptyList(),
-                        errorMessage = "No se pudo cargar tus votos. Vuelve a abrir la pestaña de Votos."
-                    )
-                }
-                return@launch
-            }
-
-            when (val result = getVotosUsuarioUseCase(userId)) {
+            when (val result = getMisVotosUseCase()) {
                 is Result.Success -> {
                     _uiState.update {
                         it.copy(misVotos = result.data)
                     }
-                    // Recalcular mazo de fallas a partir de los votos actuales
                     _uiState.update { state ->
                         state.copy(
                             fallasParaVotar = buildDeck(state.fallas, result.data)
@@ -136,18 +121,6 @@ class VotosViewModel(
                 is Result.Loading -> {}
             }
         }
-    }
-
-    private suspend fun resolveCurrentUserId(maxRetries: Int = 4): Long? {
-        repeat(maxRetries) { attempt ->
-            val currentUser = getCurrentUserUseCase()
-            if (currentUser != null) return currentUser.idUsuario
-
-            if (attempt < maxRetries - 1) {
-                delay(250L * (attempt + 1))
-            }
-        }
-        return null
     }
 
     /**

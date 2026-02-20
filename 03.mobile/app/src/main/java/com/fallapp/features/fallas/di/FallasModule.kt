@@ -52,6 +52,7 @@ val fallasModule = module {
     // Use cases votos
     factory { VotarFallaUseCase(repository = get()) }
     factory { GetVotosUsuarioUseCase(repository = get()) }
+    factory { GetMisVotosUseCase(repository = get()) }
     factory { EliminarVotoUseCase(repository = get()) }
     factory { GetVotosFallaUseCase(repository = get()) }
     factory { GetRankingUseCase(apiService = get()) }
@@ -79,10 +80,9 @@ val fallasModule = module {
         VotosViewModel(
             getFallasUseCase = get(),
             votarFallaUseCase = get(),
-            getVotosUsuarioUseCase = get(),
+            getMisVotosUseCase = get(),
             eliminarVotoUseCase = get(),
             getVotosFallaUseCase = get(),
-            getCurrentUserUseCase = get(),
             getRankingUseCase = get(),
             crearComentarioUseCase = get()
         )

@@ -59,14 +59,30 @@ class VotosRepositoryImpl(
         }
     }
     
+    override suspend fun getMisVotos(): Result<List<Voto>> {
+        return try {
+            val response = apiService.getMisVotos()
+            if (response.exito && response.datos != null) {
+                Result.Success(response.datos.map { it.toDomain() })
+            } else {
+                Result.Error(
+                    exception = Exception(response.mensaje ?: "Error al obtener votos"),
+                    message = response.mensaje
+                )
+            }
+        } catch (e: Exception) {
+            Result.Error(
+                exception = e,
+                message = e.message ?: "Error de conexión al obtener votos"
+            )
+        }
+    }
+
     override suspend fun getVotosUsuario(idUsuario: Long): Result<List<Voto>> {
         return try {
-            // Usamos endpoint GET /api/votos/usuario/{idUsuario}
             val response = apiService.getVotosUsuario(idUsuario)
-
             if (response.exito && response.datos != null) {
-                val votosDto = response.datos
-                Result.Success(votosDto.map { it.toDomain() })
+                Result.Success(response.datos.map { it.toDomain() })
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos"),

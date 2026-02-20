@@ -21,12 +21,8 @@ interface VotosRepository {
      */
     suspend fun crearVoto(request: VotoRequest): Result<Voto>
     
-    /**
-     * Obtiene los votos de un usuario específico.
-     * 
-     * @param idUsuario ID del usuario
-     * @return Result con lista de votos o error
-     */
+    suspend fun getMisVotos(): Result<List<Voto>>
+
     suspend fun getVotosUsuario(idUsuario: Long): Result<List<Voto>>
     
     /**

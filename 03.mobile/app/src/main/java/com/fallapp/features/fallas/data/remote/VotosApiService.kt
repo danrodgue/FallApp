@@ -48,18 +48,11 @@ class VotosApiService(
             setBody(request)
         }.body()
 
-    /**
-     * Obtiene los votos del usuario actual a partir del token JWT.
-     *
-     * El backend devuelve ApiResponse<List<VotoDTO>> (no paginado),
-     * así que aquí modelamos `datos` como una lista plana.
-     */
-    /**
-     * Obtiene los votos del usuario indicado.
-     *
-     * Se usa el endpoint de la guía:
-     *   GET /api/votos/usuario/{idUsuario}
-     */
+    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> =
+        client.get("${ApiConfig.API_PATH}/votos/mis-votos") {
+            attachAuthHeader()
+        }.body()
+
     suspend fun getVotosUsuario(idUsuario: Long): ApiResponse<List<VotoDto>> =
         client.get("${ApiConfig.API_PATH}/votos/usuario/$idUsuario") {
             attachAuthHeader()
