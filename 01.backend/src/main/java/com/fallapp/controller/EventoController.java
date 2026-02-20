@@ -112,6 +112,7 @@ public class EventoController {
      * Requiere autenticación (admin o usuario de la falla)
      */
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserDetails)) {
@@ -122,7 +123,8 @@ public class EventoController {
         if (usuario == null) {
             return ResponseEntity.status(403).body(ApiResponse.error("No autorizado"));
         }
-        boolean permitido = usuario.getRol() == RolUsuario.admin || usuario.getRol() == RolUsuario.casal;
+        RolUsuario rol = usuario.getRol();
+        boolean permitido = rol != null && (rol == RolUsuario.admin || rol == RolUsuario.casal);
         if (!permitido) {
             return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para eliminar este evento"));
         }
