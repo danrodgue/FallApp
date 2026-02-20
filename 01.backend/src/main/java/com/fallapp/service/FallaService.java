@@ -327,4 +327,4 @@ public class FallaService {
                     "Categoría no válida. Valores permitidos: especial, primera, segunda, tercera, cuarta, quinta, sin_categoria");
             }
         }
-    }
+    }}

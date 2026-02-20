@@ -86,50 +86,71 @@ public class EventoController {
 
     /**
      * POST /api/eventos - Crear nuevo evento
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere: ADMIN o usuario casal asociado a la falla del evento
      */
     @PostMapping
     public ResponseEntity<ApiResponse<EventoDTO>> crear(
             @RequestBody @jakarta.validation.Valid EventoDTO eventoDTO) {
+        Usuario usuario = getUsuarioAutenticado();
+        if (!esPermitido(usuario, eventoDTO.getIdFalla())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para crear eventos en esta falla"));
+        }
         EventoDTO eventoCreado = eventoService.crear(eventoDTO);
         return ResponseEntity.status(201).body(ApiResponse.success("Evento creado exitosamente", eventoCreado));
     }
 
     /**
      * PUT /api/eventos/{id} - Actualizar evento existente
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere: ADMIN o usuario casal asociado a la falla del evento
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<EventoDTO>> actualizar(
             @PathVariable Long id,
             @RequestBody @jakarta.validation.Valid EventoDTO eventoDTO) {
+        EventoDTO eventoExistente = eventoService.obtenerPorId(id);
+        Usuario usuario = getUsuarioAutenticado();
+        if (!esPermitido(usuario, eventoExistente.getIdFalla())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para modificar eventos de esta falla"));
+        }
         EventoDTO eventoActualizado = eventoService.actualizar(id, eventoDTO);
         return ResponseEntity.ok(ApiResponse.success("Evento actualizado exitosamente", eventoActualizado));
     }
 
     /**
      * DELETE /api/eventos/{id} - Eliminar evento
-     * Requiere autenticación (admin o usuario de la falla)
+     * Requiere: ADMIN o usuario casal asociado a la falla del evento
      */
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(403).body(ApiResponse.error("No autorizado"));
-        }
-        String email = ((UserDetails) auth.getPrincipal()).getUsername();
-        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
-        if (usuario == null) {
-            return ResponseEntity.status(403).body(ApiResponse.error("No autorizado"));
-        }
-        RolUsuario rol = usuario.getRol();
-        boolean permitido = rol != null && (rol == RolUsuario.admin || rol == RolUsuario.casal);
-        if (!permitido) {
-            return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para eliminar este evento"));
+        EventoDTO eventoExistente = eventoService.obtenerPorId(id);
+        Usuario usuario = getUsuarioAutenticado();
+        if (!esPermitido(usuario, eventoExistente.getIdFalla())) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para eliminar eventos de esta falla"));
         }
         eventoService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.success("Evento eliminado exitosamente", null));
+    }
+
+    // ── Helpers de autorización ──────────────────────────────────────────────
+
+    private Usuario getUsuarioAutenticado() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserDetails)) {
+            return null;
+        }
+        String email = ((UserDetails) auth.getPrincipal()).getUsername();
+        return usuarioRepository.findByEmail(email).orElse(null);
+    }
+
+    private boolean esPermitido(Usuario usuario, Long idFalla) {
+        if (usuario == null) return false;
+        RolUsuario rol = usuario.getRol();
+        if (rol == RolUsuario.admin) return true;
+        if (rol == RolUsuario.casal && usuario.getFalla() != null
+                && idFalla != null
+                && idFalla.equals(usuario.getFalla().getIdFalla())) return true;
+        return false;
     }
 
     /**
