@@ -34,7 +34,7 @@ class VotosRepositoryImpl(
             if (!response.exito) {
                 return Result.Error(
                     exception = Exception(response.mensaje ?: "Error al crear voto"),
-                    message = response.mensaje
+                    message = response.mensaje ?: "No se pudo registrar tu voto"
                 )
             }
 
@@ -52,9 +52,16 @@ class VotosRepositoryImpl(
             )
             Result.Success(dummyVoto)
         } catch (e: Exception) {
+            val errorMsg = when {
+                e.message?.contains("nn not found", ignoreCase = true) == true ->
+                    "Error al procesar tu voto. Por favor intenta de nuevo."
+                e.message?.contains("Sesión expirada", ignoreCase = true) == true ->
+                    "Tu sesión ha expirado. Por favor inicia sesión de nuevo."
+                else -> e.message ?: "Error de conexión al votar"
+            }
             Result.Error(
                 exception = e,
-                message = e.message ?: "Error de conexión al crear voto"
+                message = errorMsg
             )
         }
     }
@@ -67,13 +74,24 @@ class VotosRepositoryImpl(
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos"),
-                    message = response.mensaje
+                    message = response.mensaje ?: "Error desconocido al obtener votos"
                 )
             }
         } catch (e: Exception) {
+            val errorMsg = when {
+                e.message?.contains("no soporta este endpoint", ignoreCase = true) == true ->
+                    "El servidor está en mantenimiento. Intenta más tarde."
+                e.message?.contains("nn not found", ignoreCase = true) == true ->
+                    "Error al sincronizar tus votos. Por favor recarga la pantalla."
+                e.message?.contains("Sesión expirada", ignoreCase = true) == true ->
+                    e.message ?: "Tu sesión ha expirado"
+                e.message?.contains("405", ignoreCase = true) == true ->
+                    "El servidor no está respondiendo correctamente. Intenta más tarde."
+                else -> e.message ?: "Error de conexión al obtener votos"
+            }
             Result.Error(
                 exception = e,
-                message = e.message ?: "Error de conexión al obtener votos"
+                message = errorMsg
             )
         }
     }
@@ -86,13 +104,18 @@ class VotosRepositoryImpl(
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos"),
-                    message = response.mensaje
+                    message = response.mensaje ?: "Error desconocido al obtener votos"
                 )
             }
         } catch (e: Exception) {
+            val errorMsg = when {
+                e.message?.contains("nn not found", ignoreCase = true) == true ->
+                    "Error al parsear votos del usuario. Intenta recargar."
+                else -> e.message ?: "Error de conexión"
+            }
             Result.Error(
                 exception = e,
-                message = e.message ?: "Error de conexión al obtener votos"
+                message = errorMsg
             )
         }
     }
@@ -106,13 +129,18 @@ class VotosRepositoryImpl(
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al eliminar voto"),
-                    message = response.mensaje
+                    message = response.mensaje ?: "No se pudo eliminar el voto"
                 )
             }
         } catch (e: Exception) {
+            val errorMsg = when {
+                e.message?.contains("nn not found", ignoreCase = true) == true ->
+                    "Error al procesar la eliminación del voto. Intenta de nuevo."
+                else -> e.message ?: "Error de conexión"
+            }
             Result.Error(
                 exception = e,
-                message = e.message ?: "Error de conexión al eliminar voto"
+                message = errorMsg
             )
         }
     }
@@ -130,13 +158,18 @@ class VotosRepositoryImpl(
             } else {
                 Result.Error(
                     exception = Exception(response.mensaje ?: "Error al obtener votos de la falla"),
-                    message = response.mensaje
+                    message = response.mensaje ?: "Error desconocido"
                 )
             }
         } catch (e: Exception) {
+            val errorMsg = when {
+                e.message?.contains("nn not found", ignoreCase = true) == true ->
+                    "Error al parsear votos de la falla. Intenta recargar."
+                else -> e.message ?: "Error de conexión"
+            }
             Result.Error(
                 exception = e,
-                message = e.message ?: "Error de conexión al obtener votos de la falla"
+                message = errorMsg
             )
         }
     }

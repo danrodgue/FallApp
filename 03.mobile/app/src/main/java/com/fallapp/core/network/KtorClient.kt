@@ -47,10 +47,13 @@ object KtorClient {
             // ====== JSON Serialization ======
             install(ContentNegotiation) {
                 json(Json {
-                    prettyPrint = true
+                    prettyPrint = false
                     isLenient = true
                     ignoreUnknownKeys = true // Ignora campos extras del backend
                     encodeDefaults = true
+                    coerceInputValues = true // Coerces default values for missing fields
+                    allowSpecialFloatingPointValues = true
+                    allowStructuredMapKeys = true
                 })
             }
 
@@ -104,10 +107,13 @@ object KtorClient {
             // Reutilizar configuración base
             install(ContentNegotiation) {
                 json(Json {
-                    prettyPrint = true
+                    prettyPrint = false
                     isLenient = true
                     ignoreUnknownKeys = true
                     encodeDefaults = true
+                    coerceInputValues = true
+                    allowSpecialFloatingPointValues = true
+                    allowStructuredMapKeys = true
                 })
             }
 

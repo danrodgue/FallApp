@@ -107,12 +107,17 @@ class VotosViewModel(
                 }
                 is Result.Error -> {
                     val msg = result.message ?: ""
-                    val userFriendly = if (
-                        msg.contains("Request method 'GET' is not supported", ignoreCase = true)
-                    ) {
-                        "La API de votos no respondió correctamente. Reintenta en unos segundos."
-                    } else {
-                        msg.ifBlank { "Error al cargar tus votos" }
+                    val userFriendly = when {
+                        msg.contains("no está respondiendo correctamente", ignoreCase = true) ||
+                        msg.contains("en mantenimiento", ignoreCase = true) ->
+                            "El servidor está en mantenimiento. Intenta en unos minutos."
+                        msg.contains("Request method 'GET' is not supported", ignoreCase = true) ->
+                            "El servidor está en mantenimiento. Intenta en unos minutos."
+                        msg.contains("nn not found", ignoreCase = true) ->
+                            "Error al sincronizar tus votos. Por favor recarga la pantalla."
+                        msg.contains("Sesión expirada", ignoreCase = true) ->
+                            "Tu sesión ha expirado. Por favor inicia sesión de nuevo."
+                        else -> msg.ifBlank { "Error al cargar tus votos" }
                     }
                     _uiState.update {
                         it.copy(errorMessage = userFriendly)
@@ -188,12 +193,15 @@ class VotosViewModel(
                 }
                 is Result.Error -> {
                     val raw = result.message ?: ""
-                    val userFriendly = if (raw.contains("JDBC exception executing", ignoreCase = true)
-                        || raw.contains("operator does not exist: tipo_voto", ignoreCase = true)
-                    ) {
-                        "No se ha podido registrar tu voto por un problema en el servidor. Inténtalo más tarde."
-                    } else {
-                        raw.ifBlank { "Error al votar" }
+                    val userFriendly = when {
+                        raw.contains("JDBC exception executing", ignoreCase = true) ||
+                        raw.contains("operator does not exist: tipo_voto", ignoreCase = true) ->
+                            "No se ha podido registrar tu voto por un problema en el servidor. Inténtalo más tarde."
+                        raw.contains("nn not found", ignoreCase = true) ->
+                            "Error al procesar tu voto. Por favor intenta de nuevo."
+                        raw.contains("Sesión expirada", ignoreCase = true) ->
+                            "Tu sesión ha expirado. Por favor inicia sesión de nuevo."
+                        else -> raw.ifBlank { "Error al votar" }
                     }
                     _uiState.update {
                         it.copy(

@@ -40,37 +40,64 @@ class VotosApiService(
      * Por eso modelamos `datos` como `JsonElement` y dejamos que
      * la capa de repositorio simplemente use el flag `exito`/`mensaje`.
      */
-    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<JsonElement> =
-        client.post(ApiConfig.Endpoints.VOTOS) {
-            contentType(ContentType.Application.Json)
-            attachAuthHeader()
-            // request now includes `idFalla` (server expects idFalla)
-            setBody(request)
-        }.body()
+    suspend fun crearVoto(request: VotoRequestDto): ApiResponse<JsonElement> {
+        return try {
+            client.post(ApiConfig.Endpoints.VOTOS) {
+                contentType(ContentType.Application.Json)
+                attachAuthHeader()
+                // request now includes `idFalla` (server expects idFalla)
+                setBody(request)
+            }.body()
+        } catch (e: Exception) {
+            throw ApiException("Error al crear voto: ${e.message}")
+        }
+    }
 
-    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> =
-        client.get("${ApiConfig.API_PATH}/votos/mis-votos") {
-            attachAuthHeader()
-        }.body()
+    suspend fun getMisVotos(): ApiResponse<List<VotoDto>> {
+        return try {
+            val userId = tokenManager.getUserId()
+                ?: throw ApiException("No se pudo obtener el ID de usuario.")
+            client.get("${ApiConfig.API_PATH}/votos/usuario/$userId") {
+                attachAuthHeader()
+            }.body()
+        } catch (e: Exception) {
+            throw ApiException("Error al obtener mis votos: ${e.message}")
+        }
+    }
 
-    suspend fun getVotosUsuario(idUsuario: Long): ApiResponse<List<VotoDto>> =
-        client.get("${ApiConfig.API_PATH}/votos/usuario/$idUsuario") {
-            attachAuthHeader()
-        }.body()
+    suspend fun getVotosUsuario(idUsuario: Long): ApiResponse<List<VotoDto>> {
+        return try {
+            client.get("${ApiConfig.API_PATH}/votos/usuario/$idUsuario") {
+                attachAuthHeader()
+            }.body()
+        } catch (e: Exception) {
+            throw ApiException("Error al obtener votos del usuario: ${e.message}")
+        }
+    }
 
-    suspend fun eliminarVoto(idVoto: Long): ApiResponse<Unit> =
-        client.delete("${ApiConfig.Endpoints.VOTOS}/$idVoto") {
-            attachAuthHeader()
-        }.body()
+    suspend fun eliminarVoto(idVoto: Long): ApiResponse<Unit> {
+        return try {
+            client.delete("${ApiConfig.Endpoints.VOTOS}/$idVoto") {
+                attachAuthHeader()
+            }.body()
+        } catch (e: Exception) {
+            throw ApiException("Error al eliminar voto: ${e.message}")
+        }
+    }
 
     /**
      * Obtiene los votos asociados a una falla concreta.
      *
      * El backend devuelve ApiResponse<List<VotoDTO>> (no paginado).
      */
-    suspend fun getVotosFalla(idFalla: Long): ApiResponse<List<VotoDto>> =
-        client.get("${ApiConfig.API_PATH}/votos/falla/$idFalla") {
-            attachAuthHeader()
-        }.body()
+    suspend fun getVotosFalla(idFalla: Long): ApiResponse<List<VotoDto>> {
+        return try {
+            client.get("${ApiConfig.API_PATH}/votos/falla/$idFalla") {
+                attachAuthHeader()
+            }.body()
+        } catch (e: Exception) {
+            throw ApiException("Error al obtener votos de la falla: ${e.message}")
+        }
+    }
 }
 
