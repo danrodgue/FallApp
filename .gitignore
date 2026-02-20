@@ -11,6 +11,9 @@ yarn-error.log*
 # Electron / builds
 dist/
 build/
+releases/
+releases/*.exe
+releases/*.zip
 
 # OS
 .DS_Store
