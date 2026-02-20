@@ -39,6 +39,13 @@ android {
             versionNameSuffix = "-DEBUG"
         }
     }
+
+    applicationVariants.all {
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "FallApp.apk"
+        }
+    }
     
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -4,6 +4,7 @@ import com.fallapp.dto.FallaDTO;
 import com.fallapp.dto.PaginatedResponse;
 import com.fallapp.dto.UbicacionDTO;
 import com.fallapp.model.Falla;
+import com.fallapp.exception.BadRequestException;
 import com.fallapp.exception.ResourceNotFoundException;
 import com.fallapp.repository.FallaRepository;
 import lombok.RequiredArgsConstructor;
@@ -294,8 +295,20 @@ public class FallaService {
             entidad.setTelefonoContacto(null);
         }
         entidad.setEmailContacto(dto.getEmailContacto());
-        
-        if (dto.getCategoria() != null) {
-            entidad.setCategoria(Falla.CategoriaFalla.valueOf(dto.getCategoria().toLowerCase()));
+
+        // Categoría: solo actualizar si viene no vacía y es válida (evita 500 por valueOf inválido)
+        String cat = dto.getCategoria();
+        if (cat != null && !cat.isBlank()) {
+            try {
+                String normalized = cat.trim().toLowerCase().replace(' ', '_');
+                // Aceptar variantes comunes: primera_a, primera_a -> primera
+                if ("primera_a".equals(normalized)) normalized = "primera";
+                if ("segunda_a".equals(normalized)) normalized = "segunda";
+                if ("tercera_a".equals(normalized)) normalized = "tercera";
+                entidad.setCategoria(Falla.CategoriaFalla.valueOf(normalized));
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException(
+                    "Categoría no válida. Valores permitidos: especial, primera, segunda, tercera, cuarta, quinta, sin_categoria");
+            }
         }
-    }}
+    }
