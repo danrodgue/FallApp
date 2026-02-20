@@ -20,7 +20,9 @@
     },
     "devDependencies": {
         "electron": "^40.0.0",
-        "electron-builder": "^23.6.0"
+        "electron-builder": "^23.6.0",
+        "jimp": "^1.6.0",
+        "png-to-ico": "^3.0.1"
     },
     "build": {
         "appId": "com.fallapp.desktop",
