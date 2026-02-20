@@ -255,7 +255,16 @@ public class FallaService {
      */
     private void mapearDTOAEntidad(FallaDTO dto, Falla entidad) {
         entidad.setNombre(dto.getNombre());
-        entidad.setSeccion(dto.getSeccion());
+        // Validar y normalizar `seccion` (máx 5 caracteres)
+        if (dto.getSeccion() != null) {
+            String seccion = dto.getSeccion().trim();
+            if (seccion.length() > 5) {
+                throw new BadRequestException("La sección no puede tener más de 5 caracteres");
+            }
+            entidad.setSeccion(seccion);
+        } else {
+            entidad.setSeccion(null);
+        }
         entidad.setFallera(dto.getFallera());
         entidad.setPresidente(dto.getPresidente());
         entidad.setArtista(dto.getArtista());
@@ -274,7 +283,16 @@ public class FallaService {
         
         entidad.setDescripcion(dto.getDescripcion());
         entidad.setWebOficial(dto.getWebOficial());
-        entidad.setTelefonoContacto(dto.getTelefonoContacto());
+        // Normalizar teléfono: quitar caracteres no numéricos y validar longitud
+        if (dto.getTelefonoContacto() != null) {
+            String telefono = dto.getTelefonoContacto().replaceAll("\\D", "");
+            if (telefono.length() > 20) {
+                throw new BadRequestException("El teléfono debe tener como máximo 20 dígitos");
+            }
+            entidad.setTelefonoContacto(telefono);
+        } else {
+            entidad.setTelefonoContacto(null);
+        }
         entidad.setEmailContacto(dto.getEmailContacto());
         
         if (dto.getCategoria() != null) {
