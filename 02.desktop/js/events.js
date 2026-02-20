@@ -479,14 +479,19 @@ async function saveFromForm(){
 async function deleteEvent(id){
   if(!confirm('¿Eliminar este evento?')) return;
   try{
-    await eliminarEvento(id);
+    const token = localStorage.getItem('fallapp_token');
+    if (window.api && window.api.deleteEvent && token) {
+      await window.api.deleteEvent(id, token);
+    } else {
+      await eliminarEvento(id);
+    }
     events = events.filter(x => x.id_evento !== parseInt(id) && x.idEvento !== parseInt(id) && x.id !== id); 
     saveLocal(); 
     renderList(currentSearchValue() || '');
     showNotification('Evento eliminado correctamente', 'success');
   }catch(e){
     console.error('Error deleting event:', e);
-    showNotification(`Error al eliminar evento: ${e.message}`, 'error');
+    showNotification(e.message || String(e), 'error');
   }
 }
 

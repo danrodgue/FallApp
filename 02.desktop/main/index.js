@@ -127,11 +127,18 @@ ipcMain.handle('update-event', async (evt, payload) => {
   }
 });
 
-ipcMain.handle('delete-event', async (evt, id) => {
+ipcMain.handle('delete-event', async (evt, id, token) => {
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
     const res = await fetch(`${API_BASE}/api/eventos/${id}`, { 
-      method: 'DELETE' 
+      method: 'DELETE',
+      headers
     });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || `Error ${res.status}`);
+    }
     return res.status === 204 || res.ok;
   } catch (error) {
     console.error('Error deleting event:', error);

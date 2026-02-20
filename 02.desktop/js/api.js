@@ -190,19 +190,24 @@ async function actualizarEvento(id, datos) {
 }
 
 async function eliminarEvento(id) {
-  try {
-    const respuesta = await fetch(`${API_EVENTOS_URL}/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    });
-    if (!respuesta.ok) {
-      const error = await parseErrorResponse(respuesta);
-      throw new Error(error);
+  const respuesta = await fetch(`${API_EVENTOS_URL}/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  if (!respuesta.ok) {
+    const texto = await respuesta.text();
+    let detalle = '';
+    try {
+      const data = texto ? JSON.parse(texto) : {};
+      const msg = data.mensaje || data.message || (data.error && (data.error.mensaje || data.error.message || data.error));
+      detalle = msg ? `[${respuesta.status}] ${msg}` : `[${respuesta.status}]`;
+    } catch (_) {
+      detalle = `[${respuesta.status}]`;
     }
-    return await respuesta.json();
-  } catch (error) {
-    throw new Error(`No se pudo eliminar el evento: ${error.message}`);
+    if (texto) detalle += '\nCuerpo: ' + texto;
+    throw new Error(detalle);
   }
+  return await respuesta.json();
 }
 
 async function subirImagenEvento(idEvento, archivo) {
