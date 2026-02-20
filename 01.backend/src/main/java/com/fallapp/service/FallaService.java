@@ -209,6 +209,10 @@ public class FallaService {
         Falla falla = fallaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Falla", "id", id));
 
+        // Preservar urlBoceto y descripcion antes del mapeo (si el DTO no los envía, se restauran)
+        String urlBocetoExistente = falla.getUrlBoceto();
+        String descripcionExistente = falla.getDescripcion();
+
         // Verificar si el nuevo nombre ya existe (y no es el mismo)
         if (!falla.getNombre().equals(fallaDTO.getNombre()) && 
             fallaRepository.existsByNombre(fallaDTO.getNombre())) {
@@ -216,6 +220,13 @@ public class FallaService {
         }
 
         mapearDTOAEntidad(fallaDTO, falla, true);
+
+        if (fallaDTO.getUrlBoceto() == null && urlBocetoExistente != null) {
+            falla.setUrlBoceto(urlBocetoExistente);
+        }
+        if (fallaDTO.getDescripcion() == null && descripcionExistente != null) {
+            falla.setDescripcion(descripcionExistente);
+        }
         
         Falla fallaActualizada = fallaRepository.save(falla);
         return convertirADTO(fallaActualizada);

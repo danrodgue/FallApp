@@ -477,6 +477,7 @@ function showNotificationFalla(message, type = 'info') {
 }
 
 function saveFalla() {
+   const urlBocetoVal = document.getElementById('fallaUrlBoceto')?.value?.trim() || null;
    const formData = {
       nombre: document.getElementById('fallaNombre').value.trim(),
       seccion: document.getElementById('fallaSeccion').value.trim(),
@@ -489,7 +490,8 @@ function saveFalla() {
       emailContacto: document.getElementById('fallaEmailContacto').value.trim(),
       anyoFundacion: parseInt(document.getElementById('fallaAnyoFundacion').value) || null,
       distintivo: document.getElementById('fallaDistintivo').value.trim(),
-      categoria: document.getElementById('fallaCategoria').value.trim()
+      categoria: document.getElementById('fallaCategoria').value.trim(),
+      urlBoceto: urlBocetoVal
       // Nota: totalEventos, totalNinots, totalMiembros son read-only (calculados por backend)
    };
 
