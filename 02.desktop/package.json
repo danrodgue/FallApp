@@ -1,1 +1,33 @@
-{"name":"fallapp","version":"1.0.0","description":"Aplicación de fallas","license":"Proprietary","author":"Gautier, Daniel, Jose","type":"commonjs","main":"./main/index.js","scripts":{"test":"jest --verbose","test:watch":"jest --watch","test:coverage":"jest --coverage","start":"electron .","test:e2e":"start-server-and-test \"http-server . -p 4173 -c-1\" http://127.0.0.1:4173/js/index.html \"wdio run ./wdio.conf.js\""},"dependencies":{"electron":"^40.0.0","mongoose":"^9.1.4","node-fetch":"^2.6.9"},"devDependencies":{"@wdio/cli":"^9.18.0","@wdio/local-runner":"^9.18.0","@wdio/mocha-framework":"^9.18.0","@wdio/spec-reporter":"^9.18.0","chromedriver":"^141.0.2","http-server":"^14.1.1","jest":"^29.7.0","jest-environment-jsdom":"^29.7.0","start-server-and-test":"^2.0.10","wdio-chromedriver-service":"^8.1.1","webdriverio":"^9.18.0"}}
+{
+    "name": "fallapp",
+    "version": "1.0.0",
+    "description": "Aplicación de fallas",
+    "license": "Proprietary",
+    "author": "Gautier Bastidas Joly, Daniel Rodríguez Guerola, Jose Burgos Martínez",
+    "type": "commonjs",
+    "main": "./main/index.js",
+    "scripts": {
+        "test": "jest --verbose",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "start": "electron .",
+        "test:e2e": "start-server-and-test \"http-server . -p 4173 -c-1\" http://127.0.0.1:4173/js/index.html \"wdio run ./wdio.conf.js\""
+    },
+    "dependencies": {
+        "electron": "^40.0.0",
+        "node-fetch": "^2.6.9"
+    },
+    "devDependencies": {
+        "@wdio/cli": "^9.18.0",
+        "@wdio/local-runner": "^9.18.0",
+        "@wdio/mocha-framework": "^9.18.0",
+        "@wdio/spec-reporter": "^9.18.0",
+        "chromedriver": "^141.0.2",
+        "http-server": "^14.1.1",
+        "jest": "^29.7.0",
+        "jest-environment-jsdom": "^29.7.0",
+        "start-server-and-test": "^2.0.10",
+        "wdio-chromedriver-service": "^8.1.1",
+        "webdriverio": "^9.18.0"
+    }
+}

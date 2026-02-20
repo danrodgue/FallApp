@@ -218,6 +218,12 @@
   z-index: 2000;
 }
 
+/* En la página de eventos, bajar un poco la tarjeta del modal
+   pero manteniendo la superposición transparente en toda la pantalla */
+.events-page .modal-card {
+  margin-top: calc(14vh + var(--spacing-lg));
+}
+
 .modal-card {
   background: #fff;
   padding: var(--spacing-lg);
