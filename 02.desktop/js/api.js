@@ -15,7 +15,8 @@ function getAuthHeaders() {
 async function parseErrorResponse(response) {
   try {
     const data = await response.json();
-    return data.message || data.error || `Error ${response.status}`;
+    const msg = data.mensaje || data.message || (data.error && (data.error.mensaje || data.error.message || data.error)) || `Error ${response.status}`;
+    return typeof msg === 'string' ? msg : JSON.stringify(msg);
   } catch (e) {
     return `Error del servidor (${response.status})`;
   }
