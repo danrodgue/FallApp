@@ -235,6 +235,16 @@ npm run dist
 ```
 
 ---
+## Entregables
+
+El proyecto incluye una carpeta denominada Entregables, destinada a contener las versiones compiladas del software para su distribución académica o evaluación.
+
+Estos serán los siguientes:
+
+Archivo .exe (versión de escritorio)
+
+-Archivo .apk (versión Android)
+
 
 ## Convenciones y notas
 
@@ -245,4 +255,7 @@ npm run dist
 
 ## Licencia
 
-Ver `LICENSE`.
+Este proyecto está protegido por derechos de autor.
+Todos los derechos están reservados, salvo los permisos expresamente concedidos en el archivo LICENSE
+.
+
