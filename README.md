@@ -92,7 +92,7 @@ Recomendación: centralizar cualquier cambio de URL en el cliente móvil:
 
 Documentados en Swagger:
 
-- Swagger UI: **[ENLACE_SWAGGER_AQUI]**
+- Swagger UI: http://35.180.21.42:8080/swagger-ui/index.html
 
 ---
 
