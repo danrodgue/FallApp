@@ -558,7 +558,7 @@ function setEditMode(enabled){
    const fields = [
       'fallaNombre', 'fallaSeccion', 'fallaFallera', 'fallaPresidente', 
       'fallaArtista', 'fallaLema', 'fallaWebOficial', 'fallaTelefonoContacto', 'fallaEmailContacto',
-      'fallaAnyoFundacion', 'fallaDistintivo', 'fallaCategoria', 
+      'fallaAnyoFundacion', 'fallaDistintivo', 
       'fallaTotalEventos', 'fallaTotalHintos', 'fallaTotalMiembros'
    ];
    fields.forEach(id=>{ const el = document.getElementById(id); if(!el) return; el.disabled = !enabled; });
