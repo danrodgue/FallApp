@@ -1161,11 +1161,13 @@ private fun RankingCard(
         null -> MaterialTheme.colorScheme.primaryContainer
         TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary      // Mejor Falla
         TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary      // Ingenio y Gracia
-        TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.tertiary     // Experimental
+        TipoVoto.ARTISTICO -> Color(0xFFFFE3A1)                      // Experimental (mismo color que el botón de votos)
     }
-    val chipContentColor =
-        if (selectedTipoVoto == null) MaterialTheme.colorScheme.onPrimaryContainer
-        else MaterialTheme.colorScheme.onPrimary
+    val chipContentColor = when (selectedTipoVoto) {
+        null -> MaterialTheme.colorScheme.onPrimaryContainer
+        TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.onSurface
+        else -> MaterialTheme.colorScheme.onPrimary
+    }
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(
