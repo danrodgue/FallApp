@@ -93,6 +93,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/estadisticas/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/usuarios/{id}").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/eventos/**").permitAll()
 
                 // Endpoints admin: autenticado
                 .requestMatchers("/api/admin/**").authenticated()
@@ -119,8 +121,6 @@ public class SecurityConfig {
                 // Endpoints de eliminación (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/api/fallas/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/fallas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/eventos/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/comentarios/**").hasRole("ADMIN")
                 

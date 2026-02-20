@@ -486,6 +486,21 @@ async function deleteEvent(id){
       await eliminarEvento(id);
     }
     events = events.filter(x => x.id_evento !== parseInt(id) && x.idEvento !== parseInt(id) && x.id !== id); 
+    const idFalla = localStorage.getItem('fallapp_user_idFalla');
+    if (idFalla) {
+      try {
+        const response = await obtenerEventosPorFalla(idFalla);
+        if (response && response.content && Array.isArray(response.content)) {
+          events = response.content;
+        } else if (response && response.datos && response.datos.content && Array.isArray(response.datos.content)) {
+          events = response.datos.content;
+        } else if (Array.isArray(response)) {
+          events = response;
+        }
+      } catch (e) {
+        console.warn('No se pudo recargar eventos tras eliminar:', e);
+      }
+    }
     saveLocal(); 
     renderList(currentSearchValue() || '');
     showNotification('Evento eliminado correctamente', 'success');

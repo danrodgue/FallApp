@@ -190,9 +190,12 @@ async function actualizarEvento(id, datos) {
 }
 
 async function eliminarEvento(id) {
+  const token = localStorage.getItem('fallapp_token');
+  const h = getAuthHeaders();
+  if (token) h['X-Auth-Token'] = token;
   const respuesta = await fetch(`${API_EVENTOS_URL}/${id}`, {
     method: 'DELETE',
-    headers: getAuthHeaders()
+    headers: h
   });
   if (!respuesta.ok) {
     const texto = await respuesta.text();
