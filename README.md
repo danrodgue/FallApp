@@ -237,13 +237,8 @@ npm run dist
 ---
 ## Entregables
 
-El proyecto incluye una carpeta denominada Entregables, destinada a contener las versiones compiladas del software para su distribución académica o evaluación.
-
-Estos serán los siguientes:
-
-- Archivo .exe (versión de escritorio)
-
-- Archivo .apk (versión Android)
+El proyecto incluye un archivo ENTREGABLES.md, donde se encuentra la carpeta de Drive destinada a contener las versiones
+compiladas del software para su distribución académica o evaluación.
 
 
 ## Convenciones y notas
