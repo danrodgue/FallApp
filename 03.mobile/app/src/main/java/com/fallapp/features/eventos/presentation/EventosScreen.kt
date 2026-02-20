@@ -60,12 +60,6 @@ fun EventosScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                actions = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar eventos"
-                    )
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -548,4 +542,3 @@ private fun formatEventDate(dateTime: java.time.LocalDateTime): String {
     val formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
     return dateTime.format(formatter)
 }
-
