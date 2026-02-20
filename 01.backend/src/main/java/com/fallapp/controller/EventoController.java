@@ -112,7 +112,7 @@ public class EventoController {
      * Requiere autenticación (admin o usuario de la falla)
      */
     @DeleteMapping("/{id}")
-    @Transactional(readOnly = true)
+    @Transactional
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         EventoDTO evento = eventoService.obtenerPorId(id);
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
