@@ -195,7 +195,7 @@ public class FallaService {
         }
 
         Falla falla = new Falla();
-        mapearDTOAEntidad(fallaDTO, falla);
+        mapearDTOAEntidad(fallaDTO, falla, false);
         
         Falla fallaSaved = fallaRepository.save(falla);
         return convertirADTO(fallaSaved);
@@ -215,7 +215,7 @@ public class FallaService {
             throw new IllegalArgumentException("Ya existe una falla con el nombre: " + fallaDTO.getNombre());
         }
 
-        mapearDTOAEntidad(fallaDTO, falla);
+        mapearDTOAEntidad(fallaDTO, falla, true);
         
         Falla fallaActualizada = fallaRepository.save(falla);
         return convertirADTO(fallaActualizada);
@@ -253,8 +253,9 @@ public class FallaService {
 
     /**
      * Mapear DTO a entidad
+     * @param esActualizacion Si true, no sobrescribir urlBoceto/descripcion cuando el DTO los envía null (preservar valores existentes)
      */
-    private void mapearDTOAEntidad(FallaDTO dto, Falla entidad) {
+    private void mapearDTOAEntidad(FallaDTO dto, Falla entidad, boolean esActualizacion) {
         entidad.setNombre(dto.getNombre());
         // Validar y normalizar `seccion` (máx 5 caracteres)
         if (dto.getSeccion() != null) {
@@ -272,7 +273,9 @@ public class FallaService {
         entidad.setLema(dto.getLema());
         entidad.setAnyoFundacion(dto.getAnyoFundacion());
         entidad.setDistintivo(dto.getDistintivo());
-        entidad.setUrlBoceto(dto.getUrlBoceto());
+        if (!esActualizacion || dto.getUrlBoceto() != null) {
+            entidad.setUrlBoceto(dto.getUrlBoceto());
+        }
         entidad.setExperim(dto.getExperim() != null ? dto.getExperim() : false);
         
         if (dto.getLatitud() != null) {
@@ -282,7 +285,9 @@ public class FallaService {
             entidad.setUbicacionLon(java.math.BigDecimal.valueOf(dto.getLongitud()));
         }
         
-        entidad.setDescripcion(dto.getDescripcion());
+        if (!esActualizacion || dto.getDescripcion() != null) {
+            entidad.setDescripcion(dto.getDescripcion());
+        }
         entidad.setWebOficial(dto.getWebOficial());
         // Normalizar teléfono: quitar caracteres no numéricos y validar longitud
         if (dto.getTelefonoContacto() != null) {
