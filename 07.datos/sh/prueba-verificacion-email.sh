@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Script de prueba del sistema de verificación de email
-# Prueba el flujo completo de registro y verificación
 
 echo "==================================="
 echo "  PRUEBA: Sistema Verificación Email"
@@ -10,7 +8,6 @@ echo ""
 
 BASE_URL="http://localhost:8080"
 
-# Generar un email único para la prueba
 TIMESTAMP=$(date +%s)
 TEST_EMAIL="prueba_verificacion_${TIMESTAMP}@example.com"
 TEST_USER="user_${TIMESTAMP}"
@@ -19,7 +16,6 @@ echo "📧 Email de prueba: $TEST_EMAIL"
 echo "👤 Usuario de prueba: $TEST_USER"
 echo ""
 
-# 1. Registrar nuevo usuario
 echo "1️⃣  Registrando nuevo usuario..."
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/auth/registro" \
   -H "Content-Type: application/json" \
@@ -36,17 +32,15 @@ echo "   Código HTTP: $HTTP_CODE"
 echo "   Respuesta: $BODY"
 echo ""
 
-# 2. Verificar que el usuario existe en la BD
 echo "2️⃣  Verificando usuario en base de datos..."
 DB_CHECK=$(docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c \
-  "SELECT email, verificado, token_verificacion IS NOT NULL as tiene_token 
-   FROM usuarios 
+  "SELECT email, verificado, token_verificacion IS NOT NULL as tiene_token
+   FROM usuarios
    WHERE email = '${TEST_EMAIL}';")
 
 echo "   Resultado BD: $DB_CHECK"
 echo ""
 
-# 3. Obtener el token de verificación de la BD
 echo "3️⃣  Obteniendo token de verificación..."
 TOKEN=$(docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c \
   "SELECT token_verificacion FROM usuarios WHERE email = '${TEST_EMAIL}';" | tr -d ' ')
@@ -59,7 +53,6 @@ fi
 echo "   Token obtenido: $TOKEN"
 echo ""
 
-# 4. Verificar el email usando el token
 echo "4️⃣  Verificando email con token..."
 VERIFY_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "${BASE_URL}/api/auth/verificar?token=${TOKEN}")
 
@@ -70,17 +63,15 @@ echo "   Código HTTP: $VERIFY_HTTP_CODE"
 echo "   Respuesta: $VERIFY_BODY"
 echo ""
 
-# 5. Comprobar que el usuario quedó verificado en la BD
 echo "5️⃣  Comprobando estado de verificación..."
 FINAL_CHECK=$(docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c \
-  "SELECT email, verificado, token_verificacion IS NULL as token_eliminado 
-   FROM usuarios 
+  "SELECT email, verificado, token_verificacion IS NULL as token_eliminado
+   FROM usuarios
    WHERE email = '${TEST_EMAIL}';")
 
 echo "   Resultado final BD: $FINAL_CHECK"
 echo ""
 
-# 6. Intentar login con el usuario
 echo "6️⃣  Probando login con usuario verificado..."
 LOGIN_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${BASE_URL}/api/auth/login" \
   -H "Content-Type: application/json" \
@@ -96,7 +87,6 @@ echo "   Código HTTP: $LOGIN_HTTP_CODE"
 echo "   Respuesta: $LOGIN_BODY"
 echo ""
 
-# Resumen
 echo "==================================="
 echo "  RESUMEN DE LA PRUEBA"
 echo "==================================="
@@ -122,7 +112,6 @@ fi
 echo ""
 echo "==================================="
 
-# Opcional: Limpiar usuario de prueba
 read -p "¿Deseas eliminar el usuario de prueba? (s/n): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Ss]$ ]]; then

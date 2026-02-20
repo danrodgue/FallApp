@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# Script para aplicar migración de verificación de email
-# Añade columnas de token de verificación a la tabla usuarios
 
 echo "=== Aplicando migración de verificación de email ==="
 
@@ -19,9 +17,9 @@ CREATE INDEX IF NOT EXISTS idx_usuarios_token_verificacion ON usuarios(token_ver
 UPDATE usuarios SET verificado = true WHERE fecha_registro < NOW() - INTERVAL '1 day';
 
 -- Verificar estructura
-SELECT column_name, data_type, is_nullable 
-FROM information_schema.columns 
-WHERE table_name = 'usuarios' 
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'usuarios'
   AND column_name IN ('verificado', 'token_verificacion', 'token_verificacion_expira')
 ORDER BY ordinal_position;
 EOSQL

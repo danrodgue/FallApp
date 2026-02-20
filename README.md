@@ -1,4 +1,4 @@
-# 🎭 FallApp - Plataforma de Fallas Falleras de Valencia
+# FallApp - Plataforma de Fallas Falleras de Valencia
 
 > Plataforma digital para gestión, votación y promoción de las Fallas de Valencia
 
@@ -8,19 +8,19 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-blue)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED)
 
-## 📖 Descripción
+## Descripción
 
-FallApp es una plataforma integral para la gestión digital de las Fallas de Valencia, permitiendo:
+FallApp es una plataforma integral para la gestión digital de las Fallas de Valencia, que permite:
 
-- 🏛️ Catálogo de fallas y monumentos falleros
-- 🎨 Galería de ninots (figuras) con detalle técnico
-- 🗳️ Sistema de votación y ranking
-- 💬 Comunidad de comentarios y opiniones
-- 📅 Calendario de eventos falleros
-- 🔐 Gestión de usuarios con roles
-- 📊 Estadísticas y análisis
+- Catálogo de fallas y monumentos falleros
+- Galería de ninots (figuras) con detalle técnico
+- Sistema de votación y ranking
+- Comunidad de comentarios y opiniones
+- Calendario de eventos falleros
+- Gestión de usuarios con roles
+- Estadísticas y análisis
 
-## 🚀 Stack Tecnológico
+## Stack Tecnológico
 
 ### Backend
 - **Framework**: Spring Boot 3.x
@@ -41,30 +41,30 @@ FallApp es una plataforma integral para la gestión digital de las Fallas de Val
 - **UI**: TailwindCSS / Material Design
 - **Despliegue**: Vercel / Netlify
 
-## � Estado del Proyecto
+## Estado del Proyecto
 
 | Componente | Estado | Detalles |
 |------------|--------|----------|
-| **Base de Datos PostgreSQL** | ✅ **COMPLETADO** | 347 fallas (253 con ubicación GPS), 346 ninots, 4 usuarios, 9 vistas, tests 85% |
-| **Backend Spring Boot API** | ✅ **OPERATIVO v0.5.0** | 50 endpoints REST, JWT ✅, CRUD ✅, Ubicaciones GPS ✅, **Servicio systemd** ✅ |
-| **Despliegue Automático** | ✅ **CONFIGURADO** | Servicio systemd con autoarranque y reinicio automático |
-| **Frontend Desktop (Electron)** | ⏳ Pendiente | |
-| **Tests Backend** | ✅ **COMPLETADO** | 27 tests unitarios, 100% passing (0 failures, 0 errors) |
-| **Mobile Android** | ⏳ Pendiente | |
-| **Docker Compose** | ✅ Operativo | PostgreSQL + pgAdmin |
+| **Base de Datos PostgreSQL** | **COMPLETADO** | 347 fallas (253 con ubicación GPS), 346 ninots, 4 usuarios, 9 vistas, tests 85% |
+| **Backend Spring Boot API** | **OPERATIVO v0.5.0** | 50 endpoints REST, JWT implementado, CRUD, Ubicaciones GPS, servicio systemd |
+| **Despliegue Automático** | **CONFIGURADO** | Servicio systemd con autoarranque y reinicio automático |
+| **Frontend Desktop (Electron)** | Pendiente | |
+| **Tests Backend** | **COMPLETADO** | 27 tests unitarios, 0 fallos, 0 errores |
+| **Mobile Android** | Pendiente | |
+| **Docker Compose** | Operativo | PostgreSQL + pgAdmin |
 
-📋 **[Ver Checklist de Completitud](CHECKLIST.DESPLIEGUE.BD.md)** - Despliegue de Base de Datos
+**[Ver Checklist de Completitud](CHECKLIST.DESPLIEGUE.BD.md)** - Despliegue de Base de Datos
 
-### 🚀 API Backend en Producción
+### API Backend en Producción
 
-**Estado actual:** ✅ **OPERATIVO** en http://35.180.21.42:8080
+**Estado actual:** **OPERATIVO** en http://35.180.21.42:8080
 
 **Servicio systemd:**
-- ✅ Autoarranque al iniciar el sistema
-- ✅ Reinicio automático en caso de fallos  
-- ✅ Logs centralizados con journald
-- ✅ Script de monitoreo rápido: `fallapp-status`
-- ✅ Gestión de usuarios: `fallapp-users`
+- Autoarranque al iniciar el sistema
+- Reinicio automático en caso de fallos
+- Logs centralizados con journald
+- Script de monitoreo rápido: `fallapp-status`
+- Gestión de usuarios: `fallapp-users`
 
 **Comandos útiles:**
 ```bash
@@ -86,9 +86,7 @@ sudo journalctl -u fallapp -f
 - [Servicio Systemd](04.docs/despliegue/SERVICIO-SYSTEMD.md)
 - [Gestión de Usuarios BD](04.docs/despliegue/GESTION-USUARIOS-BD.md)
 
-**Documentación:** [04.docs/despliegue/SERVICIO-SYSTEMD.md](04.docs/despliegue/SERVICIO-SYSTEMD.md)
-
-## 🗄️ Base de Datos
+## Base de Datos
 
 ### Estado Actual
 - **Motor**: PostgreSQL 13 Alpine
@@ -111,13 +109,13 @@ Password: (ver .env)
 **pgAdmin** (interfaz web): http://localhost:5050
 
 ### Documentación
-- 📋 [CHECKLIST.DESPLIEGUE.BD.md](CHECKLIST.DESPLIEGUE.BD.md) - **Checklist de completitud** (85% cobertura tests)
-- 🚀 [DESPLIEGUE.COMPLETADO.md](05.docker/DESPLIEGUE.COMPLETADO.md) - Estado completo del despliegue
-- 📐 [03.BASE-DATOS.md](04.docs/especificaciones/03.BASE-DATOS.md) - Especificación técnica
-- 🛠️ [Scripts SQL](07.datos/scripts/README.md) - Guía de scripts de inicialización
-- 🧪 [Tests](06.tests/README.md) - Suite de tests automatizados (28/34 SQL + 10/27 E2E)
+- [CHECKLIST.DESPLIEGUE.BD.md](CHECKLIST.DESPLIEGUE.BD.md) - Checklist de completitud (85% cobertura tests)
+- [DESPLIEGUE.COMPLETADO.md](05.docker/DESPLIEGUE.COMPLETADO.md) - Estado completo del despliegue
+- [03.BASE-DATOS.md](04.docs/especificaciones/03.BASE-DATOS.md) - Especificación técnica
+- [Scripts SQL](07.datos/scripts/README.md) - Guía de scripts de inicialización
+- [Tests](06.tests/README.md) - Suite de tests automatizados (28/34 SQL + 10/27 E2E)
 
-## �📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 FallApp/
@@ -143,9 +141,9 @@ FallApp/
 │   │   ├── ADR-003-nomenclatura-scripts-sql.md
 │   │   ├── ADR-004-postgis-opcional.md
 │   │   ├── ADR-005-vistas-vs-queries-backend.md
-│   │   ├── ADR-006-autenticacion-jwt-pendiente.md (✅ Implementado)
+│   │   ├── ADR-006-autenticacion-jwt-pendiente.md (Implementado)
 │   │   ├── ADR-007-formato-respuesta-api.md
-│   │   └── ADR-008-postgresql-enum-varchar.md (✅ Resuelto)
+│   │   └── ADR-008-postgresql-enum-varchar.md (Resuelto)
 │   ├── especificaciones/       # Documentación técnica
 │   │   ├── 00.VISION-GENERAL.md
 │   │   ├── 01.SISTEMA-USUARIOS.md
@@ -194,7 +192,7 @@ FallApp/
 
 ```
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Requisitos Previos
 - Docker 20.10+
@@ -203,24 +201,24 @@ FallApp/
 - Java 17+ (para desarrollo local)
 - Maven 3.8+ (para desarrollo local)
 
-### 1️⃣ Clonar Repositorio
+### 1. Clonar Repositorio
 ```bash
 git clone https://github.com/danrodgue/FallApp.git
 cd FallApp
 ```
 
-### 2️⃣ Configurar Variables de Entorno
+### 2. Configurar Variables de Entorno
 ```bash
 cp 05.docker/.env.example .env
 # Editar .env con credenciales propias
 ```
 
-### 3️⃣ Levantar Infraestructura
+### 3. Levantar Infraestructura
 ```bash
 docker-compose up -d postgres pgAdmin backend
 ```
 
-### 4️⃣ Verificar Servicios
+### 4. Verificar Servicios
 ```bash
 # Logs en vivo
 docker-compose logs -f backend
@@ -229,14 +227,14 @@ docker-compose logs -f backend
 curl http://localhost:8080/api/actuator/health
 ```
 
-### 5️⃣ Acceder a las Aplicaciones
+### 5. Acceder a las Aplicaciones
 - **API**: http://localhost:8080/api
 - **Swagger API Docs**: http://localhost:8080/api/swagger-ui.html
 - **pgAdmin (DB)**: http://localhost:5050
 
-## 🔐 Credenciales por Defecto
+## Credenciales por Defecto
 
-⚠️ **SOLO PARA DESARROLLO** - Cambiar inmediatamente en producción
+ADVERTENCIA: SOLO PARA DESARROLLO - Cambiar inmediatamente en producción
 
 | Servicio | Usuario | Contraseña | URL |
 |----------|---------|-----------|-----|
@@ -245,11 +243,11 @@ curl http://localhost:8080/api/actuator/health
 | PostgreSQL | fallapp_user | fallapp_password | localhost:5432 |
 | API Demo | demo@fallapp.es | Demo@2024 | localhost:8080/api |
 
-## 📚 Documentación
+## Documentación
 
 ### Para Desarrolladores
 - [Guía de Configuración Backend](04.docs/README.md)
-- [Especificación de Base de Datos](04.docs/especificaciones/03.BASE.DATOS.md)
+- [Especificación de Base de Datos](04.docs/especificaciones/03.BASE-DATOS.md)
 - [Scripts SQL](07.datos/scripts/README.md)
 - [Docker & Compose](05.docker/README.md)
 - [Próximos Pasos](07.datos/PROXIMOS.PASOS.md)
@@ -261,7 +259,7 @@ curl http://localhost:8080/api/actuator/health
 ### API
 - [OpenAPI/Swagger](http://localhost:8080/api/swagger-ui.html) - Documentación interactiva
 
-## 🗂️ Módulos Principales
+## Módulos Principales
 
 ### Backend (01.backend/)
 Aplicación Spring Boot con:
@@ -283,7 +281,7 @@ Aplicación Spring Boot con:
 - **Volúmenes**: Persistencia de datos
 - **Health checks**: Monitoreo de servicios
 
-## 🔄 Flujo de Desarrollo (SCRUM)
+## Flujo de Desarrollo (SCRUM)
 
 **Sprint de 15 días con equipo de 3 personas**
 
@@ -305,7 +303,7 @@ Aplicación Spring Boot con:
 - [ ] Integración con API
 - [ ] Tests E2E
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Tests unitarios
@@ -322,7 +320,7 @@ docker-compose up -d & \
   ab -n 1000 -c 10 http://localhost:8080/api/fallas
 ```
 
-## 📊 Estadísticas del Proyecto
+## Estadísticas del Proyecto
 
 | Métrica | Valor |
 |---------|-------|
@@ -333,20 +331,20 @@ docker-compose up -d & \
 | Endpoints API | 20+ (desarrollo) |
 | Cobertura Testing | (por configurar) |
 
-## 🚀 Próximas Fases
+## Próximas Fases
 
-### ✅ Completado
+### Completado
 - [x] Planificación y arquitectura
 - [x] Especificación de BD
 - [x] Docker Compose + PostgreSQL
 - [x] Scripts SQL
 
-### 🔄 En Progreso
+### En Progreso
 - [ ] Integración backend (Semana 1)
 - [ ] APIs REST (Semana 2)
 - [ ] Testing automatizado (Semana 2-3)
 
-### ⏳ Por Iniciar
+### Por Iniciar
 - [ ] Interfaz web (Frontend)
 - [ ] Aplicación móvil
 - [ ] CI/CD (GitHub Actions)
@@ -354,7 +352,7 @@ docker-compose up -d & \
 
 Ver [Próximos Pasos Detallados](07.datos/PROXIMOS.PASOS.md)
 
-## 🤝 Contribuir
+## Contribuir
 
 Este proyecto está en fase de desarrollo inicial.
 
@@ -371,7 +369,7 @@ Este proyecto está en fase de desarrollo inicial.
 ### Reportar Issues
 Ver [Issues del Proyecto](https://github.com/danrodgue/FallApp/issues)
 
-## 📝 Licencia
+## Licencia
 
 ### Código
 
@@ -397,54 +395,7 @@ de estos datos debe cumplir con los términos de la licencia CC BY 4.0,
 incluyendo la atribución adecuada al Ayuntamiento de Valencia y a la fuente
 original de los datos.
 
-## 📞 Contacto
+## Contacto
 
-- **GitHub**: [@danrodgue](https://github.com/danrodgue)
-- **Email**: [Tu Email]
-- **Issues**: [GitHub Issues](https://github.com/danrodgue/FallApp/issues)
-
-## 🎯 Visión del Proyecto
-
-> *Ser la plataforma digital líder en la comunidad fallera valenciana, conectando entusiastas, artistas y público general alrededor del patrimonio cultural de las Fallas.*
-
-### Objetivos
-1. Centralizar información de fallas 📍
-2. Facilitar participación e interacción 👥
-3. Preservar historia y tradición 📚
-4. Modernizar experiencia digital 💻
-
-## 📅 Hitos Planificados
-
-| Fecha | Hito | Estado |
-|-------|------|--------|
-| 2024-02-15 | API Backend Completa | 🔄 En progreso |
-| 2024-03-01 | Frontend React | ⏳ Por iniciar |
-| 2024-03-15 | Mobile App | ⏳ Por iniciar |
-| 2024-04-01 | Beta Release | ⏳ Por iniciar |
-| 2024-05-15 | Production Launch | ⏳ Por iniciar |
-
-## 📖 Recursos Útiles
-
-### Documentación Externa
-- [Spring Boot](https://spring.io/projects/spring-boot)
-- [PostgreSQL](https://www.postgresql.org/docs/)
-- [Docker](https://docs.docker.com/)
-- [Git](https://git-scm.com/doc)
-
-### Comunidad
-- [Spring Community](https://spring.io/community)
-- [PostgreSQL Discuss](https://www.postgresql.org/community/)
-
----
-
-**Última actualización**: 2024-02-01  
-**Versión**: 0.1.0-SNAPSHOT  
-**Rama**: main
-
----
-
-<div align="center">
-
-### ⭐ Si te gusta el proyecto, déjanos una estrella en GitHub ⭐
-
-</div>
+Si necesitas más información, propuestas de mejora o ayuda con el despliegue,
+abre un issue en el repositorio o contacta con los responsables del proyecto.

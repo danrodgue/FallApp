@@ -1,26 +1,22 @@
 #!/bin/bash
 
-# Script para probar envío de emails y capturar errores detallados
 
 echo "============================================"
 echo "🧪 TEST DE EMAIL - DIAGNÓSTICO COMPLETO"
 echo "============================================"
 echo ""
 
-# Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuración
 EMAIL_DESTINO="${1:-fallappproyect@proton.me}"
 
 echo -e "${BLUE}📧 Email de destino: $EMAIL_DESTINO${NC}"
 echo ""
 
-# 1. Verificar que backend esté funcionando
 echo "1️⃣  Verificando backend..."
 if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
     echo -e "${GREEN}   ✅ Backend funcionando${NC}"
@@ -30,12 +26,10 @@ else
 fi
 echo ""
 
-# 2. Limpiar logs anteriores (últimos 30 segundos)
 echo "2️⃣  Preparando para capturar logs..."
 sleep 2
 echo ""
 
-# 3. Enviar email de prueba
 echo "3️⃣  Enviando email de prueba..."
 RESPONSE=$(curl -s -w "\n%{http_code}" "http://localhost:8080/api/test-email/simple?to=$EMAIL_DESTINO&subject=Prueba%20Debug&text=Email%20de%20prueba%20con%20debug%20habilitado")
 
@@ -46,12 +40,10 @@ echo "   HTTP Status: $HTTP_CODE"
 echo "   Respuesta: $BODY"
 echo ""
 
-# 4. Esperar a que se procese
 echo "4️⃣  Esperando logs (2 segundos)..."
 sleep 2
 echo ""
 
-# 5. Mostrar logs de email
 echo "============================================"
 echo "📋 LOGS DE EMAIL (últimos 60 segundos)"
 echo "============================================"
@@ -65,21 +57,19 @@ echo "🔍 ANÁLISIS DE ERRORES"
 echo "============================================"
 echo ""
 
-# Buscar errores específicos
 ERRORS=$(sudo journalctl -u fallapp --since "60 seconds ago" --no-pager | grep -i "ERROR\|Exception\|Failed\|rejected\|authentication failed\|535\|550")
 
 if [ -n "$ERRORS" ]; then
     echo -e "${RED}❌ ERRORES ENCONTRADOS:${NC}"
     echo "$ERRORS"
     echo ""
-    
-    # Analizar errores comunes
+
     if echo "$ERRORS" | grep -qi "authentication failed\|535"; then
         echo -e "${YELLOW}⚠️  Error de autenticación SMTP${NC}"
         echo "   - Verifica usuario y contraseña de Brevo"
         echo "   - Usuario actual: $(grep 'spring.mail.username' /srv/FallApp/01.backend/src/main/resources/application.properties | cut -d= -f2)"
     fi
-    
+
     if echo "$ERRORS" | grep -qi "550\|554\|sender"; then
         echo -e "${YELLOW}⚠️  Error: Remitente rechazado${NC}"
         echo "   - El correo remitente NO está verificado en Brevo"

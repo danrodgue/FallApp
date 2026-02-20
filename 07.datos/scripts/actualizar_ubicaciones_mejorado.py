@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 """
 Script mejorado para actualizar ubicaciones GPS de fallas en PostgreSQL
 Usa matching normalizado de nombres para mayor cobertura
@@ -11,7 +11,7 @@ import sys
 from datetime import datetime
 import re
 
-# Configuración de conexión a PostgreSQL
+
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,
@@ -24,9 +24,9 @@ def normalizar_nombre(nombre):
     """Normaliza el nombre para comparación flexible"""
     if not nombre:
         return ""
-    # Convertir a minúsculas
+
     nombre = nombre.lower()
-    # Remover acentos
+
     replacements = {
         'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
         'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
@@ -35,7 +35,7 @@ def normalizar_nombre(nombre):
     }
     for old, new in replacements.items():
         nombre = nombre.replace(old, new)
-    # Remover caracteres especiales y espacios múltiples
+
     nombre = re.sub(r'[^\w\s]', ' ', nombre)
     nombre = re.sub(r'\s+', ' ', nombre)
     return nombre.strip()
@@ -54,11 +54,11 @@ def cargar_datos_json(ruta_json):
 def obtener_fallas_bd(cursor):
     """Obtiene todas las fallas de la BD con sus nombres normalizados"""
     cursor.execute("""
-        SELECT id_falla, nombre 
-        FROM fallas 
+        SELECT id_falla, nombre
+        FROM fallas
         ORDER BY id_falla
     """)
-    
+
     fallas = {}
     for row in cursor.fetchall():
         id_falla, nombre = row
@@ -67,23 +67,23 @@ def obtener_fallas_bd(cursor):
             'nombre_original': nombre,
             'nombre_normalizado': nombre_norm
         }
-    
+
     print(f"✅ Fallas en BD: {len(fallas)}")
     return fallas
 
 def crear_indice_json(datos_json):
     """Crea índice de fallas del JSON por nombre normalizado"""
     indice = {}
-    
+
     for falla in datos_json:
         if not falla.get('geo_point_2d'):
             continue
-            
+
         nombre = falla.get('nombre', '')
         nombre_norm = normalizar_nombre(nombre)
-        
+
         geo = falla['geo_point_2d']
-        
+
         if nombre_norm:
             indice[nombre_norm] = {
                 'nombre_original': nombre,
@@ -92,50 +92,50 @@ def crear_indice_json(datos_json):
                 'seccion': falla.get('seccion', ''),
                 'anyo_fundacion': falla.get('anyo_fundacion', '')
             }
-    
+
     print(f"✅ Fallas en JSON con ubicación: {len(indice)}")
     return indice
 
 def actualizar_ubicaciones(cursor, fallas_bd, indice_json):
     """Actualiza ubicaciones con matching mejorado"""
-    
+
     stats = {
         'actualizadas': 0,
         'sin_match': 0,
         'errores': 0,
         'sin_ubicacion': []
     }
-    
+
     for id_falla, info_bd in fallas_bd.items():
         nombre_norm = info_bd['nombre_normalizado']
         nombre_orig = info_bd['nombre_original']
-        
-        # Buscar en JSON
+
+
         if nombre_norm in indice_json:
             datos = indice_json[nombre_norm]
             lat = datos['latitud']
             lon = datos['longitud']
-            
+
             if lat and lon:
                 try:
                     cursor.execute("""
-                        UPDATE fallas 
+                        UPDATE fallas
                         SET ubicacion_lat = %s,
                             ubicacion_lon = %s,
                             actualizado_en = CURRENT_TIMESTAMP
                         WHERE id_falla = %s
                     """, (lat, lon, id_falla))
-                    
+
                     if cursor.rowcount > 0:
                         print(f"✅ {id_falla:3d} | {nombre_orig[:50]:<50} | ({lat:.6f}, {lon:.6f})")
                         stats['actualizadas'] += 1
                     else:
                         print(f"❌ {id_falla:3d} | {nombre_orig[:50]:<50} | UPDATE sin efecto")
                         stats['errores'] += 1
-                    
-                    # Commit individual
+
+
                     cursor.connection.commit()
-                    
+
                 except Exception as e:
                     print(f"❌ {id_falla:3d} | {nombre_orig[:50]:<50} | Error: {e}")
                     cursor.connection.rollback()
@@ -154,7 +154,7 @@ def actualizar_ubicaciones(cursor, fallas_bd, indice_json):
                 'id': id_falla,
                 'nombre': nombre_orig
             })
-    
+
     return stats
 
 def main():
@@ -164,16 +164,16 @@ def main():
     print("=" * 80)
     print(f"Inicio: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print()
-    
-    # 1. Cargar JSON
+
+
     ruta_json = '/srv/FallApp/07.datos/raw/falles-fallas.json'
     datos_json = cargar_datos_json(ruta_json)
-    
-    # 2. Crear índice JSON
+
+
     indice_json = crear_indice_json(datos_json)
     print()
-    
-    # 3. Conectar a BD
+
+
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
@@ -182,21 +182,21 @@ def main():
     except Exception as e:
         print(f"❌ Error de conexión: {e}")
         sys.exit(1)
-    
-    # 4. Obtener fallas de BD
+
+
     fallas_bd = obtener_fallas_bd(cursor)
     print()
-    
-    # 5. Actualizar ubicaciones
+
+
     print("📍 Actualizando ubicaciones...")
     print("-" * 80)
     stats = actualizar_ubicaciones(cursor, fallas_bd, indice_json)
-    
-    # 6. Cerrar conexión
+
+
     cursor.close()
     conn.close()
-    
-    # 7. Resumen
+
+
     print()
     print("=" * 80)
     print("📊 RESUMEN")
@@ -205,21 +205,21 @@ def main():
     print(f"⚠️  Sin match en JSON:          {stats['sin_match']}")
     print(f"❌ Errores:                     {stats['errores']}")
     print()
-    
-    # Calcular cobertura
+
+
     total_bd = len(fallas_bd)
     cobertura = (stats['actualizadas'] / total_bd * 100) if total_bd > 0 else 0
     print(f"📊 Cobertura: {stats['actualizadas']}/{total_bd} ({cobertura:.1f}%)")
-    
-    # Mostrar fallas sin ubicación
+
+
     if stats['sin_ubicacion']:
         print()
         print(f"⚠️  Fallas sin ubicación ({len(stats['sin_ubicacion'])}):")
-        for falla in stats['sin_ubicacion'][:10]:  # Mostrar solo primeras 10
+        for falla in stats['sin_ubicacion'][:10]:
             print(f"   - ID {falla['id']}: {falla['nombre']}")
         if len(stats['sin_ubicacion']) > 10:
             print(f"   ... y {len(stats['sin_ubicacion']) - 10} más")
-    
+
     print()
     print(f"Fin: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 80)

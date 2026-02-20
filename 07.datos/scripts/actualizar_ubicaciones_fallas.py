@@ -12,7 +12,7 @@ from psycopg2.extras import execute_values
 import os
 import sys
 
-# Configuración de la base de datos
+
 DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,
@@ -21,7 +21,7 @@ DB_CONFIG = {
     'password': 'fallapp_secure_password_2026'
 }
 
-# Ruta del archivo JSON
+
 JSON_FILE = '/srv/FallApp/07.datos/raw/falles-fallas.json'
 
 def cargar_json():
@@ -53,8 +53,8 @@ def conectar_db():
 def actualizar_ubicaciones(conn, fallas_json):
     """Actualiza las ubicaciones de las fallas en la base de datos."""
     cursor = conn.cursor()
-    
-    # Estadísticas
+
+
     stats = {
         'total': len(fallas_json),
         'actualizadas': 0,
@@ -62,51 +62,51 @@ def actualizar_ubicaciones(conn, fallas_json):
         'no_encontradas': 0,
         'errores': 0
     }
-    
+
     print("\n🔄 Iniciando actualización de ubicaciones...")
     print("=" * 80)
-    
+
     for falla in fallas_json:
         id_falla = falla.get('id_falla')
         nombre = falla.get('nombre', 'Sin nombre')
         geo_point = falla.get('geo_point_2d', {})
-        
-        # Validar datos
+
+
         if not id_falla:
             stats['errores'] += 1
             continue
-        
+
         lat = geo_point.get('lat')
         lon = geo_point.get('lon')
-        
+
         if lat is None or lon is None:
             stats['sin_ubicacion'] += 1
             print(f"⚠️  Falla #{id_falla:3d} - {nombre[:50]:<50} [SIN UBICACIÓN]")
             continue
-        
+
         try:
-            # Actualizar en base de datos
+
             cursor.execute("""
-                UPDATE fallas 
+                UPDATE fallas
                 SET ubicacion_lat = %s,
                     ubicacion_lon = %s,
                     actualizado_en = CURRENT_TIMESTAMP
                 WHERE id_falla = %s
                 RETURNING id_falla, nombre
             """, (lat, lon, id_falla))
-            
+
             resultado = cursor.fetchone()
-            
+
             if resultado:
                 stats['actualizadas'] += 1
                 print(f"✅ Falla #{id_falla:3d} - {nombre[:50]:<50} -> ({lat:.6f}, {lon:.6f})")
-                # Commit después de cada actualización exitosa
+
                 conn.commit()
             else:
                 stats['no_encontradas'] += 1
                 print(f"❌ Falla #{id_falla:3d} - {nombre[:50]:<50} [NO EXISTE EN BD]")
                 conn.rollback()
-                
+
         except psycopg2.Error as e:
             stats['errores'] += 1
             print(f"❌ Error actualizando falla #{id_falla}: {e}")
@@ -117,9 +117,9 @@ def actualizar_ubicaciones(conn, fallas_json):
             print(f"❌ Error inesperado actualizando falla #{id_falla}: {e}")
             conn.rollback()
             continue
-    
+
     cursor.close()
-    
+
     return stats
 
 def mostrar_estadisticas(stats):
@@ -133,8 +133,8 @@ def mostrar_estadisticas(stats):
     print(f"❌ No encontradas en BD:        {stats['no_encontradas']}")
     print(f"❌ Errores:                     {stats['errores']}")
     print("=" * 80)
-    
-    # Calcular porcentaje de éxito
+
+
     if stats['total'] > 0:
         exito = (stats['actualizadas'] / stats['total']) * 100
         print(f"\n🎯 Tasa de éxito: {exito:.1f}%")
@@ -142,30 +142,30 @@ def mostrar_estadisticas(stats):
 def verificar_actualizacion(conn):
     """Verifica cuántas fallas tienen ubicación después de la actualización."""
     cursor = conn.cursor()
-    
+
     print("\n🔍 Verificando resultado...")
-    
+
     try:
-        # Contar fallas con ubicación
+
         cursor.execute("""
-            SELECT 
+            SELECT
                 COUNT(*) as total,
                 COUNT(ubicacion_lat) as con_ubicacion,
                 COUNT(*) - COUNT(ubicacion_lat) as sin_ubicacion
             FROM fallas
         """)
-        
+
         total, con_ubicacion, sin_ubicacion = cursor.fetchone()
-        
+
         print(f"\n📍 Estado final de ubicaciones en BD:")
         print(f"   Total de fallas:        {total}")
         print(f"   ✅ Con ubicación:       {con_ubicacion}")
         print(f"   ❌ Sin ubicación:       {sin_ubicacion}")
-        
+
         if con_ubicacion > 0:
             porcentaje = (con_ubicacion / total) * 100
             print(f"   📊 Cobertura:           {porcentaje:.1f}%")
-            
+
     except psycopg2.Error as e:
         print(f"❌ Error en verificación: {e}")
     finally:
@@ -176,25 +176,25 @@ def main():
     print("=" * 80)
     print("🗺️  ACTUALIZACIÓN DE UBICACIONES DE FALLAS")
     print("=" * 80)
-    
-    # Cargar datos
+
+
     fallas_json = cargar_json()
-    
-    # Conectar a DB
+
+
     conn = conectar_db()
-    
+
     try:
-        # Actualizar ubicaciones
+
         stats = actualizar_ubicaciones(conn, fallas_json)
-        
-        # Mostrar estadísticas
+
+
         mostrar_estadisticas(stats)
-        
-        # Verificar resultado
+
+
         verificar_actualizacion(conn)
-        
+
         print("\n✅ Proceso completado exitosamente\n")
-        
+
     except Exception as e:
         print(f"\n❌ Error inesperado: {e}")
         sys.exit(1)

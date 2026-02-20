@@ -1,16 +1,11 @@
--- ========================================================================
--- INSERCIÓN COMPLETA DE FALLAS - Generado automáticamente
--- Total: 351 fallas
--- Fuente: falles-fallas.jsonl
--- Fecha: 2026-02-04
--- ========================================================================
+
 
 BEGIN;
 
--- Limpiar tabla
+
 TRUNCATE TABLE fallas RESTART IDENTITY CASCADE;
 
--- Insertar todas las fallas
+
 INSERT INTO fallas (
     nombre, seccion, fallera, presidente, artista, lema,
     anyo_fundacion, distintivo, url_boceto, experim,
@@ -368,9 +363,8 @@ INSERT INTO fallas (
 ('Joaquim Navarro-Carrícola', '7A', 'Alba Escot Obón', 'Marcos Maroto Jimenez', 'Ignacio Ferrando Tamarit', 'Discordia', 1962, 'Brillants (2006)', 'http://mapas.valencia.es/WebsMunicipales/layar/img/fallasvalencia/2025_072_bm.jpg', false, 39.45285577758091, -0.38692476532345454, 'sin_categoria', '{"objectid": 8224, "id_falla_original": 72}'::jsonb),
 ('Benicadell-Sant Roc', '4A', 'Ainhoa Ruiz Bernad', 'Pedro Miñarro Sánchez', 'Xavier Herrero  Martínez', 'La mascara', 1972, 'Brillants (2016)', 'http://mapas.valencia.es/WebsMunicipales/layar/img/fallasvalencia/2025_223_bm.jpg', false, 39.49052484285274, -0.39359869668803743, 'sin_categoria', '{"objectid": 8226, "id_falla_original": 223}'::jsonb);
 
--- Verificar
+
 SELECT COUNT(*) as total_insertado FROM fallas;
 
 COMMIT;
 
--- ========================================================================

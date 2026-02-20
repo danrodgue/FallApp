@@ -1,8 +1,4 @@
 #!/bin/bash
-# =============================================================================
-# test_postgres_connection.sh
-# Test E2E de conexión a PostgreSQL
-# =============================================================================
 
 set -e
 
@@ -11,12 +7,10 @@ echo "TEST E2E: PostgreSQL Connection"
 echo "========================================="
 echo ""
 
-# Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# Test 1: Verificar que el contenedor está corriendo
 echo "Test 1: Contenedor PostgreSQL corriendo"
 if sudo docker ps | grep -q "fallapp-postgres"; then
     echo -e "${GREEN}PASS${NC} | Contenedor fallapp-postgres UP"
@@ -28,7 +22,6 @@ else
     sleep 5
 fi
 
-# Test 2: Conexión con psql
 echo ""
 echo "Test 2: Conexión con psql"
 if sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -c "SELECT 1;" > /dev/null 2>&1; then
@@ -38,7 +31,6 @@ else
     exit 1
 fi
 
-# Test 3: Listar bases de datos
 echo ""
 echo "Test 3: Listar bases de datos"
 DBS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d postgres -t -c "SELECT datname FROM pg_database WHERE datname='fallapp';")
@@ -49,7 +41,6 @@ else
     exit 1
 fi
 
-# Test 4: Contar tablas
 echo ""
 echo "Test 4: Tablas en base de datos"
 TABLE_COUNT=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';")
@@ -62,7 +53,6 @@ else
     exit 1
 fi
 
-# Test 5: Contar fallas
 echo ""
 echo "Test 5: Datos de fallas"
 FALLA_COUNT=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM fallas;")
@@ -75,7 +65,6 @@ else
     exit 1
 fi
 
-# Test 6: Contar usuarios
 echo ""
 echo "Test 6: Datos de usuarios"
 USER_COUNT=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM usuarios;")
@@ -88,7 +77,6 @@ else
     exit 1
 fi
 
-# Test 7: Verificar vistas
 echo ""
 echo "Test 7: Vistas SQL"
 VIEW_COUNT=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM information_schema.views WHERE table_schema='public';")
@@ -101,7 +89,6 @@ else
     exit 1
 fi
 
-# Test 8: Verificar funciones
 echo ""
 echo "Test 8: Funciones SQL"
 FUNC_COUNT=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM pg_proc WHERE proname IN ('buscar_fallas', 'obtener_ranking_fallas');")
@@ -114,7 +101,6 @@ else
     exit 1
 fi
 
-# Test 9: Query compleja (JOIN)
 echo ""
 echo "Test 9: Query compleja con JOIN"
 if sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -c "SELECT f.nombre, COUNT(v.id_voto) FROM fallas f LEFT JOIN votos v ON f.id_falla = v.id_falla GROUP BY f.id_falla LIMIT 5;" > /dev/null 2>&1; then
@@ -124,7 +110,6 @@ else
     exit 1
 fi
 
-# Test 10: Performance simple
 echo ""
 echo "Test 10: Performance básica"
 START=$(date +%s%3N)

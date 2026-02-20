@@ -5,32 +5,30 @@ echo "  USUARIOS DE FALLAPP - Gestión de Base de Datos"
 echo "=========================================="
 echo ""
 
-# Verificar que Docker esté corriendo
 if ! docker ps | grep -q fallapp-postgres; then
     echo "❌ Error: El contenedor de PostgreSQL no está corriendo"
     echo "   Inicia el contenedor con: cd /srv/FallApp/05.docker && docker-compose up -d"
     exit 1
 fi
 
-# Obtener lista de usuarios desde PostgreSQL
 echo "📊 USUARIOS REGISTRADOS EN LA BASE DE DATOS"
 echo "=========================================="
 echo ""
 
 docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -A -F'|' -c \
-"SELECT 
+"SELECT
     id_usuario,
     nombre_completo,
     email,
     rol,
     CASE WHEN activo THEN 'Sí' ELSE 'No' END as activo,
     TO_CHAR(fecha_registro, 'YYYY-MM-DD HH24:MI:SS') as fecha_registro,
-    CASE 
-        WHEN ultimo_acceso IS NOT NULL 
+    CASE
+        WHEN ultimo_acceso IS NOT NULL
         THEN TO_CHAR(ultimo_acceso, 'YYYY-MM-DD HH24:MI:SS')
         ELSE 'Nunca'
     END as ultimo_acceso
-FROM usuarios 
+FROM usuarios
 ORDER BY id_usuario;" | while IFS='|' read -r id nombre email rol activo fecha ultimo; do
     echo "👤 Usuario #$id"
     echo "   Nombre: $nombre"

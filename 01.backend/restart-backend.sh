@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# ============================================================================
-# Script: restart-backend.sh
-# Descripción: Reinicia el backend de FallApp (Spring Boot)
-# Uso: bash restart-backend.sh
-# ============================================================================
-
 set -e  # Salir si hay error
 
 # Colores para output

@@ -1,8 +1,4 @@
 #!/bin/bash
-# =============================================================================
-# test_data_persistence.sh
-# Test E2E de persistencia de datos
-# =============================================================================
 
 set -e
 
@@ -11,7 +7,6 @@ echo "TEST E2E: Data Persistence"
 echo "========================================="
 echo ""
 
-# Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -20,7 +15,6 @@ NC='\033[0m'
 PROJECT_DIR="/srv/FallApp/05.docker"
 cd "$PROJECT_DIR"
 
-# Test 1: Contar datos iniciales
 echo "Test 1: Contar datos iniciales"
 INITIAL_FALLAS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM fallas;")
 INITIAL_FALLAS=$(echo $INITIAL_FALLAS | tr -d ' ')
@@ -30,7 +24,6 @@ INITIAL_USERS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallap
 INITIAL_USERS=$(echo $INITIAL_USERS | tr -d ' ')
 echo "Usuarios iniciales: $INITIAL_USERS"
 
-# Test 2: Insertar datos de prueba
 echo ""
 echo "Test 2: Insertar datos de prueba"
 sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -c "
@@ -45,7 +38,6 @@ VALUES ('test_persist@test.com', 'hash_test_persist', 'Test Persistence', 'usuar
 ON CONFLICT (email) DO NOTHING;
 " > /dev/null 2>&1
 
-# Verificar inserción
 NEW_FALLAS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM fallas;")
 NEW_FALLAS=$(echo $NEW_FALLAS | tr -d ' ')
 
@@ -58,13 +50,11 @@ else
     echo -e "${YELLOW}WARN${NC} | Datos ya existían (ON CONFLICT DO NOTHING)"
 fi
 
-# Test 3: Reiniciar contenedor
 echo ""
 echo "Test 3: Reiniciar contenedor PostgreSQL"
 sudo docker-compose restart postgres > /dev/null 2>&1
 sleep 5
 
-# Esperar a que esté disponible
 for i in {1..10}; do
     if sudo docker exec fallapp-postgres pg_isready -U fallapp_user -d fallapp > /dev/null 2>&1; then
         echo -e "${GREEN}PASS${NC} | PostgreSQL reiniciado y disponible"
@@ -78,7 +68,6 @@ for i in {1..10}; do
     fi
 done
 
-# Test 4: Verificar persistencia de datos
 echo ""
 echo "Test 4: Verificar datos después de reinicio"
 AFTER_RESTART_FALLAS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM fallas;")
@@ -96,7 +85,6 @@ else
     exit 1
 fi
 
-# Test 5: Verificar datos específicos de prueba
 echo ""
 echo "Test 5: Verificar datos específicos insertados"
 TEST_FALLA=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT nombre FROM fallas WHERE nombre='TEST_PERSISTENCE_FALLA';")
@@ -106,7 +94,6 @@ else
     echo -e "${YELLOW}WARN${NC} | Falla de prueba no encontrada (puede haber sido limpiada)"
 fi
 
-# Test 6: Verificar volumen Docker
 echo ""
 echo "Test 6: Verificar volumen Docker"
 if sudo docker volume ls | grep -q "05docker_postgres_data"; then
@@ -117,7 +104,6 @@ else
     exit 1
 fi
 
-# Test 7: Down y Up completo (test de persistencia extremo)
 echo ""
 echo "Test 7: Down y Up completo (persistencia extrema)"
 echo "Deteniendo todos los servicios..."
@@ -128,7 +114,6 @@ echo "Iniciando servicios nuevamente..."
 sudo docker-compose up -d postgres > /dev/null 2>&1
 sleep 5
 
-# Esperar disponibilidad
 for i in {1..10}; do
     if sudo docker exec fallapp-postgres pg_isready -U fallapp_user -d fallapp > /dev/null 2>&1; then
         break
@@ -141,7 +126,6 @@ for i in {1..10}; do
     fi
 done
 
-# Verificar datos finales
 FINAL_FALLAS=$(sudo docker exec fallapp-postgres psql -U fallapp_user -d fallapp -t -c "SELECT COUNT(*) FROM fallas;")
 FINAL_FALLAS=$(echo $FINAL_FALLAS | tr -d ' ')
 

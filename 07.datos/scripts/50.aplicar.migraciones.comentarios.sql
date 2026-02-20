@@ -1,23 +1,9 @@
--- ============================================================================
--- 50.aplicar.migraciones.comentarios.sql
--- ============================================================================
--- Script único para alinear la tabla comentarios con la entidad JPA Comentario
--- en un servidor donde solo se ejecutó el schema inicial (01.schema.sql).
---
--- Soluciona los errores que aparecen en docker logs fallapp-postgres:
---   - column "actualizado_en" of relation "comentarios" does not exist
---   - column c1_0.contenido does not exist
---   - null value in column "texto_comentario" violates not-null constraint
---
--- Incluye: 40 (sentimiento), 41 (actualizado_en), 42 (contenido), 43 (texto nullable + trigger).
--- Ejecutar una sola vez conectado a la base fallapp.
--- ============================================================================
 
--- 40: Columna sentimiento (análisis IA)
+
 ALTER TABLE comentarios
 ADD COLUMN IF NOT EXISTS sentimiento VARCHAR(20);
 
--- 41: Columna actualizado_en
+
 ALTER TABLE comentarios
 ADD COLUMN IF NOT EXISTS actualizado_en TIMESTAMP WITH TIME ZONE NULL;
 
@@ -33,7 +19,7 @@ BEGIN
   END IF;
 END $$;
 
--- 42: Columna contenido y copia desde texto_comentario
+
 ALTER TABLE comentarios
 ADD COLUMN IF NOT EXISTS contenido TEXT;
 
@@ -41,7 +27,7 @@ UPDATE comentarios
 SET contenido = texto_comentario
 WHERE contenido IS NULL AND texto_comentario IS NOT NULL;
 
--- 43: texto_comentario nullable + trigger de sincronía
+
 ALTER TABLE comentarios
 ALTER COLUMN texto_comentario DROP NOT NULL;
 

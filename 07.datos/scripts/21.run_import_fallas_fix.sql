@@ -1,4 +1,4 @@
--- Importación con manejo de anyo_fundacion nulo (usa 0 cuando falta)
+
 BEGIN;
 CREATE TEMP TABLE raw_import (data jsonb);
 COPY raw_import (data) FROM '/tmp/falles-fallas.jsonl';
@@ -32,6 +32,6 @@ ON CONFLICT (nombre) DO NOTHING;
 DROP TABLE raw_import;
 COMMIT;
 
--- Estadísticas
+
 SELECT COUNT(*) AS total_fallas FROM fallas;
 SELECT categoria, COUNT(*) AS cantidad FROM fallas GROUP BY categoria ORDER BY cantidad DESC;

@@ -1,16 +1,11 @@
 #!/bin/bash
 
-# ============================================================================
-# Script: test-email.sh
-# Descripción: Prueba completa del sistema de envío de emails
-# ============================================================================
 
 echo "================================================"
 echo "  📧 DIAGNÓSTICO DE ENVÍO DE EMAILS"
 echo "================================================"
 echo ""
 
-# 1. Verificar que el backend está corriendo
 echo "1️⃣  Verificando backend..."
 HEALTH=$(curl -s http://localhost:8080/actuator/health 2>&1)
 if echo "$HEALTH" | grep -q "UP"; then
@@ -22,13 +17,11 @@ else
 fi
 echo ""
 
-# 2. Probar endpoint de información
 echo "2️⃣  Consultando endpoints disponibles..."
 INFO=$(curl -s http://localhost:8080/api/test-email/info 2>&1)
 echo "$INFO"
 echo ""
 
-# 3. Probar envío de email simple
 echo "3️⃣  Probando envío de email simple..."
 echo "Enviando a: test@example.com"
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
@@ -48,12 +41,10 @@ else
 fi
 echo ""
 
-# 4. Verificar logs del backend
 echo "4️⃣  Últimos logs del backend relacionados con email..."
 sudo journalctl -u fallapp --since "1 minute ago" | grep -i "email\|mail\|smtp" | tail -10 || echo "(Sin logs de email encontrados)"
 echo ""
 
-# 5. Verificar configuración en application.properties
 echo "5️⃣  Verificando configuración de email..."
 echo "Host SMTP: smtp-relay.brevo.com"
 echo "Puerto: 587"

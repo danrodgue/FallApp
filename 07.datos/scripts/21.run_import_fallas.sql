@@ -1,4 +1,4 @@
--- Script de importación en una única sesión para COPY en tabla temporal
+
 BEGIN;
 
 CREATE TEMP TABLE raw_import (data jsonb);
@@ -35,6 +35,6 @@ DROP TABLE raw_import;
 
 COMMIT;
 
--- Estadísticas post-importación
+
 SELECT COUNT(*) AS total_fallas FROM fallas;
 SELECT categoria, COUNT(*) AS cantidad FROM fallas GROUP BY categoria ORDER BY cantidad DESC;

@@ -1,8 +1,4 @@
 #!/bin/bash
-# =============================================================================
-# test_ubicaciones_performance.sh
-# Test de Performance: Endpoint de ubicaciones
-# =============================================================================
 
 set -e
 
@@ -13,13 +9,11 @@ echo ""
 
 API_URL="http://localhost:8080"
 
-# Colores
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Test 1: Tiempo de respuesta individual
 echo "Test 1: Tiempo de respuesta individual"
 echo "--------------------------------------"
 RESPONSE_TIME=$(curl -s -o /dev/null -w "%{time_total}" $API_URL/api/fallas/95/ubicacion)
@@ -33,7 +27,6 @@ else
     echo -e "${RED}FAIL${NC} | Respuesta lenta (>= 1.0s)"
 fi
 
-# Test 2: Múltiples requests secuenciales
 echo ""
 echo "Test 2: 10 requests secuenciales"
 echo "--------------------------------------"
@@ -55,7 +48,6 @@ else
     echo -e "${RED}FAIL${NC} | Rendimiento deficiente (>= 0.5s promedio)"
 fi
 
-# Test 3: Requests concurrentes (5 paralelos)
 echo ""
 echo "Test 3: 5 requests concurrentes"
 echo "--------------------------------------"
@@ -80,7 +72,6 @@ else
     echo -e "${RED}FAIL${NC} | Problemas de concurrencia (>= 2.0s)"
 fi
 
-# Test 4: Tamaño de respuesta
 echo ""
 echo "Test 4: Tamaño de respuesta"
 echo "--------------------------------------"
@@ -97,7 +88,6 @@ else
     echo -e "${RED}FAIL${NC} | Respuesta grande (>= 1KB)"
 fi
 
-# Test 5: Carga de base de datos (100 fallas)
 echo ""
 echo "Test 5: Carga pesada (100 requests)"
 echo "--------------------------------------"
@@ -122,7 +112,6 @@ else
     echo -e "${RED}FAIL${NC} | No soporta carga pesada (>= 60s)"
 fi
 
-# Test 6: Verificar memoria/recursos (si está disponible)
 echo ""
 echo "Test 6: Uso de recursos del backend"
 echo "--------------------------------------"
@@ -131,7 +120,7 @@ if command -v systemctl &> /dev/null; then
     if [ "$MEMORY" != "[not set]" ] && [ ! -z "$MEMORY" ]; then
         MEMORY_MB=$((MEMORY / 1024 / 1024))
         echo "Memoria en uso: ${MEMORY_MB} MB"
-        
+
         if [ $MEMORY_MB -lt 512 ]; then
             echo -e "${GREEN}PASS${NC} | Uso de memoria bajo (< 512 MB)"
         elif [ $MEMORY_MB -lt 768 ]; then

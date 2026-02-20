@@ -1,17 +1,8 @@
 #!/bin/bash
 
-# ============================================================================
-# Script: diagnostico-verificacion-email.sh
-# Descripción: Diagnóstico end-to-end del flujo de verificación por email
-# Uso:
-#   bash diagnostico-verificacion-email.sh [EMAIL_DESTINO] [BASE_URL]
-# Ejemplo:
-#   bash diagnostico-verificacion-email.sh miemail@gmail.com http://localhost:8080
-# ============================================================================
 
 set -u
 
-# Colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -47,9 +38,6 @@ echo -e "${BLUE}Email destino test SMTP:${NC} ${EMAIL_DESTINO}"
 echo -e "${BLUE}Usuario de prueba registro:${NC} ${TEST_EMAIL}"
 echo ""
 
-# -------------------------------------------------------------
-# Helpers
-# -------------------------------------------------------------
 
 get_prop() {
   local key="$1"
@@ -68,9 +56,6 @@ print_step_warn() {
   echo -e "${YELLOW}⚠️  $1${NC}"
 }
 
-# -------------------------------------------------------------
-# 1) Mostrar configuración actual de correo (sin exponer pass)
-# -------------------------------------------------------------
 
 echo -e "${BLUE}1️⃣  Configuración de correo actual${NC}"
 MAIL_HOST=$(get_prop "spring.mail.host")
@@ -98,9 +83,6 @@ fi
 
 echo ""
 
-# -------------------------------------------------------------
-# 2) Comprobar backend activo
-# -------------------------------------------------------------
 
 echo -e "${BLUE}2️⃣  Comprobando backend${NC}"
 BACKEND_INFO=$(curl -s -o /tmp/fallapp_email_info.json -w "%{http_code}" "${BASE_URL}/api/test-email/info")
@@ -114,9 +96,6 @@ else
 fi
 echo ""
 
-# -------------------------------------------------------------
-# 3) Enviar email de prueba (SMTP)
-# -------------------------------------------------------------
 
 echo -e "${BLUE}3️⃣  Prueba de envío SMTP${NC}"
 SMTP_HTTP=$(curl -s -o /tmp/fallapp_smtp_test.json -w "%{http_code}" \
@@ -132,9 +111,6 @@ else
 fi
 echo ""
 
-# -------------------------------------------------------------
-# 4) Registro real para validar flujo de verificación
-# -------------------------------------------------------------
 
 echo -e "${BLUE}4️⃣  Registro de usuario de prueba${NC}"
 REG_HTTP=$(curl -s -o /tmp/fallapp_registro_test.json -w "%{http_code}" -X POST "${BASE_URL}/api/auth/registro" \
@@ -150,9 +126,6 @@ fi
 echo "- Respuesta: $(cat /tmp/fallapp_registro_test.json 2>/dev/null)"
 echo ""
 
-# -------------------------------------------------------------
-# 5) Leer token de verificación desde DB
-# -------------------------------------------------------------
 
 echo -e "${BLUE}5️⃣  Extrayendo token de verificación desde BD${NC}"
 TOKEN=""
@@ -174,9 +147,6 @@ else
 fi
 echo ""
 
-# -------------------------------------------------------------
-# 6) Consumir endpoint de verificación con token
-# -------------------------------------------------------------
 
 echo -e "${BLUE}6️⃣  Verificando cuenta con token${NC}"
 if [ $STATUS_TOKEN -eq 1 ]; then
@@ -195,9 +165,6 @@ else
 fi
 echo ""
 
-# -------------------------------------------------------------
-# 7) Probar login final
-# -------------------------------------------------------------
 
 echo -e "${BLUE}7️⃣  Probando login del usuario de prueba${NC}"
 LOGIN_HTTP=$(curl -s -o /tmp/fallapp_login_test.json -w "%{http_code}" -X POST "${BASE_URL}/api/auth/login" \
@@ -213,9 +180,6 @@ fi
 echo "- Respuesta: $(cat /tmp/fallapp_login_test.json 2>/dev/null)"
 echo ""
 
-# -------------------------------------------------------------
-# 8) Logs recientes del servicio (foco email/smtp/error)
-# -------------------------------------------------------------
 
 echo -e "${BLUE}8️⃣  Logs recientes del servicio (email/smtp/error)${NC}"
 if command -v journalctl >/dev/null 2>&1; then
@@ -227,9 +191,6 @@ else
 fi
 echo ""
 
-# -------------------------------------------------------------
-# 9) Resumen y acciones sugeridas
-# -------------------------------------------------------------
 
 echo -e "${BLUE}====================================================${NC}"
 echo -e "${BLUE}  📊 RESUMEN DIAGNÓSTICO${NC}"
@@ -255,7 +216,6 @@ echo "- Logs en vivo: sudo journalctl -u fallapp -f"
 echo "- Reintento verificación: curl -X POST '${BASE_URL}/api/auth/reenviar-verificacion?email=${TEST_EMAIL}'"
 echo ""
 
-# Limpieza opcional
 read -p "¿Quieres eliminar el usuario de prueba (${TEST_EMAIL})? (s/n): " RESP
 if [[ "$RESP" =~ ^[Ss]$ ]]; then
   if docker ps --format '{{.Names}}' | grep -q "^${DB_CONTAINER}$"; then

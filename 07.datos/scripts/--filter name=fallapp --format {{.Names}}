@@ -1,7 +1,0 @@
-        column_name        |        data_type         | is_nullable | column_default 
----------------------------+--------------------------+-------------+----------------
- verificado                | boolean                  | NO          | false
- token_verificacion        | character varying        | YES         | 
- token_verificacion_expira | timestamp with time zone | YES         | 
-(3 rows)
-

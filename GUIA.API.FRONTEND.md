@@ -1,6 +1,6 @@
-# 🎭 Guía de API para Equipos Desktop y Mobile - FallApp
+# Guía de API para Equipos Desktop y Mobile - FallApp
 
-> **📱 Guía para Desarrolladores Frontend**  
+> **Guía para Desarrolladores Frontend**  
 > **Versión API:** 2.0  
 > **Última actualización:** 2026-02-11  
 > **Sistema de Votación:** v4.0 (Votos directos a FALLAS por categoría)  
@@ -9,7 +9,7 @@
 
 ---
 
-> ⚠️ **Nota para Desarrolladores**: Esta guía está basada en la especificación oficial [04.API-REST.md](04.docs/especificaciones/04.API-REST.md). 
+> **Nota para Desarrolladores**: Esta guía está basada en la especificación oficial [04.API-REST.md](04.docs/especificaciones/04.API-REST.md).  
 > Para detalles técnicos completos, consulta ese documento.
 
 ---
@@ -153,7 +153,7 @@ API REST para FallApp que proporciona acceso a datos de fallas valencianas, gest
 #### POST `/api/auth/iniciar-sesion`
 Autenticación de usuario con email y contraseña.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Petición**:
 ```json
@@ -191,7 +191,7 @@ Autenticación de usuario con email y contraseña.
 #### POST `/api/auth/registrar`
 Registro de nuevo usuario.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Petición**:
 ```json
@@ -229,7 +229,7 @@ Registro de nuevo usuario.
 #### POST `/api/auth/renovar-token`
 Renovar token JWT antes de expiración.
 
-**Autenticación**: 🔒 Requerida
+**Autenticación**: Requerida
 
 **Respuesta exitosa** (200):
 ```json
@@ -247,7 +247,7 @@ Renovar token JWT antes de expiración.
 #### POST `/api/auth/cerrar-sesion`
 Cerrar sesión (invalida token actual).
 
-**Autenticación**: 🔒 Requerida
+**Autenticación**: Requerida
 
 **Respuesta exitosa** (200):
 ```json
@@ -262,7 +262,7 @@ Cerrar sesión (invalida token actual).
 #### GET `/api/auth/perfil`
 Obtener información del usuario autenticado.
 
-**Autenticación**: 🔒 Requerida
+**Autenticación**: Requerida
 
 **Respuesta exitosa** (200):
 ```json
@@ -289,7 +289,7 @@ Obtener información del usuario autenticado.
 #### GET `/api/usuarios`
 Listar todos los usuarios (paginado).
 
-**Autenticación**: 🔒 ADMIN
+**Autenticación**: ADMIN
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0): Número de página
@@ -334,7 +334,7 @@ Listar todos los usuarios (paginado).
 #### GET `/api/usuarios/{id}`
 Obtener usuario por ID.
 
-**Autenticación**: 🔒 ADMIN o propio usuario
+**Autenticación**: ADMIN o propio usuario
 
 **Respuesta exitosa** (200):
 ```json
@@ -363,7 +363,7 @@ Obtener usuario por ID.
 #### PUT `/api/usuarios/{id}`
 Actualizar información de usuario.
 
-**Autenticación**: 🔒 ADMIN o propio usuario
+**Autenticación**: ADMIN o propio usuario
 
 **Petición**:
 ```json
@@ -400,7 +400,7 @@ Actualizar información de usuario.
 #### PUT `/api/usuarios/{id}/foto`
 Actualizar foto de perfil del usuario.
 
-**Autenticación**: 🔒 ADMIN o propio usuario
+**Autenticación**: ADMIN o propio usuario
 
 **Content-Type**: `multipart/form-data`
 
@@ -438,7 +438,7 @@ curl -X PUT http://localhost:8080/api/usuarios/123/foto \
 #### GET `/api/usuarios/{id}/foto`
 Obtener la foto de perfil de un usuario.
 
-**Autenticación**: 🔒 ADMIN o propio usuario (recomendado, según política de privacidad)
+**Autenticación**: ADMIN o propio usuario (recomendado, según política de privacidad)
 
 **Respuesta exitosa** (200):
 - Cuerpo: bytes de la imagen en bruto.
@@ -460,7 +460,7 @@ curl -X GET http://localhost:8080/api/usuarios/123/foto \
 #### DELETE `/api/usuarios/{id}`
 Eliminar usuario (borrado lógico: `activo = false`).
 
-**Autenticación**: 🔒 ADMIN
+**Autenticación**: ADMIN
 
 **Respuesta exitosa** (200):
 ```json
@@ -479,7 +479,7 @@ Eliminar usuario (borrado lógico: `activo = false`).
 #### PUT `/api/usuarios/{id}/estado`
 Activar o desactivar usuario.
 
-**Autenticación**: 🔒 ADMIN
+**Autenticación**: ADMIN
 
 **Petición**:
 ```json
@@ -505,7 +505,7 @@ Activar o desactivar usuario.
 #### GET `/api/usuarios/{id}/votos`
 Obtener votos realizados por un usuario.
 
-**Autenticación**: 🔒 ADMIN o propio usuario
+**Autenticación**: ADMIN o propio usuario
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0)
@@ -540,7 +540,7 @@ Obtener votos realizados por un usuario.
 #### GET `/api/fallas`
 Listar todas las fallas con filtros opcionales.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0)
@@ -588,7 +588,7 @@ Listar todas las fallas con filtros opcionales.
 #### GET `/api/fallas/{id}`
 Obtener información detallada de una falla.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -634,7 +634,7 @@ Obtener información detallada de una falla.
 #### POST `/api/fallas`
 Crear nueva falla.
 
-**Autenticación**: 🔒 ADMIN
+**Autenticación**: ADMIN
 
 **Petición**:
 ```json
@@ -684,7 +684,7 @@ Crear nueva falla.
 #### PUT `/api/fallas/{id}`
 Actualizar información de falla.
 
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+**Autenticación**: ADMIN o CASAL (propia falla)
 
 **Petición**:
 ```json
@@ -721,7 +721,7 @@ Actualizar información de falla.
 #### DELETE `/api/fallas/{id}`
 Eliminar falla (borrado lógico).
 
-**Autenticación**: 🔒 ADMIN
+**Autenticación**: ADMIN
 
 **Respuesta exitosa** (200):
 ```json
@@ -739,7 +739,7 @@ Eliminar falla (borrado lógico).
 #### GET `/api/fallas/buscar`
 Búsqueda de fallas por texto.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `texto` (string, requerido): Texto a buscar
@@ -775,7 +775,7 @@ Búsqueda de fallas por texto.
 #### GET `/api/fallas/cercanas`
 Fallas cercanas a una ubicación.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `latitud` (decimal, requerido): Latitud del punto
@@ -817,7 +817,7 @@ Fallas cercanas a una ubicación.
 #### GET `/api/fallas/{id}/eventos`
 Obtener eventos de una falla.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `tipo` (string, opcional): Filtrar por tipo (planta, crema, ofrenda)
@@ -852,7 +852,7 @@ Obtener eventos de una falla.
 #### GET `/api/fallas/{id}/ninots`
 Obtener ninots de una falla.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -881,7 +881,7 @@ Obtener ninots de una falla.
 #### GET `/api/fallas/{id}/estadisticas`
 Estadísticas de una falla.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -924,7 +924,7 @@ Estadísticas de una falla.
 #### GET `/api/eventos`
 Listar eventos con filtros y paginación.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0): Número de página (0-based)
@@ -999,7 +999,7 @@ GET /api/eventos?desde_fecha=2026-03-01T00:00:00&hasta_fecha=2026-03-31T23:59:59
 #### GET `/api/eventos/futuros`
 Obtener todos los eventos futuros (desde la fecha/hora actual).
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -1032,7 +1032,7 @@ Obtener todos los eventos futuros (desde la fecha/hora actual).
 #### GET `/api/eventos/proximos`
 Obtener los próximos N eventos (ordenados por fecha ascendente).
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `limite` (int, default: 10, max: 50): Número máximo de eventos a retornar
@@ -1061,7 +1061,7 @@ Obtener los próximos N eventos (ordenados por fecha ascendente).
 #### GET `/api/eventos/tipo/{tipo}`
 Obtener eventos filtrados por tipo específico.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Tipos válidos**: 
 - `planta` - Plantà del monumento
@@ -1098,7 +1098,7 @@ Obtener eventos filtrados por tipo específico.
 #### GET `/api/eventos/falla/{idFalla}`
 Obtener eventos de una falla específica (paginado).
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `page` (int, default: 0): Número de página
@@ -1124,7 +1124,7 @@ Obtener eventos de una falla específica (paginado).
 #### GET `/api/eventos/{id}`
 Obtener detalles completos de un evento por su ID.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -1162,7 +1162,7 @@ Obtener detalles completos de un evento por su ID.
 #### POST `/api/eventos`
 Crear nuevo evento.
 
-**Autenticación**: 🔒 Requiere autenticación (cualquier usuario autenticado)
+**Autenticación**: Requiere autenticación (cualquier usuario autenticado)
 
 **Petición**:
 ```json
@@ -1223,7 +1223,7 @@ Crear nuevo evento.
 #### PUT `/api/eventos/{id}`
 Actualizar evento existente.
 
-**Autenticación**: 🔒 Requiere autenticación (admin o casal de la falla)
+**Autenticación**: Requiere autenticación (admin o casal de la falla)
 
 **Petición** (enviar objeto completo):
 ```json
@@ -1260,13 +1260,12 @@ Actualizar evento existente.
 - `404 NOT_FOUND`: Evento no existe
 
 
-
 ---
 
 #### DELETE `/api/eventos/{id}`
 Eliminar evento del sistema.
 
-**Autenticación**: 🔒 Solo rol ADMIN
+**Autenticación**: Solo rol ADMIN
 
 **Respuesta exitosa** (200):
 ```json
@@ -1283,22 +1282,22 @@ Eliminar evento del sistema.
 
 ---
 
-### 📝 Resumen de Endpoints de Eventos
+### Resumen de Endpoints de Eventos
 
 | Método | Endpoint | Autenticación | Descripción |
 |--------|----------|---------------|-------------|
-| GET | `/api/eventos` | ❌ Público | Listar con filtros y paginación |
-| GET | `/api/eventos/futuros` | ❌ Público | Todos los eventos futuros |
-| GET | `/api/eventos/proximos?limite=N` | ❌ Público | Próximos N eventos (max 50) |
-| GET | `/api/eventos/tipo/{tipo}` | ❌ Público | Filtrar por tipo específico |
-| GET | `/api/eventos/falla/{idFalla}` | ❌ Público | Eventos de una falla (paginado) |
-| GET | `/api/eventos/{id}` | ❌ Público | Detalles de un evento |
-| POST | `/api/eventos` | ✅ Usuario | Crear evento |
-| PUT | `/api/eventos/{id}` | ✅ Usuario | Actualizar evento |
-| DELETE | `/api/eventos/{id}` | ✅ Solo ADMIN | Eliminar evento |
+| GET | `/api/eventos` | Público | Listar con filtros y paginación |
+| GET | `/api/eventos/futuros` | Público | Todos los eventos futuros |
+| GET | `/api/eventos/proximos?limite=N` | Público | Próximos N eventos (max 50) |
+| GET | `/api/eventos/tipo/{tipo}` | Público | Filtrar por tipo específico |
+| GET | `/api/eventos/falla/{idFalla}` | Público | Eventos de una falla (paginado) |
+| GET | `/api/eventos/{id}` | Público | Detalles de un evento |
+| POST | `/api/eventos` | Usuario | Crear evento |
+| PUT | `/api/eventos/{id}` | Usuario | Actualizar evento |
+| DELETE | `/api/eventos/{id}` | Solo ADMIN | Eliminar evento |
 
 **Notas importantes**:
-- ⚠️ Los endpoints de imagen (`/api/eventos/{id}/imagen`) están **DESHABILITADOS** porque la base de datos no tiene las columnas `imagen` y `imagen_content_type`. Usar el campo `urlImagen` en su lugar.
+- Los endpoints de imagen (`/api/eventos/{id}/imagen`) están DESHABILITADOS porque la base de datos no tiene las columnas `imagen` y `imagen_content_type`. Usar el campo `urlImagen` en su lugar.
 - La columna `tipo` en PostgreSQL es VARCHAR(30), no ENUM, para compatibilidad con Hibernate.
 - Los tipos de evento válidos son: `planta`, `crema`, `ofrenda`, `infantil`, `concierto`, `exposicion`, `encuentro`, `cena`, `teatro`, `otro`.
 
@@ -1309,7 +1308,7 @@ Eliminar evento del sistema.
 #### GET `/api/ninots`
 Listar ninots con filtros.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0)
@@ -1351,7 +1350,7 @@ Listar ninots con filtros.
 #### GET `/api/ninots/{id}`
 Obtener ninot por ID.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -1399,7 +1398,7 @@ Obtener ninot por ID.
 #### POST `/api/ninots`
 Crear nuevo ninot.
 
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+**Autenticación**: ADMIN o CASAL (propia falla)
 
 **Petición**:
 ```json
@@ -1441,7 +1440,7 @@ Crear nuevo ninot.
 #### PUT `/api/ninots/{id}`
 Actualizar ninot.
 
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+**Autenticación**: ADMIN o CASAL (propia falla)
 
 **Petición**:
 ```json
@@ -1468,7 +1467,7 @@ Actualizar ninot.
 #### DELETE `/api/ninots/{id}`
 Eliminar ninot.
 
-**Autenticación**: 🔒 ADMIN o CASAL (propia falla)
+**Autenticación**: ADMIN o CASAL (propia falla)
 
 **Respuesta exitosa** (200):
 ```json
@@ -1486,7 +1485,7 @@ Eliminar ninot.
 #### GET `/api/ninots/{id}/votos`
 Obtener votos de un ninot.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0)
@@ -1522,7 +1521,7 @@ Obtener votos de un ninot.
 #### GET `/api/ninots/clasificacion`
 Clasificación de ninots por votos.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `tipo_voto` (string, opcional): Filtrar por tipo de voto
@@ -1559,14 +1558,14 @@ Clasificación de ninots por votos.
 
 ### 4.6 Votos (`/api/votos`)
 
-> **📖 Documentación Completa**: Ver [05.SISTEMA-VOTACION.md](05.SISTEMA-VOTACION.md) para especificación detallada del sistema de votación.
+Documentación Completa: Ver [05.SISTEMA-VOTACION.md](05.SISTEMA-VOTACION.md) para especificación detallada del sistema de votación.
 
 **Modelo Actual (v4.0)**: Votos directos a **fallas** por categoría de concurso fallero.
 
 #### POST `/api/votos`
 Registrar voto a una falla en una categoría específica.
 
-**Autenticación**: 🔒 Requerida (JWT)
+**Autenticación**: Requerida (JWT)
 
 **Petición**:
 ```json
@@ -1600,11 +1599,13 @@ Registrar voto a una falla en una categoría específica.
 }
 ```
 
+---
+
 **Validaciones**:
-- ✅ JWT válido en header `Authorization: Bearer {token}`
-- ✅ `idFalla` debe existir en tabla `fallas`
-- ✅ `tipoVoto` debe ser uno de los 3 valores válidos
-- ✅ No debe existir voto previo (usuario + falla + tipo) - Garantizado por constraint DB
+- JWT válido en header `Authorization: Bearer {token}`
+- `idFalla` debe existir en tabla `fallas`
+- `tipoVoto` debe ser uno de los 3 valores válidos
+- No debe existir voto previo (usuario + falla + tipo) - Garantizado por constraint DB
 
 **Errores**:
 - `409 CONFLICT`: Ya has votado esta falla en esta categoría
@@ -1617,7 +1618,7 @@ Registrar voto a una falla en una categoría específica.
 #### GET `/api/votos/usuario/{idUsuario}`
 Obtener votos de un usuario específico.
 
-**Autenticación**: 🔒 Requerida (JWT)
+**Autenticación**: Requerida (JWT)
 
 **Control de Acceso**:
 - Usuario solo puede ver sus propios votos
@@ -1660,7 +1661,7 @@ Obtener votos de un usuario específico.
 #### GET `/api/votos/falla/{idFalla}`
 Obtener todos los votos de una falla.
 
-**Público**: ✅ Sí (no requiere autenticación)
+**Público**: Sí (no requiere autenticación)
 
 **Query Parameters**:
 - `tipo` (opcional): Filtrar por tipo (`EXPERIMENTAL`, `INGENIO_Y_GRACIA`, `MONUMENTO`)
@@ -1699,7 +1700,7 @@ Obtener todos los votos de una falla.
 #### DELETE `/api/votos/{idVoto}`
 Eliminar voto propio.
 
-**Autenticación**: 🔒 Requerida (JWT)
+**Autenticación**: Requerida (JWT)
 
 **Control de Acceso**:
 - Usuario solo puede eliminar sus propios votos
@@ -1723,7 +1724,7 @@ Eliminar voto propio.
 #### GET `/api/estadisticas/votos`
 Estadísticas y rankings de votación.
 
-**Público**: ✅ Sí (no requiere autenticación)
+**Público**: Sí (no requiere autenticación)
 
 **Respuesta exitosa** (200):
 ```json
@@ -1782,7 +1783,7 @@ Estadísticas y rankings de votación.
 #### GET `/api/comentarios`
 Listar comentarios con filtros.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `pagina` (int, default: 0)
@@ -1818,7 +1819,7 @@ Listar comentarios con filtros.
 #### GET `/api/comentarios/{id}`
 Obtener comentario por ID.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -1844,7 +1845,7 @@ Obtener comentario por ID.
 #### POST `/api/comentarios`
 Crear comentario.
 
-**Autenticación**: 🔒 Requerida
+**Autenticación**: Requerida
 
 **Petición**:
 ```json
@@ -1879,7 +1880,7 @@ Crear comentario.
 #### PUT `/api/comentarios/{id}`
 Editar comentario propio.
 
-**Autenticación**: 🔒 Requerida (propio comentario)
+**Autenticación**: Requerida (propio comentario)
 
 **Petición**:
 ```json
@@ -1909,7 +1910,7 @@ Editar comentario propio.
 #### DELETE `/api/comentarios/{id}`
 Eliminar comentario.
 
-**Autenticación**: 🔒 ADMIN o propio comentario
+**Autenticación**: ADMIN o propio comentario
 
 **Respuesta exitosa** (200):
 ```json
@@ -1926,7 +1927,7 @@ Eliminar comentario.
 #### GET `/api/estadisticas/resumen`
 Resumen general del sistema.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Respuesta exitosa** (200):
 ```json
@@ -1974,7 +1975,7 @@ Resumen general del sistema.
 #### GET `/api/estadisticas/clasificacion-fallas`
 Clasificación de fallas más votadas.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `limite` (int, default: 10)
@@ -2012,7 +2013,7 @@ Clasificación de fallas más votadas.
 #### GET `/api/estadisticas/actividad-reciente`
 Últimos eventos y votos del sistema.
 
-**Público**: ✅ Sí
+**Público**: Sí
 
 **Parámetros de consulta**:
 - `limite` (int, default: 20)
@@ -2056,7 +2057,7 @@ Clasificación de fallas más votadas.
 
 ## 5. Paginación
 
-Todas las rutas que devuelven listas utilizan **paginación estándar**:
+Todas las rutas que devuelven listas utilizan paginación estándar:
 
 ### Parámetros de consulta:
 - `pagina` (int, default: 0): Número de página (comienza en 0)
@@ -2166,8 +2167,8 @@ Busca en campos: nombre, lema, artista, presidente usando índice GIN de Postgre
 
 ### 10.3 Rate Limiting
 
-- Usuarios no autenticados: **60 peticiones/minuto**
-- Usuarios autenticados: **300 peticiones/minuto**
+- Usuarios no autenticados: 60 peticiones/minuto
+- Usuarios autenticados: 300 peticiones/minuto
 - ADMIN: sin límite
 
 ---
@@ -2320,4 +2321,4 @@ Importar colección desde: `/docs/postman/FallApp.postman_collection.json`
 
 **Última actualización**: 2026-02-01  
 **Versión del documento**: 1.0  
-**Estado**: ✅ Aprobada para implementación
+**Estado**: Aprobada para implementación

@@ -1,68 +1,40 @@
 #!/bin/bash
 
-###############################################################################
-# Script de Prueba: Flujo Completo de Autenticación
-# Autor: Sistema FallApp
-# Fecha: 2026-02-03
-# Versión: 0.5.2
-#
-# Descripción:
-#   Prueba completa del flujo de autenticación JWT en la API:
-#   1. Registro de usuario
-#   2. Login
-#   3. Uso de token en endpoints protegidos
-#   4. Verificación de permisos
-#   5. Manejo de errores
-#
-# Uso:
-#   bash test_api_auth.sh [URL_BASE]
-#
-# Ejemplo:
-#   bash test_api_auth.sh http://localhost:8080
-#   bash test_api_auth.sh http://35.180.21.42:8080
-###############################################################################
 
-# Configuración
 BASE_URL="${1:-http://localhost:8080}"
 API_URL="$BASE_URL/api"
 
-# Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Contadores
 TESTS_PASSED=0
 TESTS_FAILED=0
 TOTAL_TESTS=0
 
-# Función para imprimir test
 print_test() {
     echo -e "${BLUE}TEST $TOTAL_TESTS:${NC} $1"
 }
 
-# Función para resultado exitoso
 test_pass() {
     echo -e "${GREEN}✓ PASS${NC} - $1"
     ((TESTS_PASSED++))
 }
 
-# Función para resultado fallido
 test_fail() {
     echo -e "${RED}✗ FAIL${NC} - $1"
     ((TESTS_FAILED++))
 }
 
-# Función para hacer request y verificar
 make_request() {
     local method=$1
     local endpoint=$2
     local data=$3
     local headers=$4
     local expected_code=$5
-    
+
     if [ -n "$data" ]; then
         response=$(curl -s -w "\n%{http_code}" -X "$method" "$API_URL$endpoint" \
             -H "Content-Type: application/json" \
@@ -72,10 +44,10 @@ make_request() {
         response=$(curl -s -w "\n%{http_code}" -X "$method" "$API_URL$endpoint" \
             $headers)
     fi
-    
+
     http_code=$(echo "$response" | tail -n1)
     body=$(echo "$response" | head -n-1)
-    
+
     if [ "$http_code" -eq "$expected_code" ]; then
         echo "$body"
         return 0
@@ -86,9 +58,6 @@ make_request() {
     fi
 }
 
-###############################################################################
-# INICIO DE PRUEBAS
-###############################################################################
 
 echo "=========================================="
 echo "🔐 PRUEBAS DE AUTENTICACIÓN - FallApp"
@@ -97,7 +66,6 @@ echo "URL Base: $BASE_URL"
 echo "Fecha: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
-# Variables globales para datos de test
 TIMESTAMP=$(date +%s)
 TEST_EMAIL="test_auth_${TIMESTAMP}@example.com"
 TEST_PASSWORD="TestPass123!"
@@ -105,9 +73,6 @@ TEST_NAME="Usuario Test Auth"
 TOKEN=""
 USER_ID=""
 
-###############################################################################
-# TEST 1: Verificar que la API está activa
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar que la API está activa"
 if curl -s "$BASE_URL/actuator/health" | grep -q "UP"; then
@@ -117,9 +82,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 2: Registro de nuevo usuario
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Registro de nuevo usuario"
 REGISTER_DATA='{
@@ -136,10 +98,9 @@ HTTP_CODE=$(echo "$REGISTER_RESPONSE" | tail -n1)
 BODY=$(echo "$REGISTER_RESPONSE" | sed '$d')
 
 if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
-    # Verificar que la respuesta contiene token
     TOKEN=$(echo "$BODY" | jq -r '.datos.token // empty')
     USER_ID=$(echo "$BODY" | jq -r '.datos.usuario.idUsuario // empty')
-    
+
     if [ -n "$TOKEN" ] && [ "$TOKEN" != "null" ]; then
         test_pass "Usuario registrado correctamente - Token obtenido"
         echo "   → Email: $TEST_EMAIL"
@@ -155,9 +116,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 3: Verificar estructura de respuesta de registro
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar estructura de respuesta de registro"
 if echo "$BODY" | jq -e '.exito == true' > /dev/null 2>&1 && \
@@ -171,9 +129,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 4: Intentar registrar mismo email (debe fallar)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Intentar registrar mismo email (debe fallar)"
 DUPLICATE_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/auth/registro" \
@@ -188,9 +143,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 5: Login con credenciales correctas
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Login con credenciales correctas"
 LOGIN_DATA='{
@@ -208,7 +160,6 @@ if [ "$HTTP_CODE" -eq 200 ] || [ "$HTTP_CODE" -eq 201 ]; then
     NEW_TOKEN=$(echo "$LOGIN_BODY" | jq -r '.datos.token // empty')
     if [ -n "$NEW_TOKEN" ] && [ "$NEW_TOKEN" != "null" ]; then
         test_pass "Login exitoso - Nuevo token obtenido"
-        # Actualizar token para siguientes tests
         TOKEN="$NEW_TOKEN"
     else
         test_fail "Login exitoso pero sin token"
@@ -218,9 +169,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 6: Login con credenciales incorrectas
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Login con credenciales incorrectas (debe fallar)"
 BAD_LOGIN_DATA='{
@@ -240,9 +188,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 7: Acceder a endpoint protegido CON token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Acceder a endpoint protegido CON token"
 FALLA_DATA='{
@@ -272,9 +217,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 8: Acceder a endpoint protegido SIN token (debe fallar)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Acceder a endpoint protegido SIN token (debe fallar con 401)"
 NO_TOKEN_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/fallas" \
@@ -289,9 +231,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 9: Acceder con token inválido (debe fallar)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Acceder con token inválido (debe fallar)"
 INVALID_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/fallas" \
@@ -307,12 +246,8 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 10: Verificar formato del token (JWT)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar formato del token (JWT)"
-# JWT tiene formato: header.payload.signature (3 partes separadas por punto)
 TOKEN_PARTS=$(echo "$TOKEN" | grep -o '\.' | wc -l)
 if [ "$TOKEN_PARTS" -eq 2 ]; then
     test_pass "Token tiene formato JWT válido (3 partes)"
@@ -321,9 +256,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 11: Crear evento con token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Crear evento con autenticación"
 EVENTO_DATA='{
@@ -349,9 +281,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 12: Votar por falla con token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Votar por falla con autenticación"
 VOTO_DATA='{
@@ -374,9 +303,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 13: Crear comentario con token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Crear comentario con autenticación"
 COMENTARIO_DATA='{
@@ -398,9 +324,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 14: Verificar que endpoints públicos funcionan sin token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar que GET /fallas es público (sin token)"
 PUBLIC_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "$API_URL/fallas?page=0&size=1")
@@ -413,9 +336,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 15: Verificar que ubicación es pública
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar que GET /fallas/{id}/ubicacion es público"
 UBICACION_RESPONSE=$(curl -s -w "\n%{http_code}" -X GET "$API_URL/fallas/95/ubicacion")
@@ -428,9 +348,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 16: Verificar rol del usuario (debe ser 'usuario')
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar que el usuario tiene rol 'usuario'"
 USER_ROL=$(echo "$LOGIN_BODY" | jq -r '.datos.usuario.rol // empty')
@@ -441,9 +358,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 17: Verificar que usuario NO puede eliminar (no es ADMIN)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar que usuario normal NO puede eliminar fallas"
 DELETE_RESPONSE=$(curl -s -w "\n%{http_code}" -X DELETE "$API_URL/fallas/999" \
@@ -459,9 +373,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 18: Verificar expiración del token (campo expiraEn)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar campo expiraEn en respuesta de login"
 EXPIRA_EN=$(echo "$LOGIN_BODY" | jq -r '.datos.expiraEn // empty')
@@ -472,9 +383,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 19: Verificar tipo de token (debe ser Bearer)
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Verificar tipo de token en respuesta"
 TIPO_TOKEN=$(echo "$LOGIN_BODY" | jq -r '.datos.tipo // empty')
@@ -485,9 +393,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# TEST 20: Actualizar falla con token
-###############################################################################
 ((TOTAL_TESTS++))
 print_test "Actualizar falla con autenticación (PUT)"
 if [ -n "$NEW_FALLA_ID" ] && [ "$NEW_FALLA_ID" != "null" ]; then
@@ -497,13 +402,13 @@ if [ -n "$NEW_FALLA_ID" ] && [ "$NEW_FALLA_ID" != "null" ]; then
         "presidente": "Presidente Actualizado",
         "anyoFundacion": 2025
     }'
-    
+
     UPDATE_RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT "$API_URL/fallas/$NEW_FALLA_ID" \
         -H "Content-Type: application/json" \
         -H "Authorization: Bearer $TOKEN" \
         -d "$UPDATE_DATA")
     HTTP_CODE=$(echo "$UPDATE_RESPONSE" | tail -n1)
-    
+
     if [ "$HTTP_CODE" -eq 200 ]; then
         test_pass "Falla actualizada correctamente (HTTP 200)"
     else
@@ -514,9 +419,6 @@ else
 fi
 echo ""
 
-###############################################################################
-# RESUMEN FINAL
-###############################################################################
 echo ""
 echo "=========================================="
 echo "📊 RESUMEN DE RESULTADOS"

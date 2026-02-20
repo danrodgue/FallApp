@@ -1,6 +1,4 @@
 #!/bin/bash
-# Script para aplicar migración y compilar backend
-# Fecha: 2026-02-16
 
 set -e
 
@@ -9,7 +7,6 @@ echo "  APLICANDO MIGRACIÓN SQL Y COMPILANDO"
 echo "=========================================="
 echo ""
 
-# 1. Aplicar migración SQL
 echo "1. Aplicando migración SQL..."
 cd /srv/FallApp/07.datos/scripts
 
@@ -24,19 +21,17 @@ fi
 
 echo ""
 
-# 2. Verificar campos en BD
 echo "2. Verificando campos en BD..."
 psql -U fallapp_user -d fallapp -h localhost -c "
-SELECT column_name, data_type, is_nullable 
-FROM information_schema.columns 
-WHERE table_name = 'usuarios' 
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'usuarios'
   AND column_name IN ('verificado', 'token_verificacion', 'token_verificacion_expira')
 ORDER BY ordinal_position;
 " 2>&1 | grep -v "PGPASSWORD"
 
 echo ""
 
-# 3. Compilar backend
 echo "3. Compilando backend..."
 cd /srv/FallApp/01.backend
 ./mvnw clean install -DskipTests
