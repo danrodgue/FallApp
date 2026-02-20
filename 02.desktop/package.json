@@ -11,23 +11,30 @@
         "test:watch": "jest --watch",
         "test:coverage": "jest --coverage",
         "start": "electron .",
-        "test:e2e": "start-server-and-test \"http-server . -p 4173 -c-1\" http://127.0.0.1:4173/js/index.html \"wdio run ./wdio.conf.js\""
+        "test:e2e": "start-server-and-test \"http-server . -p 4173 -c-1\" http://127.0.0.1:4173/js/index.html \"wdio run ./wdio.conf.js\"",
+        "make-icon": "node tools/convert_icon.js",
+        "dist": "electron-builder --win"
     },
     "dependencies": {
-        "electron": "^40.0.0",
         "node-fetch": "^2.6.9"
     },
     "devDependencies": {
-        "@wdio/cli": "^9.18.0",
-        "@wdio/local-runner": "^9.18.0",
-        "@wdio/mocha-framework": "^9.18.0",
-        "@wdio/spec-reporter": "^9.18.0",
-        "chromedriver": "^145.0.5",
-        "http-server": "^14.1.1",
-        "jest": "^29.7.0",
-        "jest-environment-jsdom": "^29.7.0",
-        "start-server-and-test": "^2.0.10",
-        "wdio-chromedriver-service": "^8.1.1",
-        "webdriverio": "^9.18.0"
+        "electron": "^40.0.0",
+        "electron-builder": "^23.6.0"
+    },
+    "build": {
+        "appId": "com.fallapp.desktop",
+        "productName": "FallApp",
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "icon": "build/icon.ico"
+        },
+        "files": [
+            "**/*",
+            "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+            "!**/node_modules/*/.bin"
+        ]
     }
 }

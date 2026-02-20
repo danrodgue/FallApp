@@ -217,12 +217,39 @@ document.addEventListener('DOMContentLoaded', () => {
       inputBuscarFalla.setCustomValidity('');
     }
 
-    if (!nombreOk) return inputNombre.reportValidity();
-    if (!emailOk) return inputEmail.reportValidity();
-    if (!passOk) return inputPassword.reportValidity();
-    if (!telefonoOk) return inputTelefono.reportValidity();
-    if (!cpOk) return inputCodigoPostal.reportValidity();
-    if (!fallaOk && inputBuscarFalla) return inputBuscarFalla.reportValidity();
+    if (!nombreOk) {
+      mostrarError('Escribe tu nombre completo.');
+      try { inputNombre.reportValidity(); } catch (e) {}
+      return false;
+    }
+    if (!emailOk) {
+      mostrarError('Escribe un email válido.');
+      try { inputEmail.reportValidity(); } catch (e) {}
+      return false;
+    }
+    if (!passOk) {
+      mostrarError('La contraseña debe tener al menos 6 caracteres.');
+      try { inputPassword.reportValidity(); } catch (e) {}
+      return false;
+    }
+    if (!telefonoOk) {
+      mostrarError('El teléfono debe tener al menos 9 dígitos. Usa sólo números y signos +, () o - si lo deseas.');
+      try { inputTelefono.reportValidity(); } catch (e) {}
+      return false;
+    }
+    if (!cpOk) {
+      mostrarError('El código postal debe tener 5 dígitos.');
+      try { inputCodigoPostal.reportValidity(); } catch (e) {}
+      return false;
+    }
+    if (!fallaOk && inputBuscarFalla) {
+      mostrarError('Selecciona una falla de la lista.');
+      try { inputBuscarFalla.reportValidity(); } catch (e) {}
+      return false;
+    }
+
+    // Clear any previous error message
+    limpiarError();
 
     return true;
   }
@@ -377,13 +404,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const textoOriginalBoton = botonRegistro.textContent;
     botonRegistro.textContent = 'Creando cuenta...';
 
+    // normalize telefono to digits only for backend
+    const telefonoNormalized = telefono ? telefono.replace(/\D/g, '') : undefined;
+
     const payloadRegistro = {
       email,
       contrasena: password,
       nombreCompleto,
       idFalla,
       rol: 'casal',
-      telefono: telefono || undefined,
+      telefono: telefonoNormalized || undefined,
       direccion: direccion || undefined,
       ciudad: ciudad || undefined,
       codigoPostal: codigoPostal || undefined
