@@ -241,9 +241,9 @@ El proyecto incluye una carpeta denominada Entregables, destinada a contener las
 
 Estos serán los siguientes:
 
-Archivo .exe (versión de escritorio)
+- Archivo .exe (versión de escritorio)
 
--Archivo .apk (versión Android)
+- Archivo .apk (versión Android)
 
 
 ## Convenciones y notas
