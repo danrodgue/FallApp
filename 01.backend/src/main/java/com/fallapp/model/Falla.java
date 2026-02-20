@@ -86,8 +86,7 @@ public class Falla {
     private String emailContacto;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "categoria", nullable = false)
-    @ColumnTransformer(write = "CAST(? AS categoria_falla)")
+    @Column(name = "categoria", nullable = false, length = 50)
     private CategoriaFalla categoria = CategoriaFalla.sin_categoria;
 
     @CreationTimestamp
