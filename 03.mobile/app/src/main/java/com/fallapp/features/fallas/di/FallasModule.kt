@@ -17,20 +17,17 @@ import com.fallapp.features.votos.presentation.VotosViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-/**
- * Módulo de Koin para la feature Fallas.
- * Provee todas las dependencias (API, Repository, UseCases, ViewModels).
- */
+// Módulo de fallas: APIs, repos, use cases y ViewModels
 val fallasModule = module {
     
-    // Data Layer - API
+    // APIs
     single { FallasApiService(httpClient = get()) }
     single { VotosApiService(client = get(), tokenManager = get()) }
     single { ComentariosApiService(client = get(), tokenManager = get()) }
     single { NinotsApiService(client = get()) }
     single { EstadisticasApiService(client = get()) }
     
-    // Data Layer - Repository
+    // Repos
     single<FallasRepository> {
         FallasRepositoryImpl(
             apiService = get(),
@@ -46,13 +43,13 @@ val fallasModule = module {
         )
     }
     
-    // Domain Layer - Use Cases (Fallas)
+    // Use cases fallas
     factory { GetFallasUseCase(repository = get()) }
     factory { GetFallaByIdUseCase(repository = get()) }
     factory { SearchFallasUseCase(repository = get()) }
     factory { GetFallasByCategoriaUseCase(repository = get()) }
     
-    // Domain Layer - Use Cases (Votos)
+    // Use cases votos
     factory { VotarFallaUseCase(repository = get()) }
     factory { GetVotosUsuarioUseCase(repository = get()) }
     factory { EliminarVotoUseCase(repository = get()) }
@@ -60,7 +57,7 @@ val fallasModule = module {
     factory { GetRankingUseCase(apiService = get()) }
     factory { CrearComentarioUseCase(comentariosApiService = get(), getCurrentUserUseCase = get()) }
     
-    // Presentation Layer - ViewModels
+    // ViewModels
     viewModel {
         FallasListViewModel(
             getFallasUseCase = get(),

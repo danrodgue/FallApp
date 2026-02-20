@@ -7,10 +7,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-/**
- * Esquema de colores claro de FallApp.
- * Usa la paleta de colores coincidente con 02.desktop (rojo #c62828).
- */
+// Colores tema claro (rojo fallas #c62828)
 private val LightColorScheme = lightColorScheme(
     primary = FallaPrimary,
     onPrimary = Color.White,
@@ -44,10 +41,7 @@ private val LightColorScheme = lightColorScheme(
     scrim = Color.Black
 )
 
-/**
- * Esquema de colores oscuro de FallApp.
- * Usa tonos beige oscuro cálidos en lugar de grises fríos.
- */
+// Colores tema oscuro (tonos beige oscuros)
 private val DarkColorScheme = darkColorScheme(
     primary = LegacyPrimaryLight,
     onPrimary = FallaTextPrimary,
@@ -81,18 +75,7 @@ private val DarkColorScheme = darkColorScheme(
     scrim = Color.Black
 )
 
-/**
- * Tema de FallApp con paleta de colores coincidente con 02.desktop.
- * 
- * Características:
- * - Color primario: Rojo de las Fallas (#c62828)
- * - Backgrounds: Tonos claros y cálidos (#fff5f6)
- * - Textos: Oscuros para buen contraste (#1a0a0a)
- * - Soporte para modo claro y oscuro
- * 
- * @param darkTheme Si true, usa el esquema oscuro. Por defecto detecta el tema del sistema.
- * @param content Contenido de la app que usará este tema.
- */
+// Tema principal: rojo fallas, fondos claros, soporta modo oscuro
 @Composable
 fun FallAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

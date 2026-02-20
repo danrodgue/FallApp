@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.fallapp.user.R
@@ -39,12 +40,7 @@ import com.fallapp.features.fallas.domain.model.Voto
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-/**
- * Pantalla principal de Votos con 3 tabs:
- * - Votar: Lista de fallas para votar
- * - Mis Votos: Votos del usuario
- * - Ranking: Fallas más votadas
- */
+// Pantalla de votos con 3 pestañas: Ranking, Votar y Mis Votos
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VotosScreen(
@@ -53,7 +49,7 @@ fun VotosScreen(
     viewModel: VotosViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(1) } // Iniciar en tab 1 (Votar)
+    var selectedTab by remember { mutableIntStateOf(1) }
     val snackbarHostState = remember { SnackbarHostState() }
     var showInfo by remember { mutableStateOf(false) }
     var selectedFalla by remember { mutableStateOf<Falla?>(null) }
@@ -72,7 +68,6 @@ fun VotosScreen(
         }
     }
 
-    // Mostrar mensajes
     LaunchedEffect(uiState.successMessage) {
         uiState.successMessage?.let { message ->
             snackbarHostState.showSnackbar(message)
@@ -104,7 +99,7 @@ fun VotosScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            if (selectedTab == 1) { // Solo mostrar lupa en tab Votar
+                            if (selectedTab == 1) {
                                 IconButton(onClick = { showSearchField = !showSearchField }) {
                                     Icon(
                                         imageVector = if (showSearchField) Icons.Default.Close else Icons.Default.Search,
@@ -135,7 +130,6 @@ fun VotosScreen(
                     )
                 )
 
-                // Campo de búsqueda debajo del título (solo en tab Votar)
                 if (selectedTab == 1 && showSearchField) {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -146,7 +140,6 @@ fun VotosScreen(
                             value = searchQuery,
                             onValueChange = { query ->
                                 searchQuery = query
-                                // Buscar falla que coincida
                                 selectedFalla = if (query.isBlank()) {
                                     null
                                 } else {
@@ -336,7 +329,6 @@ private fun VotarTab(
             )
         } else {
             if (selectedFalla != null) {
-                // Mostrar falla específica seleccionada del dropdown
                 SwipeFallaCard(
                     falla = selectedFalla,
                     onVoteClick = { tipoVoto -> onVoteClick(selectedFalla, tipoVoto) },
@@ -344,7 +336,6 @@ private fun VotarTab(
                     onCommentSubmit = { contenido -> onCommentSubmit(selectedFalla, contenido) }
                 )
             } else {
-                // Modo mazo aleatorio normal
                 StackedCardDeck(
                     fallas = fallas,
                     onVoteClick = onVoteClick,
@@ -380,14 +371,12 @@ private fun StackedCardDeck(
     val activeScale = remember { Animatable(1f) }
 
     val swipeThreshold = 150f
-    val screenWidth = 800f // valor aproximado para animación de salida
+    val screenWidth = 800f
 
     fun computeNextIndex(direction: Float): Int =
         if (direction >= 0f) {
-            // Swipe a la derecha → siguiente
             (currentIndex + 1) % fallas.size
         } else {
-            // Swipe a la izquierda → anterior
             (currentIndex - 1 + fallas.size) % fallas.size
         }
 
@@ -422,7 +411,6 @@ private fun StackedCardDeck(
                                 val direction = if (activeOffsetX.value >= 0f) 1f else -1f
 
                                 if (shouldSwipe) {
-                                    // 1) Animar carta actual hacia afuera
                                     activeOffsetX.animateTo(
                                         targetValue = direction * screenWidth,
                                         animationSpec = tween(
@@ -430,15 +418,9 @@ private fun StackedCardDeck(
                                             easing = FastOutSlowInEasing
                                         )
                                     )
-
-                                    // 2) Cambiar índice a la siguiente carta
                                     currentIndex = computeNextIndex(direction)
-
-                                    // 3) Preparar entrada de la nueva carta desde el lado opuesto
                                     activeOffsetX.snapTo(-direction * screenWidth * 0.5f)
                                     activeScale.snapTo(0.9f)
-
-                                    // 4) Animar nueva carta al centro
                                     activeOffsetX.animateTo(
                                         targetValue = 0f,
                                         animationSpec = tween(
@@ -454,7 +436,6 @@ private fun StackedCardDeck(
                                         )
                                     )
                                 } else {
-                                    // Volver al centro sin cambiar de carta
                                     activeOffsetX.animateTo(
                                         targetValue = 0f,
                                         animationSpec = tween(
@@ -483,7 +464,6 @@ private fun StackedCardDeck(
             )
         }
 
-        // Contador de cartas (igual estilo que te gustaba: posición / total)
         Text(
             text = "${currentIndex + 1} / ${fallas.size}",
             style = MaterialTheme.typography.bodySmall,
@@ -495,9 +475,6 @@ private fun StackedCardDeck(
     }
 }
 
-/**
- * Carta tipo "Tinder" para votar una falla.
- */
 @Composable
 private fun SwipeFallaCard(
     falla: Falla,
@@ -558,7 +535,6 @@ private fun SwipeFallaCard(
                     contentScale = ContentScale.Fit
                 )
 
-                // Botón X con fondo circular semitransparente
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -593,7 +569,6 @@ private fun SwipeFallaCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Imagen principal de la falla (clickeable para pantalla completa)
             if (imageUrl != null) {
                 AsyncImage(
                     model = imageUrl,
@@ -650,7 +625,6 @@ private fun SwipeFallaCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Fila: Ver mapa + botón para desplegar comentarios
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -737,7 +711,6 @@ private fun SwipeFallaCard(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Botones de votación
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -832,9 +805,6 @@ private fun VoteLegendRow(
     }
 }
 
-/**
- * Tab de mis votos.
- */
 @Composable
 private fun MisVotosTab(
     votos: List<Voto>,
@@ -926,7 +896,6 @@ private fun MiVotoCard(
         )
     }
 
-    // Dialog de imagen en pantalla completa
     if (showFullScreenImage && imageUrl != null) {
         Dialog(
             onDismissRequest = { showFullScreenImage = false },
@@ -947,7 +916,6 @@ private fun MiVotoCard(
                     contentScale = ContentScale.Fit
                 )
 
-                // Botón X con fondo circular semitransparente
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -1002,7 +970,7 @@ private fun MiVotoCard(
                         ),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = Color.Unspecified
+                        tint = if (isSystemInDarkTheme()) Color.White else Color.Unspecified
                     )
                     Text(
                         text = when (voto.tipoVoto) {
@@ -1045,9 +1013,6 @@ private fun MiVotoCard(
     }
 }
 
-/**
- * Tab de ranking de votos.
- */
 @Composable
 private fun RankingTab(
     ranking: List<FallaRanking>,
@@ -1058,7 +1023,6 @@ private fun RankingTab(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        // Filtro de tipo de voto
         ScrollableTabRow(
             selectedTabIndex = when (selectedTipoVoto) {
                 null -> 0
@@ -1094,7 +1058,7 @@ private fun RankingTab(
                             painter = painterResource(id = iconRes),
                             contentDescription = null,
                             modifier = Modifier.size(18.dp),
-                            tint = Color.Unspecified
+                            tint = if (isSystemInDarkTheme()) Color.White else Color.Unspecified
                         )
                     }
                 )
@@ -1146,9 +1110,6 @@ private fun RankingTab(
     }
 }
 
-/**
- * Card de ranking de una falla.
- */
 @Composable
 private fun RankingCard(
     position: Int,
@@ -1156,16 +1117,16 @@ private fun RankingCard(
     selectedTipoVoto: TipoVoto?,
     onFallaClick: () -> Unit
 ) {
-    // Color del badge de votos según la categoría seleccionada en el filtro
     val chipColor = when (selectedTipoVoto) {
         null -> MaterialTheme.colorScheme.primaryContainer
-        TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary      // Mejor Falla
-        TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary      // Ingenio y Gracia
-        TipoVoto.ARTISTICO -> Color(0xFFFFE3A1)                      // Experimental (mismo color que el botón de votos)
+        TipoVoto.INGENIOSO -> MaterialTheme.colorScheme.primary
+        TipoVoto.CRITICO -> MaterialTheme.colorScheme.secondary
+        TipoVoto.ARTISTICO -> Color(0xFFFFE3A1)
     }
+    val isDark = isSystemInDarkTheme()
     val chipContentColor = when (selectedTipoVoto) {
         null -> MaterialTheme.colorScheme.onPrimaryContainer
-        TipoVoto.ARTISTICO -> MaterialTheme.colorScheme.onSurface
+        TipoVoto.ARTISTICO -> if (isDark) Color.Black else MaterialTheme.colorScheme.onSurface
         else -> MaterialTheme.colorScheme.onPrimary
     }
     ElevatedCard(
@@ -1181,7 +1142,6 @@ private fun RankingCard(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Posición
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = when (position) {
@@ -1206,7 +1166,6 @@ private fun RankingCard(
                 }
             }
 
-            // Información de la falla
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.nombre,
@@ -1222,7 +1181,6 @@ private fun RankingCard(
                 )
             }
 
-            // Número de votos
             Surface(
                 shape = MaterialTheme.shapes.small,
                 color = chipColor
@@ -1233,7 +1191,6 @@ private fun RankingCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        // Icono de fuego en el badge de votos
                         imageVector = Icons.Default.Whatshot,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),

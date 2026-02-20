@@ -10,26 +10,19 @@ import com.fallapp.features.profile.presentation.ProfileViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-/**
- * Módulo de Koin para la feature Profile.
- * Provee todas las dependencias (API, Repository, UseCases, ViewModels).
- */
+// Módulo de perfil: API, repos, use cases y ViewModel
 val profileModule = module {
 
-    // Data Layer - API
     single { ProfileApiService(httpClient = get(), tokenManager = get()) }
 
-    // Data Layer - Repository
     single<ProfileRepository> {
         ProfileRepositoryImpl(profileApiService = get())
     }
 
-    // Domain Layer - Use Cases
     factory { GetUserProfileUseCase(profileRepository = get()) }
     factory { UpdateUserProfileUseCase(profileRepository = get()) }
     factory { UploadUserImageUseCase(profileRepository = get()) }
 
-    // Presentation Layer - ViewModels
     viewModel {
         ProfileViewModel(
             getUserProfileUseCase = get(),

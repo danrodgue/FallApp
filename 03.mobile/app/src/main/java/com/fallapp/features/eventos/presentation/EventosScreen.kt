@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -308,9 +309,8 @@ private fun EventoRow(
                 )
             }
 
-            // Flecha indicadora
             Icon(
-                imageVector = Icons.Default.Search,
+                imageVector = Icons.Default.Info,
                 contentDescription = "Ver detalles",
                 modifier = Modifier.padding(end = 12.dp),
                 tint = MaterialTheme.colorScheme.primary

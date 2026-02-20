@@ -30,18 +30,7 @@ data class UpdateProfileRequest(
     val codigoPostal: String?
 )
 
-/**
- * Servicio API para obtener información de perfil de usuario.
- *
- * Realiza peticiones HTTP a los endpoints de perfil según
- * la documentación de API REST.
- *
- * Endpoints:
- * - GET /api/usuarios/{id} - Obtener datos completos del perfil del usuario
- *
- * La capa data/remote expone solo DTOs y respuestas crudas de la API.
- * El mapeo a modelos de dominio se realiza en los mappers de data/mapper.
- */
+// Servicio que llama a la API de perfil (GET/PUT usuarios, subir imagen)
 class ProfileApiService(
     private val httpClient: HttpClient,
     private val tokenManager: TokenManager
@@ -52,41 +41,20 @@ class ProfileApiService(
         return "${ApiConfig.TOKEN_PREFIX}$token"
     }
 
-    /**
-     * GET /api/usuarios/{id}
-     *
-     * Obtiene toda la información del perfil del usuario autenticado.
-     *
-     * @param userId ID del usuario a recuperar
-     * @return ApiResponse con UsuarioPerfilDto (datos completos del usuario)
-     * @throws Exception si la petición falla, el usuario no existe o la red no está disponible
-     */
     suspend fun getUserProfile(userId: Long): ApiResponse<UsuarioPerfilDto> {
-        return httpClient.get("${ApiConfig.API_URL}/usuarios/$userId").body()
+        return httpClient.get("${ApiConfig.API_URL}/usuarios/$userId") {
+            authHeaderValue()?.let { header(ApiConfig.AUTH_HEADER, it) }
+        }.body()
     }
 
-    /**
-     * PUT /api/usuarios/{id}
-     *
-     * Actualiza la información del perfil del usuario.
-     *
-     * @param userId ID del usuario a actualizar
-     * @param request Datos a actualizar
-     * @return ApiResponse con UsuarioPerfilDto actualizado
-     * @throws Exception si la petición falla o la red no está disponible
-     */
     suspend fun updateUserProfile(userId: Long, request: UpdateProfileRequest): ApiResponse<UsuarioPerfilDto> {
         return httpClient.put("${ApiConfig.API_URL}/usuarios/$userId") {
+            authHeaderValue()?.let { header(ApiConfig.AUTH_HEADER, it) }
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
     }
 
-    /**
-     * POST /api/usuarios/{id}/imagen
-     *
-     * Sube una imagen de perfil en formato multipart/form-data.
-     */
     suspend fun uploadUserImage(
         userId: Long,
         imageBytes: ByteArray,

@@ -9,29 +9,11 @@ import com.fallapp.features.profile.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-/**
- * Implementación del repositorio de perfil de usuario.
- *
- * Realiza las llamadas a la API para obtener información del perfil.
- * Maneja errores y convierte DTOs a modelos de dominio.
- *
- * @property profileApiService Servicio API para llamadas HTTP
- */
+// Aquí hacemos las llamadas reales a la API de perfil y pasamos los datos al dominio
 class ProfileRepositoryImpl(
     private val profileApiService: ProfileApiService
 ) : ProfileRepository {
 
-    /**
-     * Obtiene el perfil del usuario desde la API.
-     *
-     * Flow que:
-     * 1. Emite Loading mientras se realiza la llamada
-     * 2. Emite Success con UsuarioPerfil si la llamada es exitosa
-     * 3. Emite Error si hay un problema
-     *
-     * @param userId ID del usuario a recuperar
-     * @return Flow con Result<UsuarioPerfil>
-     */
     override fun getUserProfile(userId: Long): Flow<Result<UsuarioPerfil>> = flow {
         try {
             emit(Result.Loading)
@@ -54,17 +36,6 @@ class ProfileRepositoryImpl(
         }
     }
 
-    /**
-     * Actualiza el perfil del usuario en la API.
-     *
-     * @param userId ID del usuario
-     * @param nombreCompleto Nombre actualizado
-     * @param telefono Teléfono actualizado
-     * @param direccion Dirección actualizada
-     * @param ciudad Ciudad actualizada
-     * @param codigoPostal Código postal actualizado
-     * @return Flow con Result<UsuarioPerfil> actualizado
-     */
     override fun updateUserProfile(
         userId: Long,
         nombreCompleto: String,

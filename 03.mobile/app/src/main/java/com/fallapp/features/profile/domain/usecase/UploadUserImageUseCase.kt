@@ -4,9 +4,7 @@ import com.fallapp.core.util.Result
 import com.fallapp.features.profile.domain.repository.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Caso de uso para subir foto de perfil del usuario.
- */
+// Use case para subir la foto de perfil
 class UploadUserImageUseCase(
     private val profileRepository: ProfileRepository
 ) {

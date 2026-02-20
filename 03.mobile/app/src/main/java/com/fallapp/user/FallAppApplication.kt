@@ -15,17 +15,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import com.fallapp.user.BuildConfig
 
-/**
- * Clase principal de la aplicación FallApp User.
- * 
- * Responsabilidades:
- * - Inicializar Koin (Dependency Injection)
- * - Configurar logging global
- * - Inicializar librerías de terceros
- * 
- * @author Equipo FallApp
- * @since 1.0.0
- */
+// Aquí arranca la app. Inicializamos Koin para la inyección de dependencias,
+// el log y las librerías que usa la app.
 class FallAppApplication : Application() {
 
     override fun onCreate() {
@@ -33,22 +24,17 @@ class FallAppApplication : Application() {
         
         // Inicializar Koin
         startKoin {
-            // Log level según build type
             androidLogger(if (BuildConfig.DEBUG) Level.DEBUG else Level.ERROR)
-            
-            // Contexto de Android
             androidContext(this@FallAppApplication)
-            
-            // Módulos de DI
             modules(
                 networkModule,
                 databaseModule,
                 appModule,
-                authModule,    // ← Auth feature module
-                fallasModule,  // ← Fallas feature module
-                eventosModule, // ← Eventos feature module
-                mapModule,     // ← Map feature module
-                profileModule  // ← Profile feature module
+                authModule,
+                fallasModule,
+                eventosModule,
+                mapModule,
+                profileModule
             )
         }
     }

@@ -11,15 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.fallapp.core.navigation.NavGraph
 import com.fallapp.core.ui.theme.FallAppTheme
 
-/**
- * Actividad principal de FallApp User.
- * 
- * Configura la navegación y el tema de la aplicación con la paleta de colores
- * coincidente con 02.desktop (rojo #c62828).
- * 
- * @author Equipo FallApp
- * @since 1.0.0
- */
+// Actividad principal. Aquí se monta la navegación y el tema (colores tipo fallas)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
