@@ -97,7 +97,8 @@ public class Falla {
     @Column(name = "actualizado_en")
     private LocalDateTime actualizadoEn;
 
-    @Column(name = "datos_json", columnDefinition = "JSONB")
+    @Column(name = "datos_json")
+    @ColumnTransformer(write = "?::jsonb")
     private String datosJson;
 
     // Relaciones
