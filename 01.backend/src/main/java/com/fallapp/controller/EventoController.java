@@ -2,9 +2,15 @@ package com.fallapp.controller;
 
 import com.fallapp.dto.ApiResponse;
 import com.fallapp.dto.EventoDTO;
+import com.fallapp.model.Usuario;
+import com.fallapp.model.Usuario.RolUsuario;
+import com.fallapp.repository.UsuarioRepository;
 import com.fallapp.service.EventoService;
 import com.fallapp.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +36,7 @@ public class EventoController {
     
     private final EventoService eventoService;
     private final FileUploadService fileUploadService;
+    private final UsuarioRepository usuarioRepository;
     
     /**
      * GET /api/eventos/futuros - Obtener eventos futuros
@@ -104,7 +112,25 @@ public class EventoController {
      * Requiere autenticación (admin o usuario de la falla)
      */
     @DeleteMapping("/{id}")
+    @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
+        EventoDTO evento = eventoService.obtenerPorId(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof UserDetails)) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No autorizado"));
+        }
+        String email = ((UserDetails) auth.getPrincipal()).getUsername();
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No autorizado"));
+        }
+        boolean permitido = usuario.getRol() == RolUsuario.admin;
+        if (!permitido && usuario.getRol() == RolUsuario.casal && usuario.getFalla() != null && evento.getIdFalla() != null) {
+            permitido = usuario.getFalla().getIdFalla().equals(evento.getIdFalla());
+        }
+        if (!permitido) {
+            return ResponseEntity.status(403).body(ApiResponse.error("No tienes permisos para eliminar este evento"));
+        }
         eventoService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.success("Evento eliminado exitosamente", null));
     }

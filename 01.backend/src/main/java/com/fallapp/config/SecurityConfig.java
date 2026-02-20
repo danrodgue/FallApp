@@ -119,8 +119,8 @@ public class SecurityConfig {
                 // Endpoints de eliminación (solo ADMIN)
                 .requestMatchers(HttpMethod.DELETE, "/api/fallas/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/fallas/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/eventos/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/eventos/**").authenticated()
+                .requestMatchers(HttpMethod.DELETE, "/eventos/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/comentarios/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/comentarios/**").hasRole("ADMIN")
                 

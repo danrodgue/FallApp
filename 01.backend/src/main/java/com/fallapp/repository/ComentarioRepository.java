@@ -24,10 +24,8 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
      */
     Page<Comentario> findByUsuario(Usuario usuario, Pageable pageable);
 
-    /**
-     * Buscar comentarios por falla ordenados por fecha
-     */
-    List<Comentario> findByFallaOrderByCreadoEnDesc(Falla falla);
+    @Query("SELECT c FROM Comentario c JOIN FETCH c.usuario WHERE c.falla = :falla ORDER BY c.creadoEn DESC")
+    List<Comentario> findByFallaOrderByCreadoEnDesc(@Param("falla") Falla falla);
 
     /**
      * Buscar comentarios por falla con paginación
